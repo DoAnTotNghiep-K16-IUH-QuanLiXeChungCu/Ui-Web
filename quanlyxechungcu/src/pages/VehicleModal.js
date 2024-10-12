@@ -8,13 +8,15 @@ const VehicleModal = ({
   handleSubmit,
   handleCloseModal,
 }) => {
+  console.log("newVehicle_____", newVehicle);
+
   if (!showAddForm) return null; // Nếu showAddForm là false, không hiển thị modal
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-[400px]">
         <h2 className="text-lg font-semibold mb-4">
-          {newVehicle?.id ? "Cập nhật Xe" : "Thêm Xe Mới"}
+          {newVehicle?._id ? "Cập nhật Xe" : "Thêm Xe Mới"}
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -22,9 +24,12 @@ const VehicleModal = ({
             <input
               type="text"
               name="licensePlate"
-              className="border p-2 rounded w-full"
-              value={newVehicle?.licensePlate}
+              className={`border p-2 rounded w-full ${
+                newVehicle?._id ? "bg-gray-400" : "bg-white"
+              }`}
+              value={newVehicle?.licensePlate || ""}
               onChange={handleInputChange}
+              readOnly={!!newVehicle?._id}
             />
           </div>
           <div className="mb-4">
@@ -64,10 +69,10 @@ const VehicleModal = ({
             <select
               name="customerId"
               className="border p-2 rounded w-full"
-              value={newVehicle?.customerId}
+              value={newVehicle?.customerId || ""} // Gán giá trị từ customerId
               onChange={handleInputChange}
             >
-              <option>Chọn chủ xe</option>
+              <option value="">Chọn chủ xe</option>
               {customers.map((customer) => (
                 <option key={customer._id} value={customer._id}>
                   {customer.fullName}
@@ -80,7 +85,7 @@ const VehicleModal = ({
               type="submit"
               className="bg-blue-500 text-white px-4 py-2 rounded"
             >
-              {newVehicle?.id ? "Cập nhật" : "Thêm"}
+              {newVehicle?._id ? "Cập nhật" : "Thêm"}
             </button>
 
             <button

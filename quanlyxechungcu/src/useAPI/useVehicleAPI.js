@@ -6,6 +6,7 @@ import {
   UPDATE_VEHICLE,
   VEHICLE_BY_ID,
   VEHICLE_BY_LICENSEPLATE,
+  VEHICLE_BY_TYPE,
 } from "../config/API";
 export const FindCustomerByVehicleID = async (vehicleID) => {
   const token = Cookies.get("accessToken"); // Lấy token từ cookie
@@ -74,7 +75,7 @@ export const FindCustomerByLicensePlate = async (licensePlate) => {
     return null;
   }
 };
-export const getAllVehicle = async () => {
+export const getAllVehicle = async (pageNumber) => {
   const token = Cookies.get("accessToken");
 
   if (!token) {
@@ -90,17 +91,48 @@ export const getAllVehicle = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        pageNumber: 1,
-        pageSize: 20,
+        pageNumber: pageNumber,
+        pageSize: 10,
       }),
     });
 
     const data = await response.json();
 
-    if (response.status === 200) {
-      return data.data.vehicles; // Trả về dữ liệu nếu yêu cầu thành công
+    if (response.ok) {
+      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
-      console.error("Có lỗi xảy ra khi lấy danh sách vé tháng:", data.error);
+      console.error("Có lỗi xảy ra khi lấy danh sách xe:", data.error);
+    }
+  } catch (error) {
+    console.error("Error during fetching vehicle", error);
+  }
+};
+export const getAllVehicleByType = async (type) => {
+  const token = Cookies.get("accessToken");
+
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+
+  try {
+    const response = await fetch(VEHICLE_BY_TYPE, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: type,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
+    } else {
+      console.error("Có lỗi xảy ra khi lấy xe:", data.error);
     }
   } catch (error) {
     console.error("Error during fetching monthly tickets:", error);
