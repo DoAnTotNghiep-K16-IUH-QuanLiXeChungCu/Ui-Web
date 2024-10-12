@@ -28,7 +28,7 @@ const Navbar = () => {
           to="/customer"
           className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5"
         >
-          Chủ xe
+          Khách hàng
         </Link>
         <Link
           to="/vehicle"
@@ -59,6 +59,19 @@ const Navbar = () => {
           className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5"
         >
           Về chúng tôi
+        </Link>
+        <Link
+          to="/RFID"
+          className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5"
+        >
+          Danh sách thẻ
+        </Link>
+
+        <Link
+          to="/apartment"
+          className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5"
+        >
+          Danh sách phòng
         </Link>
       </div>
     </nav>

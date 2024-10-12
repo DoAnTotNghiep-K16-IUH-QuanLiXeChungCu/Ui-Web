@@ -1,20 +1,23 @@
-import React from "react";
+import { formatDateTime } from "../../utils/FormatDate";
 
-const CheckEE = ({ type }) => {
+const CheckEE = ({ type, time, front_pic, back_pic }) => {
+  // Ảnh mặc định nếu không có ảnh
+  const defaultImage =
+    "https://sanketoan.vn/public/library_employer/thutran25122n3%40gmail.com-31694/images/%E1%BA%A3nh%20tr%E1%BA%AFng.jpg";
   return (
     <div>
       <div className="grid grid-cols-2 gap-4 col-span-1 p-2">
         <div>
           <img
-            src="https://i1-vnexpress.vnecdn.net/2024/09/19/HyundaiSantaFevnexpressnet1JPG-1726701224.jpg?w=500&h=300&q=100&dpr=1&fit=crop&s=va_O9Cz7G1No2bKli1ClGA&t=image"
-            alt="Hình ảnh ra"
+            src={front_pic || defaultImage} // Kiểm tra và sử dụng ảnh mặc định
+            alt="Hình ảnh vào"
             className="w-full h-48 object-cover rounded"
           />
         </div>
         <div>
           <img
-            src="https://i1-vnexpress.vnecdn.net/2024/09/19/HyundaiSantaFevnexpressnet1JPG-1726701224.jpg?w=500&h=300&q=100&dpr=1&fit=crop&s=va_O9Cz7G1No2bKli1ClGA&t=image"
-            alt="Hình ảnh vào"
+            src={back_pic || defaultImage} // Kiểm tra và sử dụng ảnh mặc định
+            alt="Hình ảnh ra"
             className="w-full h-48 object-cover rounded"
           />
         </div>
@@ -27,6 +30,8 @@ const CheckEE = ({ type }) => {
         } text-white rounded`}
       >
         {type === "entry" ? "HÌNH ẢNH VÀO" : "HÌNH ẢNH RA"}
+        <br />
+        Thời gian: {formatDateTime(time)}
       </div>
     </div>
   );
