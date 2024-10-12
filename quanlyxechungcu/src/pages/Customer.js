@@ -3,9 +3,11 @@ import { getAllApartment } from "../useAPI/useApartmentAPI";
 import CustomerModal from "./CustomerModal";
 import {
   addCustomer,
+  deleteCustomer,
   getAllCustomer,
   updateCustomer,
 } from "../useAPI/useCustomerAPI";
+import Notification from "../components/Notification";
 
 const Customer = () => {
   const [customer, setCustomer] = useState([]);
@@ -20,7 +22,13 @@ const Customer = () => {
     isResident: "",
   }); // State lưu trữ thông tin xe mới
   const [apartments, setApartments] = useState([]);
-
+  const [showNotification, setShowNotification] = useState({
+    content: "",
+    type: "",
+    show: false,
+  });
+  const [apartmentFilter, setApartmentFilter] = useState("");
+  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
   const fetchcustomer = async () => {
     try {
       const customer = await getAllCustomer();
@@ -36,21 +44,26 @@ const Customer = () => {
     fetchcustomer();
   }, []);
 
-  const filteredcustomer =
-    customer?.length > 0
-      ? customer.filter(
-          (customer) =>
-            (customer.fullName?.toLowerCase() || "").includes(
-              searchTerm.toLowerCase()
-            ) ||
-            (customer.address?.toLowerCase() || "").includes(
-              searchTerm.toLowerCase()
-            ) ||
-            (customer.phoneNumber?.toLowerCase() || "").includes(
-              searchTerm.toLowerCase()
-            )
-        )
-      : [];
+  const filteredcustomer = customer.filter((customer) => {
+    const matchesApartment =
+      apartmentFilter === "" ||
+      customer?.apartmentsId?.name === apartmentFilter;
+    const matchesCustomerType =
+      customerTypeFilter === "" ||
+      (customerTypeFilter === "true" && customer.isResident === true) ||
+      (customerTypeFilter === "false" && customer.isResident === false);
+    const matchesSearchTerm =
+      (customer.fullName?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (customer.address?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (customer.phoneNumber?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      );
+    return matchesSearchTerm && matchesCustomerType && matchesApartment;
+  });
 
   const handleAddClick = () => {
     setNewCustomer(null);
@@ -65,18 +78,36 @@ const Customer = () => {
     });
   };
 
-  const handleDeleteCustomer = async (id) => {
-    if (!id) {
+  const handleDeleteCustomer = async (cus) => {
+    if (!cus._id) {
       console.error("ID của khách hàng không hợp lệ");
       return;
     }
 
     try {
-      // await deleteCustomer(id);
-      setCustomer((prev) => prev.filter((customer) => customer._id !== id));
-      console.log(`Khách hàng với ID ${id} đã được xóa thành công.`);
+      const deleteC = await deleteCustomer(cus._id);
+      if (deleteC) {
+        setCustomer((prev) =>
+          prev.filter((customer) => customer._id !== cus._id)
+        );
+        setShowNotification({
+          content: `Khách hàng ${cus.fullName} đã bị xóa khỏi danh sách.`,
+          type: "Notification",
+          show: true,
+        });
+      } else {
+        setShowNotification({
+          content: deleteC,
+          type: "Error",
+          show: true,
+        });
+      }
     } catch (error) {
-      console.error("Có lỗi khi xóa xe:", error);
+      setShowNotification({
+        content: `Có lỗi khi xóa khách hàng ${cus.fullName} đã bị xóa khỏi danh sách.`,
+        type: "Error",
+        show: true,
+      });
     }
   };
 
@@ -95,7 +126,11 @@ const Customer = () => {
     e.preventDefault();
     const phoneNumberLength = newCustomer.phoneNumber.length;
     if (phoneNumberLength < 10 || phoneNumberLength > 11) {
-      alert("Số điện thoại phải có từ 10 đến 11 số.");
+      setShowNotification({
+        content: "Số điện thoại phải có từ 10 đến 11 số.",
+        type: "Error",
+        show: true,
+      });
       return;
     }
 
@@ -108,15 +143,37 @@ const Customer = () => {
               customer._id === newCustomer._id ? newCustomer : customer
             )
           );
-          console.log(`Khách hàng với ID ${newCustomer._id} đã được cập nhật.`);
+          setShowNotification({
+            content: `Thông tin về khách hàng ${updateC.fullName} đã được cập nhật`,
+            type: "Notification",
+            show: true,
+          });
+          fetchcustomer();
+        } else {
+          setShowNotification({
+            content: updateC,
+            type: "Error",
+            show: true,
+          });
         }
       } else {
         const addC = await addCustomer(newCustomer);
         // console.log("Data nè _______", addC);
 
         if (addC) {
+          setShowNotification({
+            content: `Đã thêm khách hàng ${addC.fullName} vào danh sách`,
+            type: "Notification",
+            show: true,
+          });
           fetchcustomer();
           // console.log("CUSTOMER___", customer);
+        } else {
+          setShowNotification({
+            content: addC,
+            type: "Error",
+            show: true,
+          });
         }
       }
     } catch (error) {
@@ -128,7 +185,12 @@ const Customer = () => {
   const handleCloseModal = () => {
     setShowAddForm(false);
   };
-
+  const handleApartmentChange = (e) => {
+    setApartmentFilter(e.target.value);
+  };
+  const handleCustomerTypeChange = (e) => {
+    setCustomerTypeFilter(e.target.value);
+  };
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="mx-auto bg-white shadow-lg rounded-lg p-6">
@@ -153,7 +215,31 @@ const Customer = () => {
             </button>
           </div>
         </div>
-
+        <div className="flex space-x-4 mb-4 ">
+          <label className="mr-2 p-2">Loại khách:</label>
+          <select
+            className="border p-2 rounded"
+            value={customerTypeFilter}
+            onChange={handleCustomerTypeChange}
+          >
+            <option value="">Tất cả</option>
+            <option value="true">Trong khu dân cư</option>
+            <option value="false">Vãn lai</option>
+          </select>
+          <label className="mr-2 p-2">Phòng:</label>
+          <select
+            value={apartmentFilter}
+            onChange={handleApartmentChange}
+            className="border p-2 rounded"
+          >
+            <option value="">Tất cả</option>
+            {apartments.map((apartment) => (
+              <option key={apartment._id} value={apartment.name}>
+                {apartment.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="grid grid-cols-7">
           <div className="overflow-x-auto rounded bg-gray-100 border p-4 col-span-7">
             <div className="h-[400px] overflow-y-scroll">
@@ -201,7 +287,7 @@ const Customer = () => {
                       <td className="border p-2">
                         <button
                           className="bg-red-500 text-white px-4 py-2 rounded mr-1"
-                          onClick={() => handleDeleteCustomer(customer._id)}
+                          onClick={() => handleDeleteCustomer(customer)}
                         >
                           XÓA
                         </button>
@@ -227,6 +313,10 @@ const Customer = () => {
           handleInputChange={handleInputChange}
           handleSubmit={handleSubmit}
           handleCloseModal={handleCloseModal}
+        />
+        <Notification
+          showNotification={showNotification}
+          setShowNotification={setShowNotification}
         />
       </div>
     </div>

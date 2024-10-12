@@ -13,6 +13,7 @@ export const ALL_CUSTOMER = `${API}/customer/GetAllCustomers`;
 export const CUSTOMER_BY_ID = `${API}/customer/GetCustomerById`;
 export const CREATE_CUSTOMER = `${API}/customer/CreateCustomer`;
 export const UPDATE_CUSTOMER = `${API}/customer/UpdateCustomer`;
+export const DELETE_CUSTOMER = `${API}/customer/DeleteCustomer`;
 
 export const ALL_PARKING_SLOT = `${API}/parkingSlot/GetAllParkingSlots`;
 export const PARKING_SLOT_BY_ID = `${API}/parkingSlot/GetParkingSlotById`;

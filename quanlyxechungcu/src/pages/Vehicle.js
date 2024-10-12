@@ -8,6 +8,7 @@ import { changeTypeVehicle } from "./../utils/ChangeTypeVehicle";
 import { findCustomerByID, getAllCustomer } from "../useAPI/useCustomerAPI";
 import { deleteVehicle } from "./../useAPI/useVehicleAPI";
 import VehicleModal from "./VehicleModal";
+import Notification from "../components/Notification";
 
 const Vehicle = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -23,7 +24,12 @@ const Vehicle = () => {
     brand: "",
     customerId: "",
   });
-
+  const [vehicleTypeFilter, setVehicleTypeFilter] = useState(""); // State cho loại xe
+  const [showNotification, setShowNotification] = useState({
+    content: "",
+    type: "",
+    show: false,
+  });
   const fetchVehicles = async () => {
     try {
       const vehicles = await getAllVehicle();
@@ -39,30 +45,16 @@ const Vehicle = () => {
     fetchVehicles();
   }, []);
 
-  const filteredVehicles =
-    vehicles.length > 0
-      ? vehicles.filter((vehicle) => {
-          const licensePlate = vehicle?.licensePlate || "";
-          const brand = vehicle?.brand || "";
-          return (
-            licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            brand.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-        })
-      : [];
-
-  const handleRowClick = (vehicle) => {
-    if (selectedVehicle && selectedVehicle._id === vehicle._id) {
-      setSelectedVehicle(null);
-    } else {
-      setSelectedVehicle(vehicle);
-      setNewVehicle((prev) => ({
-        ...prev,
-        customerId: vehicle.customerId?._id || "", // Cập nhật ID của khách hàng khi chọn xe
-      }));
-    }
-  };
-
+  const filteredVehicles = vehicles.filter((vehicle) => {
+    const matchesVehicleType =
+      vehicleTypeFilter === "" || vehicle.type === vehicleTypeFilter;
+    const matchesSearchTerm =
+      (vehicle?.licensePlate || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (vehicle?.brand).toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearchTerm && matchesVehicleType;
+  });
   const handleAddClick = () => {
     setNewVehicle(null);
     setShowAddForm(true);
@@ -90,19 +82,26 @@ const Vehicle = () => {
     }
   };
 
-  const handleDeleteVehicle = async (id) => {
-    if (!id) {
+  const handleDeleteVehicle = async (veh) => {
+    if (!veh._id) {
       console.error("ID của xe không hợp lệ");
       return;
     }
-
     try {
-      await deleteVehicle(id);
-      setVehicles((prev) => prev.filter((vehicle) => vehicle._id !== id));
+      await deleteVehicle(veh._id);
+      setVehicles((prev) => prev.filter((vehicle) => vehicle._id !== veh._id));
       setSelectedVehicle(null);
-      console.log(`Xe với ID ${id} đã được xóa thành công.`);
+      setShowNotification({
+        content: `Xe có biển số ${veh.licensePlate} đã bị xóa khỏi danh sách.`,
+        type: "Notification",
+        show: true,
+      });
     } catch (error) {
-      console.error("Có lỗi khi xóa xe:", error);
+      setShowNotification({
+        content: `Đã có lỗi khi xóa xe có biển số ${veh.licensePlate} ra khỏi danh sách.`,
+        type: "Error",
+        show: true,
+      });
     }
   };
   const handleEditClick = (vehicle) => {
@@ -123,18 +122,44 @@ const Vehicle = () => {
       if (newVehicle.id) {
         // Cập nhật xe
         const updatedVehicle = await updateVehicle(newVehicle);
-        setVehicles((prev) =>
-          prev.map((vehicle) =>
-            vehicle._id === newVehicle.id ? newVehicle : vehicle
-          )
-        );
-        setSelectedVehicle(updatedVehicle); // Cập nhật selectedVehicle với thông tin mới
+        if (updatedVehicle) {
+          setVehicles((prev) =>
+            prev.map((vehicle) =>
+              vehicle._id === newVehicle.id ? newVehicle : vehicle
+            )
+          );
+          setSelectedVehicle(updatedVehicle);
+          setShowNotification({
+            content: `Xe có biển số ${newVehicle.licensePlate} đã được cập nhật`,
+            type: "Notification",
+            show: true,
+          });
+        } else {
+          setShowNotification({
+            content: updatedVehicle,
+            type: "Error",
+            show: true,
+          });
+        }
+        // Cập nhật selectedVehicle với thông tin mới
       } else {
         // Thêm xe mới
         const addedVehicle = await addVehicle(newVehicle);
-
-        setVehicles((prev) => [...prev, newVehicle]);
-        setSelectedVehicle(addedVehicle); // Cập nhật selectedVehicle với addedVehicle
+        if (addedVehicle) {
+          setVehicles((prev) => [...prev, newVehicle]);
+          setSelectedVehicle(addedVehicle);
+          setShowNotification({
+            content: `Xe có biển số ${newVehicle.licensePlate} đã được thêm vào danh sách`,
+            type: "Notification",
+            show: true,
+          });
+        } else {
+          setShowNotification({
+            content: addedVehicle,
+            type: "Error",
+            show: true,
+          });
+        }
       }
     } catch (error) {
       console.error("Có lỗi khi thêm/cập nhật xe:", error);
@@ -145,10 +170,12 @@ const Vehicle = () => {
   const handleCloseModal = () => {
     setShowAddForm(false);
   };
-
+  const handleVehicleTypeChange = (e) => {
+    setVehicleTypeFilter(e.target.value);
+  };
   return (
-    <div className="bg-gray-100 p-6">
-      <div className="mx-auto bg-white shadow-lg rounded-lg p-6">
+    <div className="min-h-screen bg-gray-100 p-6 ">
+      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">DANH SÁCH XE</h1>
@@ -169,24 +196,23 @@ const Vehicle = () => {
             >
               THÊM
             </button>
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded"
-              onClick={() => handleDeleteVehicle(selectedVehicle?._id)}
-            >
-              XÓA
-            </button>
-            <button
-              className="bg-yellow-500 text-white px-4 py-2 rounded"
-              onClick={() => handleEditClick(selectedVehicle)}
-              disabled={!selectedVehicle}
-            >
-              SỬA
-            </button>
           </div>
+        </div>
+        <div className="flex space-x-4 mb-4 ">
+          <label className="p-2 mr-2 ">Loại xe:</label>
+          <select
+            value={vehicleTypeFilter}
+            onChange={handleVehicleTypeChange}
+            className="border p-2 rounded"
+          >
+            <option value="">Tất cả</option>
+            <option value="car">Xe hơi</option>
+            <option value="motor">Xe máy</option>
+          </select>
         </div>
         <div className="grid grid-cols-7">
           {/* Vehicle Table */}
-          <div className="overflow-x-auto rounded bg-gray-100 border p-4 col-span-5">
+          <div className="overflow-x-auto rounded bg-gray-100 border p-4 col-span-7">
             <div className="h-[400px] overflow-y-scroll">
               <table className="min-w-full bg-white border rounded">
                 <thead>
@@ -209,6 +235,10 @@ const Vehicle = () => {
                     <th className="border p-2 sticky top-0 bg-slate-300 z-10">
                       Chủ Xe
                     </th>
+                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                      {" "}
+                      Hành động
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -220,7 +250,6 @@ const Vehicle = () => {
                           ? "bg-gray-200"
                           : ""
                       }`}
-                      onClick={() => handleRowClick(vehicle)}
                     >
                       <td className="border p-2">{index + 1}</td>
                       <td className="border p-2">{vehicle?.licensePlate}</td>
@@ -232,39 +261,28 @@ const Vehicle = () => {
                       <td className="border p-2">
                         {vehicle.customerId?.fullName || "Không có"}
                       </td>
+                      <td className="border p-2">
+                        {/* Nút Sửa */}
+                        <button
+                          className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                          onClick={() => handleEditClick(vehicle)}
+                        >
+                          Sửa
+                        </button>
+                        {/* Nút Xóa */}
+                        <button
+                          className="bg-red-500 text-white px-2 py-1 rounded"
+                          onClick={() => handleDeleteVehicle(vehicle)}
+                        >
+                          Xóa
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-
-          {selectedVehicle && (
-            <div className="ml-2 bg-gray-200 p-4 rounded col-span-2 h-[200px]">
-              <h2 className="text-lg font-semibold">Thông tin xe được chọn:</h2>
-              <p>
-                <strong>Biển Số:</strong> {selectedVehicle.licensePlate}
-              </p>
-              <p>
-                <strong>Loại xe:</strong>{" "}
-                {changeTypeVehicle(selectedVehicle.type)}
-              </p>
-              <p>
-                <strong>Màu:</strong> {selectedVehicle.color}
-              </p>
-              <p>
-                <strong>Nhãn hiệu:</strong> {selectedVehicle.brand}
-              </p>
-              <p>
-                <strong>Chủ xe:</strong>{" "}
-                {selectedVehicle.customerId?.fullName || "Không có"}
-              </p>
-              <p>
-                <strong>Số điện thoại:</strong>{" "}
-                {selectedVehicle.customerId?.phoneNumber || "Không có"}
-              </p>
-            </div>
-          )}
         </div>
         {/* Popup Modal Thêm Xe */}
         <VehicleModal
@@ -274,6 +292,10 @@ const Vehicle = () => {
           handleInputChange={handleInputChange}
           handleSubmit={handleSubmit}
           handleCloseModal={handleCloseModal}
+        />
+        <Notification
+          showNotification={showNotification}
+          setShowNotification={setShowNotification}
         />
       </div>
     </div>

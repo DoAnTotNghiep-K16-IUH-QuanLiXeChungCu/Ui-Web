@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   addMonthlyTicket,
   getAllMonthlyTicket,
@@ -16,7 +15,6 @@ import {
   findParkingSlotByID,
   getAllParkingSlot,
 } from "../useAPI/useParkingSlotAPI";
-import ExtendMonthlyTicketModal from "./ExtendMonthlyTicketModal";
 import Notification from "../components/Notification";
 
 const MonthlyTicketList = () => {
@@ -24,7 +22,6 @@ const MonthlyTicketList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showExtendForm, setShowExtendForm] = useState();
   const [newTickets, setNewTickets] = useState({
     vehicleId: "",
     parking_slotId: "",
@@ -35,6 +32,7 @@ const MonthlyTicketList = () => {
   const [listChoosenTickets, setListChoosenTickets] = useState([]);
   const [newEndDate, setNewEndDate] = useState("");
   const [vehicles, setVehicles] = useState([]);
+  const [showExtend, setShowExtend] = useState(false);
   const [slots, setSlots] = useState([]);
   const [statusFilter, setStatusFilter] = useState(""); // State cho tình trạng
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState(""); // State cho loại xe
@@ -146,10 +144,6 @@ const MonthlyTicketList = () => {
   const handleCloseModal = () => {
     setShowAddForm(false);
   };
-  const handleCloseExtendModal = () => {
-    setShowExtendForm(false);
-  };
-
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setNewTickets({ ...newTickets, [name]: value });
@@ -193,7 +187,7 @@ const MonthlyTicketList = () => {
     });
     await Promise.all(ticketPromises);
     fetchData();
-    setShowExtendForm(false);
+    showExtend(false);
   };
 
   const handleDeleteTicket = async (id) => {
@@ -269,8 +263,6 @@ const MonthlyTicketList = () => {
     );
 
     handleExtendSubmit(validUpdatedTickets);
-
-    handleCloseExtendModal();
   };
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -301,25 +293,35 @@ const MonthlyTicketList = () => {
             </button>
             <button
               className="bg-green-500 text-white px-4 py-2 rounded"
-              onClick={() => handleExtend()}
+              onClick={() => setShowExtend(true)}
             >
               GIA HẠN
             </button>
           </div>
         </div>
-        <h2 className="text-lg font-semibold mb-4">Gia hạn vé tháng</h2>
-        <div className="grid grid-cols-3">
-          <div>
-            <label className="block font-medium">Gia hạn đến ngày:</label>
-            <input
-              type="date"
-              className="w-full mt-1 p-2 border rounded"
-              name="newEndDate"
-              value={newEndDate} // Không có children ở đây
-              onChange={(e) => setNewEndDate(e.target.value)}
-            />
+        {showExtend && (
+          <div className="my-1">
+            <h2 className="text-lg font-semibold mb-4">Gia hạn vé tháng</h2>
+            <div className="flex space-x-4 mb-4 ">
+              <label className="block font-medium mr-2 p-2">
+                Gia hạn đến ngày:
+              </label>
+              <input
+                type="date"
+                className="border p-2 rounded"
+                name="newEndDate"
+                value={newEndDate} // Không có children ở đây
+                onChange={(e) => setNewEndDate(e.target.value)}
+              />
+            </div>
+            <button
+              className="bg-green-500 text-white px-4 py-2 rounded"
+              onClick={() => handleExtend()}
+            >
+              XÁC NHẬN
+            </button>
           </div>
-        </div>
+        )}
         <div className="flex space-x-4 mb-4 ">
           <label className="mr-2 p-2">Tình trạng:</label>
           <select
@@ -489,13 +491,7 @@ const MonthlyTicketList = () => {
         handleSubmit={handleSubmit}
         handleCloseModal={handleCloseModal}
       />
-      {/* <ExtendMonthlyTicketModal
-        showExtendForm={showExtendForm}
-        tickets={tickets}
-        slots={slots}
-        handleExtendSubmit={handleExtendSubmit}
-        handleCloseExtendModal={handleCloseExtendModal}
-      /> */}
+
       <Notification
         showNotification={showNotification}
         setShowNotification={setShowNotification}

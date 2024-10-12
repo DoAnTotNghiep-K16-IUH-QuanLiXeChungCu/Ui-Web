@@ -17,6 +17,7 @@ import StatisPerMonth from "./../pages/StatisPerMonth";
 import AboutUs from "./../pages/AboutUs";
 import RFIDCard from "../pages/RFIDCard";
 import Apartment from "../pages/Apartment";
+import ParkingSlot from "../pages/ParkingSlot";
 
 const Routers = () => {
   const routers = [
@@ -42,6 +43,7 @@ const Routers = () => {
         { path: "RFID", element: <RFIDCard /> },
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
+        { path: "parking-slot", element: <ParkingSlot /> },
       ],
     },
     {

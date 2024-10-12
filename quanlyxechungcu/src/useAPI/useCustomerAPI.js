@@ -3,6 +3,7 @@ import {
   ALL_CUSTOMER,
   CREATE_CUSTOMER,
   CUSTOMER_BY_ID,
+  DELETE_CUSTOMER,
   UPDATE_CUSTOMER,
 } from "../config/API";
 export const getAllCustomer = async () => {
@@ -21,7 +22,7 @@ export const getAllCustomer = async () => {
       },
       body: JSON.stringify({
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10000,
       }),
     });
 
@@ -31,9 +32,10 @@ export const getAllCustomer = async () => {
       return data.data.customers; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
       console.error("Có lỗi xảy ra khi lấy danh sách khách hàng:", data.error);
+      return data.error;
     }
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(error);
   }
 };
 
@@ -62,10 +64,9 @@ export const findCustomerByID = async (id) => {
       return data.data; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
       console.error("Có lỗi xảy ra khi tìm khách hàng:", data.error);
+      return data.error;
     }
-  } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
-  }
+  } catch (error) {}
 };
 export const addCustomer = async (customer) => {
   const token = Cookies.get("accessToken");
@@ -79,7 +80,7 @@ export const addCustomer = async (customer) => {
 
   try {
     const response = await fetch(CREATE_CUSTOMER, {
-      method: "PATCH",
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -100,10 +101,11 @@ export const addCustomer = async (customer) => {
       return data.data;
       // Trả về dữ liệu nếu yêu cầu thành công
     } else {
-      console.error("Có lỗi xảy ra khi tìm khách hàng:", data.error);
+      console.error("Có lỗi xảy ra khi thêm khách hàng:", data.error);
+      return data.error;
     }
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(error);
   }
 };
 
@@ -151,8 +153,8 @@ export const deleteCustomer = async (id) => {
   }
 
   try {
-    const response = await fetch(CUSTOMER_BY_ID, {
-      method: "DELETE",
+    const response = await fetch(DELETE_CUSTOMER, {
+      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -162,12 +164,13 @@ export const deleteCustomer = async (id) => {
       }),
     });
     const data = await response.json();
-    if (response.status === 200) {
+    if (response.ok) {
       return data.data; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
-      console.error("Có lỗi xảy ra khi tìm khách hàng:", data.error);
+      console.error("Có lỗi xảy ra khi xóa khách hàng:", data.error);
+      return data.error;
     }
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(error);
   }
 };

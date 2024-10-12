@@ -8,6 +8,7 @@ const ChangeNavCase = (str) => {
     else if (str === "Lịch sử") return "history";
     else if (str === "Thống kê") return "statistic";
     else if (str === "Theo tháng") return "permonth";
+    // else if (str === "Danh sách bãi đỗ") return "parking-slot";
   }
   return "";
 };

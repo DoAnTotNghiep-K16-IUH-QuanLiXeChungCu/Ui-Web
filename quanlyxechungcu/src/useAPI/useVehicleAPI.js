@@ -108,16 +108,11 @@ export const getAllVehicle = async () => {
 };
 export const addVehicle = async (vehicle) => {
   const token = Cookies.get("accessToken");
-
   // Kiểm tra nếu token không tồn tại
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-
-  // Kiểm tra giá trị của uuid
-  console.log("Gửi dữ liệu ở phần ADD :", { vehicle }); // Ghi lại dữ liệu gửi đi
-
   try {
     const response = await fetch(CREATE_VEHICLE, {
       method: "POST",
@@ -136,7 +131,8 @@ export const addVehicle = async (vehicle) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Lỗi API: ${errorData.message || response.status}`);
+      console.error(`Lỗi API: ${errorData.message || response.status}`);
+      return errorData.error;
     }
 
     console.log("Vehicle đã được thêm thành công.");
@@ -149,15 +145,11 @@ export const addVehicle = async (vehicle) => {
 };
 export const deleteVehicle = async (id) => {
   const token = Cookies.get("accessToken");
-
   // Kiểm tra nếu token không tồn tại
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-
-  // Kiểm tra giá trị của uuid
-  console.log("Gửi dữ liệu:", { id }); // Ghi lại dữ liệu gửi đi
 
   try {
     const response = await fetch(DELETE_VEHICLE, {
@@ -173,7 +165,8 @@ export const deleteVehicle = async (id) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Lỗi API: ${errorData.message || response.status}`);
+      console.error(`Lỗi API: ${errorData.message || response.status}`);
+      return errorData.data;
     }
 
     console.log("Vehicle đã được xóa thành công.");
@@ -211,7 +204,7 @@ export const updateVehicle = async (vehicle) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Lỗi API: ", errorData);
-      throw new Error(`Lỗi API: ${errorData.message || response.status}`);
+      return errorData.error;
     }
 
     console.log("Vehicle đã được sửa thành công.");

@@ -73,6 +73,12 @@ const Navbar = () => {
         >
           Danh sách phòng
         </Link>
+        <Link
+          to="/parking-slot"
+          className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5"
+        >
+          Danh sách bãi đổ
+        </Link>
       </div>
     </nav>
   );
