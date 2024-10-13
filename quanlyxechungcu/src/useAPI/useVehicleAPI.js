@@ -75,7 +75,7 @@ export const FindCustomerByLicensePlate = async (licensePlate) => {
     return null;
   }
 };
-export const getAllVehicle = async (pageNumber) => {
+export const getAllVehicle = async (pageNumber, pageSize) => {
   const token = Cookies.get("accessToken");
 
   if (!token) {
@@ -92,7 +92,7 @@ export const getAllVehicle = async (pageNumber) => {
       },
       body: JSON.stringify({
         pageNumber: pageNumber,
-        pageSize: 10,
+        pageSize: pageSize,
       }),
     });
 

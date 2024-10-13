@@ -46,3 +46,7 @@ export const EXIT_RECORD_BY_ENTRY_RECORD_ID = `${API}/exitRecord/GetExitRecordBy
 export const ALL_CARD = `${API}/RFIDCard/GetAllRFIDCards`;
 export const ADD_CARD = `${API}/RFIDCard/CreateRFIDCard`;
 export const DELETE_CARD = `${API}/RFIDCard/DeleteRFIDCard`;
+
+export const COUNT_VEHICLE_ENTRY = `${API}/entryRecord/CountVehicleEntry`;
+export const COUNT_VEHICLE_EXIT = `${API}/exitRecord/CountVehicleExitRecord`;
+export const MONEY_BY_DAY = `${API}/visitorHistoryMoney/GetMoneyByDay`;

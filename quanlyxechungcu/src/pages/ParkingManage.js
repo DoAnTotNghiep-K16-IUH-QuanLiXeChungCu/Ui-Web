@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CheckCard from "./../components/CheckCard";
 import CheckCamera from "../components/CheckCamera";
+import { getMoneyByDay } from "../useAPI/useRecordAPI";
+import { formatCurrency } from "../utils/FormatMoney";
 
 const ParkingManagement = () => {
+  const [moneyPerDay, setMoneyPerDay] = useState([]);
+  const fetchData = async () => {
+    const money = await getMoneyByDay(new Date("2024-01-01"));
+    console.log("Money___", money.totalMoney);
+
+    if (money) {
+      setMoneyPerDay(money.totalMoney);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
   return (
     <div className="p-4">
       <header className="bg-gray-100 p-4 flex justify-between items-center">
@@ -14,7 +29,9 @@ const ParkingManagement = () => {
         <div className="border border-gray-400 rounded-lg ml-auto">
           <div className="p-4">
             <h2 className="text-lg font-semibold">Tổng Tiền</h2>
-            <p className="text-red-500 font-bold">163,000 đ</p>
+            <p className="text-red-500 font-bold">
+              {formatCurrency(moneyPerDay)}
+            </p>
           </div>
         </div>
       </header>

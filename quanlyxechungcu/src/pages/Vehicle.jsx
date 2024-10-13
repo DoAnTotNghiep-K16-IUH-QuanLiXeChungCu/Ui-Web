@@ -5,9 +5,9 @@ import {
   getAllVehicleByType,
   updateVehicle,
 } from "../useAPI/useVehicleAPI";
-import { changeTypeVehicle } from "./../utils/ChangeTypeVehicle";
+import { changeTypeVehicle } from "../utils/ChangeTypeVehicle";
 import { findCustomerByID, getAllCustomer } from "../useAPI/useCustomerAPI";
-import { deleteVehicle } from "./../useAPI/useVehicleAPI";
+import { deleteVehicle } from "../useAPI/useVehicleAPI";
 import VehicleModal from "./VehicleModal";
 import Notification from "../components/Notification";
 
@@ -38,7 +38,7 @@ const Vehicle = () => {
 
   const fetchVehicles = async (page = currentPage) => {
     try {
-      const vehiclesData = await getAllVehicle(page);
+      const vehiclesData = await getAllVehicle(page, 10);
       setVehicles(vehiclesData.vehicles || []);
 
       // Cập nhật tổng số trang và kích thước trang

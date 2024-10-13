@@ -20,7 +20,7 @@ export const getAllParkingSlot = async () => {
       },
       body: JSON.stringify({
         pageNumber: 1,
-        pageSize: 10000,
+        pageSize: 100,
       }),
     });
 

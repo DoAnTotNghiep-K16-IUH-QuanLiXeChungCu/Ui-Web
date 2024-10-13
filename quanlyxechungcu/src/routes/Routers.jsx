@@ -5,7 +5,7 @@ import NotFound from "../pages/NotFound";
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
 import DashboardLayout from "../layouts/DashboardLayout";
-import AuthLayout from "./../layouts/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import ParkingManagement from "../pages/ParkingManage";
 import ParkingFeeConfiguration from "../pages/ParkingFeeConfiguration";
 import MonthlyTicketList from "../pages/MonthlyTicketList";
@@ -13,11 +13,12 @@ import Customer from "../pages/Customer";
 import Vehicle from "../pages/Vehicle";
 import ConnectConfiguration from "../pages/ConnectConfiguration";
 import ParkingHistory from "../pages/ParkingHistory";
-import StatisPerMonth from "./../pages/StatisPerMonth";
-import AboutUs from "./../pages/AboutUs";
+import AboutUs from "../pages/AboutUs";
 import RFIDCard from "../pages/RFIDCard";
 import Apartment from "../pages/Apartment";
 import ParkingSlot from "../pages/ParkingSlot";
+import ReportPerMonth from "../pages/ReportPerMonth";
+import ReportPerDay from "../pages/ReportPerDay";
 
 const Routers = () => {
   const routers = [
@@ -32,18 +33,18 @@ const Routers = () => {
       children: [
         { path: "home", element: <Home /> },
         { path: "parking-manage/check", element: <ParkingManagement /> },
-        // { path: "registrationform", element: <RegistrationForm /> },
         { path: "parking-manage/history", element: <ParkingHistory /> },
         { path: "setting/parking-fee", element: <ParkingFeeConfiguration /> },
         { path: "setting/connect", element: <ConnectConfiguration /> },
         { path: "customer", element: <Customer /> },
         { path: "apartment", element: <Apartment /> },
         { path: "vehicle", element: <Vehicle /> },
-        { path: "statistic/permonth", element: <StatisPerMonth /> },
+        { path: "report/per-month", element: <ReportPerMonth /> },
+        { path: "report/per-day", element: <ReportPerDay /> },
         { path: "RFID", element: <RFIDCard /> },
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
-        { path: "parking-slot", element: <ParkingSlot /> },
+        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
       ],
     },
     {

@@ -7,8 +7,8 @@ import {
   FindCustomerByVehicleID,
   getAllVehicle,
 } from "../useAPI/useVehicleAPI"; // Import hàm lấy thông tin khách hàng
-import { formatDate } from "./../utils/FormatDate";
-import { changeTypeVehicle } from "./../utils/ChangeTypeVehicle";
+import { formatDate } from "../utils/FormatDate";
+import { changeTypeVehicle } from "../utils/ChangeTypeVehicle";
 import MonthlyTicketModal from "./MonthlyTicketModal";
 import { findCustomerByID } from "../useAPI/useCustomerAPI";
 import {
@@ -67,12 +67,17 @@ const MonthlyTicketList = () => {
 
       setTickets(ticketsWithCustomer || []);
 
-      const vehilces = await getAllVehicle();
+      const c = await getAllVehicle(1, 1000);
+      const vehilces = c.vehicles;
+      // console.log("vehilces______", vehilces);
+
       const vehilceDetail = await Promise.all(
-        vehilces.map(async (vehile) => {
-          const customer = await findCustomerByID(vehile.customerId._id);
+        vehilces.map(async (vehicle) => {
+          const customer = await findCustomerByID(vehicle.customerId._id);
+          // console.log("customer___", customer);
+
           return {
-            ...vehile,
+            ...vehicle,
             customerId: customer, // Cập nhật thông tin khu đỗ xe
           };
         })

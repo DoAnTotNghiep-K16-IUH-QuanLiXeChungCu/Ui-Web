@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CheckEE from "../components/ParkingHistory/CheckEE";
 import { FindExitRecordByEntryRecordID } from "../useAPI/useRecordAPI";
-import { getALLEntryRecord } from "./../useAPI/useRecordAPI";
+import { getALLEntryRecord } from "../useAPI/useRecordAPI";
 import { FindCustomerByLicensePlate } from "../useAPI/useVehicleAPI";
 
 const ParkingHistory = () => {
