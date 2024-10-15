@@ -5,7 +5,7 @@ import {
   getAllVehicleByType,
   updateVehicle,
 } from "../useAPI/useVehicleAPI";
-import { changeTypeVehicle } from "../utils/ChangeTypeVehicle";
+import { changeTypeVehicle } from "../utils/index";
 import { findCustomerByID, getAllCustomer } from "../useAPI/useCustomerAPI";
 import { deleteVehicle } from "../useAPI/useVehicleAPI";
 import VehicleModal from "./VehicleModal";
@@ -34,7 +34,7 @@ const Vehicle = () => {
   // Trạng thái cho phân trang
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // Kích thước trang
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchVehicles = async (page = currentPage) => {
     try {
@@ -45,8 +45,10 @@ const Vehicle = () => {
       setTotalPages(vehiclesData.totalPages);
       setPageSize(vehiclesData.pageSize);
 
-      const customers = await getAllCustomer();
-      setCustomers(customers || []);
+      const customers = await getAllCustomer(1, 1000);
+      console.log("customers___", customers);
+
+      setCustomers(customers.customers || []);
     } catch (error) {
       console.error("Có lỗi xảy ra:", error);
     }
@@ -69,7 +71,13 @@ const Vehicle = () => {
     setNewVehicle(null);
     setShowAddForm(true);
   };
-
+  const handleRowClick = (ticket) => {
+    if (selectedVehicle && selectedVehicle._id === ticket._id) {
+      setSelectedVehicle(null);
+    } else {
+      setSelectedVehicle(ticket);
+    }
+  };
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     if (name === "customerId") {
@@ -185,7 +193,6 @@ const Vehicle = () => {
   const handleCloseModal = () => {
     setShowAddForm(false);
   };
-
   const handleVehicleTypeChange = (e) => {
     const type = e.target.value;
     setVehicleTypeFilter(type);
@@ -218,7 +225,7 @@ const Vehicle = () => {
           <h1 className="text-xl font-semibold">DANH SÁCH XE</h1>
         </div>
         {/* Search and Action Buttons */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-end items-center mb-4">
           <div className="flex space-x-2">
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -271,7 +278,15 @@ const Vehicle = () => {
               </thead>
               <tbody>
                 {vehicles.map((vehicle, index) => (
-                  <tr key={vehicle._id}>
+                  <tr
+                    key={vehicle._id}
+                    className={`text-center cursor-pointer ${
+                      selectedVehicle && selectedVehicle._id === vehicle._id
+                        ? "bg-gray-200"
+                        : ""
+                    }`}
+                    onClick={() => handleRowClick(vehicle)}
+                  >
                     <td className="border p-2">
                       {index + 1 + (currentPage - 1) * pageSize}
                     </td>

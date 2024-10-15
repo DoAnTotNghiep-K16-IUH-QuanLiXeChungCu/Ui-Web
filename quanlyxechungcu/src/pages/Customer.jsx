@@ -4,14 +4,14 @@ import CustomerModal from "./CustomerModal";
 import {
   addCustomer,
   deleteCustomer,
+  filterCustomer,
   getAllCustomer,
   updateCustomer,
 } from "../useAPI/useCustomerAPI";
 import Notification from "../components/Notification";
 
 const Customer = () => {
-  const [customer, setCustomer] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [customers, setCustomers] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false); // State để hiển thị form thêm xe
   const [newCustomer, setNewCustomer] = useState({
     _id: "",
@@ -27,44 +27,48 @@ const Customer = () => {
     type: "",
     show: false,
   });
+  // Trạng thái cho phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const [apartmentFilter, setApartmentFilter] = useState("");
   const [customerTypeFilter, setCustomerTypeFilter] = useState("");
-  const fetchcustomer = async () => {
+
+  const fetchCustomer = async (
+    isResident,
+    apartmentName,
+    pageNumber,
+    pageSize
+  ) => {
+    const all = await filterCustomer(
+      isResident,
+      apartmentName,
+      pageNumber,
+      pageSize
+    );
+    const allCustomer = all?.customers;
+    setTotalPages(all.totalPages);
+    setPageSize(all.pageSize);
+    setCustomers(allCustomer);
+  };
+
+  const fetchData = async () => {
     try {
-      const customer = await getAllCustomer();
-      setCustomer(customer || []);
+      const all = await filterCustomer("", "", 1, 10);
+      const allCustomer = all?.customers;
+      setTotalPages(all.totalPages);
+      setPageSize(all.pageSize);
+      setCustomers(allCustomer);
       const apartments = await getAllApartment();
       setApartments(apartments || []);
     } catch (error) {
       console.error("Có lỗi xảy ra:", error);
     }
   };
-
   useEffect(() => {
-    fetchcustomer();
+    fetchData();
   }, []);
-
-  const filteredcustomer = customer.filter((customer) => {
-    const matchesApartment =
-      apartmentFilter === "" ||
-      customer?.apartmentsId?.name === apartmentFilter;
-    const matchesCustomerType =
-      customerTypeFilter === "" ||
-      (customerTypeFilter === "true" && customer.isResident === true) ||
-      (customerTypeFilter === "false" && customer.isResident === false);
-    const matchesSearchTerm =
-      (customer.fullName?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (customer.address?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (customer.phoneNumber?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      );
-    return matchesSearchTerm && matchesCustomerType && matchesApartment;
-  });
-
   const handleAddClick = () => {
     setNewCustomer(null);
     setShowAddForm(true);
@@ -87,7 +91,7 @@ const Customer = () => {
     try {
       const deleteC = await deleteCustomer(cus._id);
       if (deleteC) {
-        setCustomer((prev) =>
+        setCustomers((prev) =>
           prev.filter((customer) => customer._id !== cus._id)
         );
         setShowNotification({
@@ -113,17 +117,15 @@ const Customer = () => {
 
   const handleEditClick = (customer) => {
     if (customer) {
-      setNewCustomer({
-        ...customer,
-        _id: customer._id,
-        apartmentsId: customer.apartmentsId?._id || "", // Đảm bảo bạn đang truyền đúng _id của apartmentsId
-      });
+      setNewCustomer(customer);
       setShowAddForm(true);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("newCustomer___", newCustomer);
+
     const phoneNumberLength = newCustomer.phoneNumber.length;
     if (phoneNumberLength < 10 || phoneNumberLength > 11) {
       setShowNotification({
@@ -133,14 +135,37 @@ const Customer = () => {
       });
       return;
     }
+    if (
+      (newCustomer.isResident === "true" &&
+        (!newCustomer.apartmentsId || newCustomer.apartmentsId === "")) ||
+      (newCustomer.isResident === undefined && newCustomer.apartmentsId !== "")
+    ) {
+      setShowNotification({
+        content: "Bạn phải chọn loại khách hàng trước khi chọn phòng",
+        type: "Error",
+        show: true,
+      });
+      return; // Ngăn không cho submit form
+    }
+    if (
+      newCustomer.isResident === true &&
+      newCustomer.apartmentsId === undefined
+    ) {
+      setShowNotification({
+        content: "Bạn phải chọn phòng cho khách trong khu dân cư",
+        type: "Error",
+        show: true,
+      });
+      return; // Ngăn không cho submit form
+    }
 
     try {
       if (newCustomer._id) {
         const updateC = await updateCustomer(newCustomer);
         if (updateC) {
-          setCustomer((prev) =>
+          setCustomers((prev) =>
             prev.map((customer) =>
-              customer._id === newCustomer._id ? newCustomer : customer
+              customer._id === updateC._id ? updateC : customer
             )
           );
           setShowNotification({
@@ -148,7 +173,7 @@ const Customer = () => {
             type: "Notification",
             show: true,
           });
-          fetchcustomer();
+          // fetchData();
         } else {
           setShowNotification({
             content: updateC,
@@ -166,7 +191,8 @@ const Customer = () => {
             type: "Notification",
             show: true,
           });
-          fetchcustomer();
+          // fetchData();
+          setCustomers((prev) => [...prev, addC]);
           // console.log("CUSTOMER___", customer);
         } else {
           setShowNotification({
@@ -191,6 +217,22 @@ const Customer = () => {
   const handleCustomerTypeChange = (e) => {
     setCustomerTypeFilter(e.target.value);
   };
+  const handleFilter = () => {
+    fetchCustomer(customerTypeFilter, apartmentFilter, 1, 10);
+  };
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      fetchCustomer(customerTypeFilter, apartmentFilter, currentPage + 1, 10);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      fetchCustomer(customerTypeFilter, apartmentFilter, currentPage - 1, 10);
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="mx-auto bg-white shadow-lg rounded-lg p-6">
@@ -198,14 +240,7 @@ const Customer = () => {
           <h1 className="text-xl font-semibold">DANH SÁCH KHÁCH HÀNG</h1>
         </div>
 
-        <div className="flex justify-between items-center mb-4">
-          <input
-            type="text"
-            placeholder="Tìm kiếm..."
-            className="border p-2 rounded w-[500px]"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="flex justify-end items-center mb-4">
           <div className="flex space-x-2">
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -239,69 +274,94 @@ const Customer = () => {
               </option>
             ))}
           </select>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded"
+            onClick={() => handleFilter()}
+          >
+            LỌC
+          </button>
         </div>
         <div className="grid grid-cols-7">
           <div className="overflow-x-auto rounded bg-gray-100 border p-4 col-span-7">
-            <div className="h-[400px] overflow-y-scroll">
-              <table className="min-w-full bg-white border rounded">
-                <thead>
-                  <tr className="bg-slate-300">
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      #
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Họ và tên
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Phòng
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Số điện thoại
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Địa chỉ
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Loại khách
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Hành động
-                    </th>
+            <table className="min-w-full bg-white border rounded">
+              <thead>
+                <tr className="bg-slate-300">
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    #
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Họ và tên
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Phòng
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Số điện thoại
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Địa chỉ
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Loại khách
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Hành động
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {customers.map((customer, index) => (
+                  <tr key={customer._id} className="text-center">
+                    <td className="border p-2">
+                      {index + 1 + (currentPage - 1) * pageSize}
+                    </td>
+                    <td className="border p-2">{customer.fullName}</td>
+                    <td className="border p-2">
+                      {customer.apartment?.name || ""}
+                    </td>
+                    <td className="border p-2">{customer.phoneNumber}</td>
+                    <td className="border p-2">{customer.address}</td>
+                    <td className="border p-2">
+                      {customer.isResident === true
+                        ? "Trong khu dân cư"
+                        : "Khách vãn lai"}
+                    </td>
+                    <td className="border p-2">
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 rounded mr-1"
+                        onClick={() => handleDeleteCustomer(customer)}
+                      >
+                        XÓA
+                      </button>
+                      <button
+                        className="bg-yellow-500 text-white px-4 py-2 rounded"
+                        onClick={() => handleEditClick(customer)}
+                      >
+                        Sửa
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredcustomer.map((customer, index) => (
-                    <tr key={customer._id} className="text-center">
-                      <td className="border p-2">{index + 1}</td>
-                      <td className="border p-2">{customer.fullName}</td>
-                      <td className="border p-2">
-                        {customer.apartmentsId?.name || ""}
-                      </td>
-                      <td className="border p-2">{customer.phoneNumber}</td>
-                      <td className="border p-2">{customer.address}</td>
-                      <td className="border p-2">
-                        {customer.isResident === true
-                          ? "Trong khu dân cư"
-                          : "Khách vãn lai"}
-                      </td>
-                      <td className="border p-2">
-                        <button
-                          className="bg-red-500 text-white px-4 py-2 rounded mr-1"
-                          onClick={() => handleDeleteCustomer(customer)}
-                        >
-                          XÓA
-                        </button>
-                        <button
-                          className="bg-yellow-500 text-white px-4 py-2 rounded"
-                          onClick={() => handleEditClick(customer)}
-                        >
-                          Sửa
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
+            <div className="flex justify-center items-center mt-4">
+              <button
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Trước
+              </button>
+              <span className="mx-5">
+                Trang {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Sau
+              </button>
             </div>
           </div>
         </div>

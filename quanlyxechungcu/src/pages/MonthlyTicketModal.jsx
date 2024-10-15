@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { changeTypeVehicle } from "../utils/ChangeTypeVehicle";
+import { changeTypeVehicle } from "../utils/index";
 import { getAllAvailabeParkingSlotByType } from "../useAPI/useParkingSlotAPI";
 
 const MonthlyTicketModal = ({
@@ -167,6 +167,19 @@ const MonthlyTicketModal = ({
           {/* Parking Slot */}
           <div className="grid grid-cols-4 gap-4">
             <div>
+              <label className="block font-medium">Loại bãi đỗ</label>
+              <select
+                name="slotType"
+                type="text"
+                className="border p-2 rounded w-full"
+                value={selectedSlotType} // Sử dụng giá trị từ state
+                onChange={handleSlotTypeChange} // Gọi hàm khi thay đổi loại bãi đỗ
+              >
+                <option value="car">Ô tô</option>
+                <option value="motor">Xe máy</option>
+              </select>
+            </div>
+            <div>
               <label className="block font-medium">Khu:</label>
               <select
                 className="w-full mt-1 p-2 border rounded"
@@ -182,19 +195,7 @@ const MonthlyTicketModal = ({
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block font-medium">Loại bãi đỗ</label>
-              <select
-                name="slotType"
-                type="text"
-                className="border p-2 rounded w-full"
-                value={selectedSlotType} // Sử dụng giá trị từ state
-                onChange={handleSlotTypeChange} // Gọi hàm khi thay đổi loại bãi đỗ
-              >
-                <option value="car">Ô tô</option>
-                <option value="motor">Xe máy</option>
-              </select>
-            </div>
+
             <div>
               <label className="block font-medium">Số lượng:</label>
               <input

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAllParkingRate } from "../useAPI/useParkingRateAPI";
-import { changeTypeVehicle } from "../utils/ChangeTypeVehicle";
+import { changeTypeVehicle } from "../utils/index";
 
 const ParkingFeeConfiguration = () => {
   const [fee, setFee] = useState([]);

@@ -73,7 +73,7 @@ const VehicleModal = ({
               onChange={handleInputChange}
             >
               <option value="">Chọn chủ xe</option>
-              {customers.map((customer) => (
+              {customers?.map((customer) => (
                 <option key={customer._id} value={customer._id}>
                   {customer.fullName}
                 </option>

@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ChangeNavCase from "../utils/ChangeNavCase";
+import { ChangeNavCase } from "../utils/index";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FindIconName } from "../utils/FindIconName";
+import { FindIconName } from "../utils/index";
 
 const Dropdown = ({ label, items, isOpen, toggleDropdown, closeDropdown }) => {
   return (

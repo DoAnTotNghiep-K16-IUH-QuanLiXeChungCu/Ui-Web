@@ -1,25 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
   addMonthlyTicket,
-  getAllMonthlyTicket,
+  filterMonthlyTicket,
 } from "../useAPI/useMonthlyTicketAPI";
-import {
-  FindCustomerByVehicleID,
-  getAllVehicle,
-} from "../useAPI/useVehicleAPI"; // Import hàm lấy thông tin khách hàng
-import { formatDate } from "../utils/FormatDate";
-import { changeTypeVehicle } from "../utils/ChangeTypeVehicle";
+import { getAllVehicle } from "../useAPI/useVehicleAPI"; // Import hàm lấy thông tin khách hàng
+import { formatDate } from "../utils/index";
+import { changeTypeVehicle } from "../utils/index";
 import MonthlyTicketModal from "./MonthlyTicketModal";
 import { findCustomerByID } from "../useAPI/useCustomerAPI";
-import {
-  findParkingSlotByID,
-  getAllParkingSlot,
-} from "../useAPI/useParkingSlotAPI";
 import Notification from "../components/Notification";
 
 const MonthlyTicketList = () => {
   const [tickets, setTickets] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTickets, setNewTickets] = useState({
@@ -33,44 +25,56 @@ const MonthlyTicketList = () => {
   const [newEndDate, setNewEndDate] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [showExtend, setShowExtend] = useState(false);
-  const [slots, setSlots] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Kích thước trang
+
+  //// Filter
   const [statusFilter, setStatusFilter] = useState(""); // State cho tình trạng
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState(""); // State cho loại xe
   const [parkingSlotFilter, setParkingSlotFilter] = useState(""); // State cho khu
   const [monthFilter, setMonthFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
+
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
     show: false,
   });
+  const fetchMonthlyTicket = async (
+    isExpired,
+    type,
+    slotCode,
+    month,
+    year,
+    page = currentPage
+  ) => {
+    const all = await filterMonthlyTicket(
+      isExpired,
+      type,
+      slotCode,
+      month,
+      year,
+      page,
+      10
+    );
+    const allMonthlyTickets = all?.residentHistoryMoneys;
+    console.log("fetchMonthlyTicket__", allMonthlyTickets);
+    setTotalPages(all.totalPages);
+    setPageSize(all.pageSize);
+    setTickets(allMonthlyTickets);
+  };
   const fetchData = async () => {
     try {
-      const monthlyTickets = await getAllMonthlyTicket(1); // Sử dụng await để lấy dữ liệu
-      const ticketsWithCustomer = await Promise.all(
-        monthlyTickets.map(async (ticket) => {
-          const c = await FindCustomerByVehicleID(ticket.vehicleId._id);
-          const customer = await findCustomerByID(c._id);
-          const slots = await getAllParkingSlot();
-          setSlots(slots);
-          const parkingSlot = await findParkingSlotByID(
-            ticket.parking_slotId._id
-          );
-          return {
-            ...ticket,
-            customer,
-            parking_slotId: parkingSlot, // Cập nhật thông tin khu đỗ xe
-          };
-        })
-      );
+      const all = await filterMonthlyTicket("", " ", " ", " ", " ", 1, 10);
+      const allMonthlyTickets = all.residentHistoryMoneys;
+      setTotalPages(all.totalPages);
+      setPageSize(all.pageSize);
+      setTickets(allMonthlyTickets);
       // console.log("ticketsWithCustomer: ", ticketsWithCustomer);
-
-      setTickets(ticketsWithCustomer || []);
-
       const c = await getAllVehicle(1, 1000);
       const vehilces = c.vehicles;
-      // console.log("vehilces______", vehilces);
-
       const vehilceDetail = await Promise.all(
         vehilces.map(async (vehicle) => {
           const customer = await findCustomerByID(vehicle.customerId._id);
@@ -82,6 +86,7 @@ const MonthlyTicketList = () => {
           };
         })
       );
+      console.log("vehilceDetail", vehilceDetail);
 
       setVehicles(vehilceDetail || []);
     } catch (error) {
@@ -92,46 +97,6 @@ const MonthlyTicketList = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const filteredTickets = tickets.filter((ticket) => {
-    const ticketDate = new Date(ticket.startDate);
-    const ticketMonth = ticketDate.getMonth() + 1;
-    const ticketYear = ticketDate.getFullYear();
-
-    const matchesMonth =
-      monthFilter === "" || ticketMonth === parseInt(monthFilter);
-    const matchesYear =
-      yearFilter === "" || ticketYear === parseInt(yearFilter);
-
-    const matchesSearchTerm =
-      (ticket?.vehicleId?.licensePlate?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (ticket.customer &&
-        (ticket?.customer?.fullName?.toLowerCase() || "").includes(
-          searchTerm.toLowerCase()
-        ));
-
-    const matchesStatus =
-      statusFilter === "" ||
-      (statusFilter === "active" && new Date(ticket.endDate) >= new Date()) ||
-      (statusFilter === "expired" && new Date(ticket.endDate) < new Date());
-
-    const matchesVehicleType =
-      vehicleTypeFilter === "" || ticket.vehicleId.type === vehicleTypeFilter;
-
-    const matchesParkingSlot =
-      parkingSlotFilter === "" ||
-      ticket.parking_slotId.slotCode === parkingSlotFilter;
-    return (
-      matchesSearchTerm &&
-      matchesStatus &&
-      matchesVehicleType &&
-      matchesParkingSlot &&
-      matchesMonth &&
-      matchesYear
-    );
-  });
 
   const handleRowClick = (ticket) => {
     if (selectedTicket && selectedTicket._id === ticket._id) {
@@ -160,6 +125,8 @@ const MonthlyTicketList = () => {
     setShowAddForm(false);
   };
   const addNewMonthlyTicket = async (newTicket, content) => {
+    console.log("newTicket______", newTicket);
+
     if (newTicket.monthlyFee <= 0) {
       setShowNotification({
         content: "Phí không được <0",
@@ -171,6 +138,8 @@ const MonthlyTicketList = () => {
 
     const addTicket = await addMonthlyTicket(newTicket);
     if (addTicket._id) {
+      // setTickets((prev) => [...prev, addTicket]);
+      setSelectedTicket(addTicket);
       setShowNotification({
         content: content,
         type: "Notification",
@@ -192,7 +161,8 @@ const MonthlyTicketList = () => {
     });
     await Promise.all(ticketPromises);
     fetchData();
-    showExtend(false);
+    setListChoosenTickets([]);
+    setShowExtend(false);
   };
 
   const handleDeleteTicket = async (id) => {
@@ -208,31 +178,55 @@ const MonthlyTicketList = () => {
       console.error("Có lỗi khi xóa xe:", error);
     }
   };
-  // Hàm xử lý thay đổi lọc
-  const handleStatusChange = (e) => {
-    setStatusFilter(e.target.value);
-  };
-
-  const handleVehicleTypeChange = (e) => {
-    setVehicleTypeFilter(e.target.value);
-  };
-
-  const handleParkingSlotChange = (e) => {
-    setParkingSlotFilter(e.target.value);
-  };
   const handleCheckboxChange = (ticket) => {
-    // Kiểm tra nếu vé đã có trong danh sách đã chọn
     if (listChoosenTickets.includes(ticket._id)) {
-      // Nếu có, bỏ nó ra khỏi danh sách
       setListChoosenTickets(
         listChoosenTickets.filter((id) => id !== ticket._id)
       );
     } else {
-      // Nếu không, thêm nó vào danh sách
       setListChoosenTickets([...listChoosenTickets, ticket._id]);
     }
   };
+  const handleFilter = () => {
+    fetchMonthlyTicket(
+      statusFilter,
+      vehicleTypeFilter,
+      parkingSlotFilter,
+      monthFilter,
+      yearFilter,
+      1,
+      10
+    );
+  };
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      fetchMonthlyTicket(
+        statusFilter,
+        vehicleTypeFilter,
+        parkingSlotFilter,
+        monthFilter,
+        yearFilter,
+        currentPage + 1,
+        10
+      );
+    }
+  };
 
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      fetchMonthlyTicket(
+        statusFilter,
+        vehicleTypeFilter,
+        parkingSlotFilter,
+        monthFilter,
+        yearFilter,
+        currentPage - 1,
+        10
+      );
+    }
+  };
   const handleExtend = async () => {
     // Kiểm tra nếu ngày gia hạn không có
     if (!newEndDate) {
@@ -251,8 +245,8 @@ const MonthlyTicketList = () => {
         if (ticket) {
           // Chuyển đổi dữ liệu về định dạng mong muốn
           const transformedTicket = {
-            vehicleId: ticket.vehicleId._id, // Lấy _id của vehicleId
-            parking_slotId: ticket.parking_slotId._id, // Lấy _id của parking_slotId
+            vehicleId: ticket.vehicle._id, // Lấy _id của vehicleId
+            parking_slotId: ticket.parkingSlot._id, // Lấy _id của parking_slotId
             monthlyFee: ticket.monthlyFee, // Số tiền hàng tháng
             startDate: new Date().toISOString().split("T")[0],
             endDate: newEndDate, // Đặt endDate là ngày gia hạn mới
@@ -275,14 +269,7 @@ const MonthlyTicketList = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">DANH SÁCH VÉ THÁNG</h1>
         </div>
-        <div className="flex justify-between items-center mb-4">
-          <input
-            type="text"
-            placeholder="Tìm kiếm..."
-            className="border p-2 rounded w-1/3"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="flex justify-end items-center mb-4">
           <div className="flex space-x-2">
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -297,7 +284,7 @@ const MonthlyTicketList = () => {
               XÓA
             </button>
             <button
-              className="bg-green-500 text-white px-4 py-2 rounded"
+              className="bg-yellow-500 text-white px-4 py-2 rounded"
               onClick={() => setShowExtend(true)}
             >
               GIA HẠN
@@ -332,16 +319,16 @@ const MonthlyTicketList = () => {
           <select
             className="border p-2 rounded"
             value={statusFilter}
-            onChange={handleStatusChange}
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">Tất cả</option>
-            <option value="active">Còn hiệu lực</option>
-            <option value="expired">Hết hiệu lực</option>
+            <option value="false">Còn hiệu lực</option>
+            <option value="true">Hết hiệu lực</option>
           </select>
           <label className="p-2 mr-2 ">Loại xe:</label>
           <select
             value={vehicleTypeFilter}
-            onChange={handleVehicleTypeChange}
+            onChange={(e) => setVehicleTypeFilter(e.target.value)}
             className="border p-2 rounded"
           >
             <option value="">Tất cả</option>
@@ -351,15 +338,14 @@ const MonthlyTicketList = () => {
           <label className="mr-2 p-2">Khu đỗ:</label>
           <select
             value={parkingSlotFilter}
-            onChange={handleParkingSlotChange}
+            onChange={(e) => setParkingSlotFilter(e.target.value)}
             className="border p-2 rounded"
           >
             <option value="">Tất cả</option>
-            {slots.map((slot) => (
-              <option key={slot._id} value={slot.slotCode}>
-                {slot.slotCode}
-              </option>
-            ))}
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="C">D</option>
           </select>
           <label className="p-2 mr-2 ">Tháng:</label>
           <select
@@ -390,100 +376,125 @@ const MonthlyTicketList = () => {
               );
             })}
           </select>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded"
+            onClick={() => handleFilter()}
+          >
+            LỌC
+          </button>
         </div>
         <div>
           {/* Ticket Table */}
           <div className="overflow-x-auto rounded bg-gray-100 border p-4">
-            <div className="h-[400px] overflow-y-scroll">
-              <table className="min-w-full bg-white border rounded">
-                <thead>
-                  <tr className="bg-slate-300">
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10"></th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      #
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Biển Số
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Chủ Xe
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Ngày Kích Hoạt
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Ngày Hết Hạn
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Loại xe
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Khu
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Giá Vé
-                    </th>
-                    <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                      Tình trạng
-                    </th>
+            <table className="min-w-full bg-white border rounded">
+              <thead>
+                <tr className="bg-slate-300">
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10"></th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    #
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Biển Số
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Chủ Xe
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Ngày Kích Hoạt
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Ngày Hết Hạn
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Loại xe
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Khu
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Giá Vé
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Tình trạng
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {tickets.map((ticket, index) => (
+                  <tr
+                    key={ticket._id}
+                    className={`text-center cursor-pointer ${
+                      selectedTicket && selectedTicket._id === ticket._id
+                        ? "bg-gray-200"
+                        : ""
+                    }`}
+                    onClick={() => handleRowClick(ticket)}
+                  >
+                    <td className="border p-2">
+                      <input
+                        type="checkbox"
+                        checked={listChoosenTickets.includes(ticket._id)}
+                        onChange={() => handleCheckboxChange(ticket)}
+                      />
+                    </td>
+                    <td className="border p-2">
+                      {index + 1 + (currentPage - 1) * pageSize}
+                    </td>
+                    <td className="border p-2">
+                      {ticket.vehicle.licensePlate}
+                    </td>
+                    <td className="border p-2">
+                      {ticket.vehicle.customer
+                        ? ticket.vehicle.customer.fullName
+                        : "N/A"}
+                    </td>
+                    <td className="border p-2">
+                      {formatDate(ticket.startDate)}
+                    </td>
+                    <td className="border p-2">{formatDate(ticket.endDate)}</td>
+                    <td className="border p-2">
+                      {changeTypeVehicle(ticket.vehicle.type)}
+                    </td>
+                    <td className="border p-2">
+                      {ticket.parkingSlot.slotCode}
+                    </td>
+                    <td className="border p-2">{ticket.monthlyFee}</td>
+                    <td className="border p-2">
+                      {new Date(ticket.endDate) < new Date() ? (
+                        "Hết hạn"
+                      ) : (
+                        <span>
+                          Còn{" "}
+                          {Math.ceil(
+                            (new Date(ticket.endDate) - new Date()) /
+                              (1000 * 60 * 60 * 24)
+                          )}{" "}
+                          ngày
+                        </span>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredTickets.map((ticket, index) => (
-                    <tr
-                      key={ticket._id}
-                      className={`text-center cursor-pointer ${
-                        selectedTicket && selectedTicket._id === ticket._id
-                          ? "bg-gray-200"
-                          : ""
-                      }`}
-                      onClick={() => handleRowClick(ticket)}
-                    >
-                      <td className="border p-2">
-                        <input
-                          type="checkbox"
-                          checked={listChoosenTickets.includes(ticket._id)}
-                          onChange={() => handleCheckboxChange(ticket)}
-                        />
-                      </td>
-                      <td className="border p-2">{index + 1}</td>
-                      <td className="border p-2">
-                        {ticket.vehicleId.licensePlate}
-                      </td>
-                      <td className="border p-2">
-                        {ticket.customer ? ticket.customer.fullName : "N/A"}
-                      </td>
-                      <td className="border p-2">
-                        {formatDate(ticket.startDate)}
-                      </td>
-                      <td className="border p-2">
-                        {formatDate(ticket.endDate)}
-                      </td>
-                      <td className="border p-2">
-                        {changeTypeVehicle(ticket.vehicleId.type)}
-                      </td>
-                      <td className="border p-2">
-                        {ticket.parking_slotId.slotCode}
-                      </td>
-                      <td className="border p-2">{ticket.monthlyFee}</td>
-                      <td className="border p-2">
-                        {new Date(ticket.endDate) < new Date() ? (
-                          "Hết hạn"
-                        ) : (
-                          <span>
-                            Còn{" "}
-                            {Math.ceil(
-                              (new Date(ticket.endDate) - new Date()) /
-                                (1000 * 60 * 60 * 24)
-                            )}{" "}
-                            ngày
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
+            <div className="flex justify-center items-center mt-4">
+              <button
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Trước
+              </button>
+              <span className="mx-5">
+                Trang {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Sau
+              </button>
             </div>
           </div>
         </div>

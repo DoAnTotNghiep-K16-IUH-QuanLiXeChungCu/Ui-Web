@@ -27,13 +27,18 @@ const Login = () => {
       const data = await response.json();
       if (response.ok) {
         // Xử lý nếu đăng nhập thành công
-        console.log("Đăng nhập thành công:", data);
+        console.log("Đăng nhập thành công:", data.data);
         Cookies.set("accessToken", data.data.accessToken, {
           expires: 1, // Cookie sẽ hết hạn sau 1 ngày
           secure: true, // Chỉ gửi cookie qua HTTPS
           sameSite: "Strict", // Ngăn chặn CSRF
         });
         Cookies.set("role", data.data.role, {
+          expires: 1, // Cookie sẽ hết hạn sau 1 ngày
+          secure: true, // Chỉ gửi cookie qua HTTPS
+          sameSite: "Strict", // Ngăn chặn CSRF
+        });
+        Cookies.set("dataUser", JSON.stringify(data.data), {
           expires: 1, // Cookie sẽ hết hạn sau 1 ngày
           secure: true, // Chỉ gửi cookie qua HTTPS
           sameSite: "Strict", // Ngăn chặn CSRF
@@ -114,6 +119,14 @@ const Login = () => {
         </form>
 
         {/* Forgot Password */}
+        <div className="mt-4 text-center">
+          <Link
+            to="/auth/forgot-password"
+            className="text-blue-500 hover:text-blue-700 text-sm"
+          >
+            Đăng kí
+          </Link>
+        </div>
         <div className="mt-4 text-center">
           <Link
             to="/auth/forgot-password"

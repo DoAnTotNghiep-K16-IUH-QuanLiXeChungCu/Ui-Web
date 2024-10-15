@@ -1,4 +1,4 @@
-import { formatDateTime } from "../../utils/FormatDate";
+import { formatDateTime } from "../../utils/index";
 
 const CheckEE = ({ type, time, front_pic, back_pic }) => {
   // Ảnh mặc định nếu không có ảnh

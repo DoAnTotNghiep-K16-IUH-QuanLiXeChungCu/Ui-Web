@@ -19,6 +19,8 @@ import Apartment from "../pages/Apartment";
 import ParkingSlot from "../pages/ParkingSlot";
 import ReportPerMonth from "../pages/ReportPerMonth";
 import ReportPerDay from "../pages/ReportPerDay";
+import Profile from "../pages/Profile";
+import UserShift from "./../pages/UserShift";
 
 const Routers = () => {
   const routers = [
@@ -45,6 +47,8 @@ const Routers = () => {
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
         { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
+        { path: "/account/profile", element: <Profile /> },
+        { path: "/userShift", element: <UserShift /> },
       ],
     },
     {

@@ -4,7 +4,7 @@ import {
   getAllAvailabeParkingSlotByType,
   getAllParkingSlot,
 } from "../useAPI/useParkingSlotAPI";
-import { changeTypeVehicle } from "../utils/ChangeTypeVehicle";
+import { changeTypeVehicle } from "../utils/index";
 
 const ParkingSlot = () => {
   const [parkingSlots, setParkingSlots] = useState([]);

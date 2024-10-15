@@ -1,6 +1,7 @@
 export const API = "http://localhost:3001/api/v1";
 export const LOGIN = `${API}/users/login`;
 export const SIGNUP = `${API}/users/sinup`;
+export const UPDATE_USER = `${API}/users/UpdateUser`;
 
 export const ALL_APARTMENT = `${API}/apartment/GetAllApartments`;
 export const APARTMENT_BY_ID = `${API}/apartment/GetApartmentById`;
@@ -10,6 +11,8 @@ export const SHIFT_BY_ID = `${API}/shift/GetShiftById`;
 export const UPDATE_SHIFT = `${API}/shift/UpdateShift`;
 
 export const ALL_CUSTOMER = `${API}/customer/GetAllCustomers`;
+export const FILTER_CUSTOMER = `${API}/customer/FilterCustomers`;
+
 export const CUSTOMER_BY_ID = `${API}/customer/GetCustomerById`;
 export const CREATE_CUSTOMER = `${API}/customer/CreateCustomer`;
 export const UPDATE_CUSTOMER = `${API}/customer/UpdateCustomer`;
@@ -34,6 +37,8 @@ export const UPDATE_VEHICLE = `${API}/vehicle/UpdateVehicle`;
 
 export const ALL_MONTHLY_TICKET = `${API}/residentHistoryMoney/GetAllResidentHistoryMoneys`;
 export const CREATE_MONTHLY_TICKET = `${API}/residentHistoryMoney/CreateResidentHistoryMoney`;
+export const FILTER_MONTHLY_TICKET = `${API}/residentHistoryMoney/FilterResidentHistoryMoneys`;
+export const UPDATE_MONTHLY_TICKET = `${API}/residentHistoryMoney/UpdateResidentHistoryMoney`;
 export const MONTHLY_TICKET_BY_ID = `${API}/residentHistoryMoney/GetResidentHistoryMoneyById`;
 export const MONTHLY_STATISTIC = `${API}/residentHistoryMoney/GetMonthlyStatistics`;
 export const YEAR_STATISTIC = `${API}/residentHistoryMoney/GetYearlyStatistics`;

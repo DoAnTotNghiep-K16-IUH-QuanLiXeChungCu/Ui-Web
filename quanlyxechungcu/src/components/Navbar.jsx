@@ -5,8 +5,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faIdCard,
   faMotorcycle,
-  faLocationDot,
   faUser,
+  faCreditCard,
+  faBuilding,
+  faClipboard,
 } from "@fortawesome/free-solid-svg-icons"; // Nhập biểu tượng cụ thể
 
 const Navbar = () => {
@@ -90,13 +92,22 @@ const Navbar = () => {
           to="/RFID"
           className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
         >
+          <FontAwesomeIcon icon={faCreditCard} />
           DANH SÁCH THẺ
         </Link>
         <Link
           to="/apartment"
           className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
         >
+          <FontAwesomeIcon icon={faBuilding} />
           DANH SÁCH PHÒNG
+        </Link>
+        <Link
+          to="/userShift"
+          className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
+        >
+          <FontAwesomeIcon icon={faClipboard} />
+          CA TRỰC
         </Link>
         <Link
           to="/about-us"
