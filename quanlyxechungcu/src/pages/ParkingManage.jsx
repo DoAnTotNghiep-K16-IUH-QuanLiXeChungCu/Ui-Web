@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import CheckCard from "./../components/CheckCard";
+import CheckCard from "../components/CheckCard";
 import CheckCamera from "../components/CheckCamera";
 import { getMoneyByDay } from "../useAPI/useRecordAPI";
 import { formatCurrency } from "../utils/index";

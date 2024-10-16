@@ -21,6 +21,7 @@ import ReportPerMonth from "../pages/ReportPerMonth";
 import ReportPerDay from "../pages/ReportPerDay";
 import Profile from "../pages/Profile";
 import UserShift from "./../pages/UserShift";
+import SignUp from "../pages/SignUp";
 
 const Routers = () => {
   const routers = [
@@ -57,6 +58,7 @@ const Routers = () => {
       children: [
         { path: "login", element: <Login /> },
         { path: "forgot-password", element: <ForgotPassword /> },
+        { path: "signup", element: <SignUp /> },
       ],
     },
     { path: "*", element: <NotFound /> },

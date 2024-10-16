@@ -46,6 +46,8 @@ export const YEAR_STATISTIC = `${API}/residentHistoryMoney/GetYearlyStatistics`;
 export const ALL_ENTRY_RECORD = `${API}/entryRecord/GetAllEntryRecords`;
 export const ALL_EXIT_RECORD = `${API}/exitRecord/GetAllExitRecords`;
 export const EXIT_RECORD_BY_ENTRY_RECORD_ID = `${API}/exitRecord/GetExitRecordByEntryRecordId`;
+export const FILTER_RECORD = `${API}/entryRecord/FilterEntryRecords`;
+
 // export const ALL_RECORD = `${API}/exitRecord/GetAllExitRecords`;
 
 export const ALL_CARD = `${API}/RFIDCard/GetAllRFIDCards`;
@@ -54,4 +56,10 @@ export const DELETE_CARD = `${API}/RFIDCard/DeleteRFIDCard`;
 
 export const COUNT_VEHICLE_ENTRY = `${API}/entryRecord/CountVehicleEntry`;
 export const COUNT_VEHICLE_EXIT = `${API}/exitRecord/CountVehicleExitRecord`;
+export const COUNT_VEHICLE_NON_EXIT = `${API}/entryRecord/CountVehicleNonExit`;
+
 export const MONEY_BY_DAY = `${API}/visitorHistoryMoney/GetMoneyByDay`;
+
+export const FILTER_USER_SHIFT = `${API}/userShift/FilterUserShift`;
+export const UPDATE_USER_SHIFT = `${API}/userShift/UpdateUserShift`;
+export const USER_SHIFT_BY_USER_RANGE_DATE = `${API}/userShift/GetUserShiftsByUserIdAndDateRange`;

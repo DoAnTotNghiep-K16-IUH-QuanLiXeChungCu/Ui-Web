@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { countVehicleEntry, countVehicleExit } from "../useAPI/useRecordAPI";
+import {
+  countVehicleEntry,
+  countVehicleExit,
+  countVehicleNonExit,
+} from "../useAPI/useRecordAPI";
 
 const CheckCard = ({ type, color }) => {
   const [vehicleEntryCount, setVehicleEntryCount] = useState([]);
@@ -17,6 +21,12 @@ const CheckCard = ({ type, color }) => {
     if (countVE) {
       setVehicleExitCount(countVE);
     }
+    const countVNE = await countVehicleNonExit(new Date("2024-01-01"));
+    console.log("countVNE: ", countVNE);
+
+    if (countVE) {
+      setVehicleNonExitCount(countVNE);
+    }
   };
 
   useEffect(() => {
@@ -29,20 +39,28 @@ const CheckCard = ({ type, color }) => {
       car: 0, // Số lượng ô tô
       motor: 0, // Số lượng xe máy
     };
-
-    vehicleData.forEach((vehicle) => {
-      if (vehicle.vehicleType === "car") {
-        sortedData.car = vehicle.amount;
-      } else if (vehicle.vehicleType === "motor") {
-        sortedData.motor = vehicle.amount;
+    if (vehicleData.length > 0) {
+      vehicleData.forEach((vehicle) => {
+        if (vehicle.vehicleType === "car") {
+          sortedData.car = vehicle.amount;
+        } else if (vehicle.vehicleType === "motor") {
+          sortedData.motor = vehicle.amount;
+        }
+      });
+    } else {
+      if (vehicleData.vehicleType === "car") {
+        sortedData.car = vehicleData.amount;
+      } else if (vehicleData.vehicleType === "motor") {
+        sortedData.motor = vehicleData.amount;
       }
-    });
+    }
 
     return sortedData;
   };
 
   const entryData = getSortedVehicleData(vehicleEntryCount);
   const exitData = getSortedVehicleData(vehicleExitCount);
+  const nonExitData = getSortedVehicleData(vehicleNonExitCount);
 
   return (
     <div className="border border-gray-400 rounded-lg">
@@ -83,11 +101,13 @@ const CheckCard = ({ type, color }) => {
             <>
               <p>
                 Ô tô:{" "}
-                <span className={`font-bold ${color}`}>{exitData.car}</span>
+                <span className={`font-bold ${color}`}>{nonExitData.car}</span>
               </p>
               <p>
                 Xe máy:{" "}
-                <span className={`font-bold ${color}`}>{exitData.motor}</span>
+                <span className={`font-bold ${color}`}>
+                  {nonExitData.motor}
+                </span>
               </p>
             </>
           )}

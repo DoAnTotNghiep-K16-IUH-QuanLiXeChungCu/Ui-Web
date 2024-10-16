@@ -121,7 +121,7 @@ const Login = () => {
         {/* Forgot Password */}
         <div className="mt-4 text-center">
           <Link
-            to="/auth/forgot-password"
+            to="/auth/signup"
             className="text-blue-500 hover:text-blue-700 text-sm"
           >
             Đăng kí

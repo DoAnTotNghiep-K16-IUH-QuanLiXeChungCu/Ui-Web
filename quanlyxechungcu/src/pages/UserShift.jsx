@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Notification from "../components/Notification";
 
 const UserShift = () => {
+  const [userShift, setUserShift] = useState([]);
+
   // Trạng thái cho phân trang
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -11,7 +13,7 @@ const UserShift = () => {
     type: "",
     show: false,
   });
-
+  const [date, setDateFilter] = useState("");
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -61,27 +63,8 @@ const UserShift = () => {
           </div>
         </div>
         <div className="flex space-x-4 mb-4 ">
-          <label className="p-2 mr-2 ">Từ ngày:</label>
-          <input type="date"></input>
-
-          <label className="p-2 mr-2 ">Đến ngày:</label>
-          <input type="date"></input>
-
-          <label className="p-2 mr-2 ">Ca:</label>
-          <select className="border p-2 rounded">
-            <option value="">Tất cả</option>
-            <option value="car">Sáng</option>
-            <option value="motor">Trưa</option>
-            <option value="motor">Tối</option>
-          </select>
-          <div className="flex space-x-2 mx-2">
-            <button
-              className="bg-green-500 text-white px-4 py-2 rounded "
-              onClick={handleAddClick}
-            >
-              LỌC
-            </button>
-          </div>
+          <label className="p-2 mr-2 ">Ngày :</label>
+          <input type="date" className="border p-2 rounded" />
         </div>
         <div className="grid grid-cols-7">
           {/* Vehicle Table */}
@@ -96,10 +79,22 @@ const UserShift = () => {
                     Ngày
                   </th>
                   <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                    Nhân viên
+                    Ngày
                   </th>
                   <th className="border p-2 sticky top-0 bg-slate-300 z-10">
-                    Ca
+                    Ngày
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Ngày
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Ngày
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Ngày
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Ngày
                   </th>
                 </tr>
               </thead>
