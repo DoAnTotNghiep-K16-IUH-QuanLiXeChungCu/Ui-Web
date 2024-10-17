@@ -63,7 +63,11 @@ export const addUserShift = async (userShift) => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(userShift),
+      body: JSON.stringify({
+        userId: userShift.userId,
+        shiftId: userShift.shiftId,
+        dateTime: userShift.dateTime,
+      }),
       credentials: "include", // Chỉ định việc gửi cookie
     });
 
@@ -134,8 +138,8 @@ export const deleteUserShift = async (id) => {
     return;
   }
   try {
-    const response = await fetch(UPDATE_USER_SHIFT, {
-      method: "DELETE_USER_SHIFT",
+    const response = await fetch(DELETE_USER_SHIFT, {
+      method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

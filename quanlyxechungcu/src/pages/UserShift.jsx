@@ -34,12 +34,15 @@ const UserShift = () => {
     userId: "",
     shiftId: "",
     dateTime: "",
+    fullname: "",
+    shiftName: "",
   });
 
   const [newUserShift, setNewUserShift] = useState({
     userId: "",
     shiftId: "",
     dateTime: "",
+    fullname: "",
   });
 
   const [selectedShift, setSelectedShift] = useState(null);
@@ -129,7 +132,9 @@ const UserShift = () => {
         id: selectedShiftData._id,
         userId: selectedShiftData.userId._id, // Lưu ID của nhân viên
         shiftId: selectedShiftData.shiftId._id, // Lưu ID của ca
-        dateTime: format(day, "yyyy-MM-dd"), // Lưu ngày
+        dateTime: format(day, "yyyy-MM-dd"),
+        fullname: selectedShiftData.userId.fullname,
+        shiftName: selectedShiftData.shiftId.shiftName,
       });
 
       // Cập nhật các select và input
@@ -157,7 +162,7 @@ const UserShift = () => {
     const addedUserShift = await addUserShift(newUserShift);
     if (addedUserShift) {
       setShowNotification({
-        content: `Đã phân ca `,
+        content: `Đã phân Ca ${newUserShift.shiftName} ngày ${newUserShift.dateTime} cho nhân viên ${newUserShift.fullname}`,
         type: "Notification",
         show: true,
       });
@@ -174,6 +179,8 @@ const UserShift = () => {
     setShowAddForm(false);
   };
   const handleDelete = async (id) => {
+    // console.log("ID___", selectedUserShift);
+
     if (!id) {
       setShowNotification({
         content: "Bạn chưa chọn ca để xóa",
@@ -184,11 +191,11 @@ const UserShift = () => {
       const del = await deleteUserShift(id);
       if (del) {
         setShowNotification({
-          content: `Ca của nhân viên ${selectedUserShift.fullname} ngày ${selectedDay} đã được xóa`,
+          content: `Ca ${selectedUserShift.dateTime} của nhân viên ${selectedUserShift.fullname} ngày ${selectedDay} đã được xóa`,
           type: "Notification",
           show: true,
         });
-        // load lại dữ liệu
+        setSelectedUserShift(null);
         setSelectedShift(null);
         setDateShift("");
         fetchUserShifts(currentWeekStart);
@@ -236,7 +243,7 @@ const UserShift = () => {
           </button>
           <button
             className="bg-red-500 text-white px-4 py-2 rounded"
-            onClick={() => handleDelete(selectedUserShift?._id)}
+            onClick={() => handleDelete(selectedUserShift?.id)}
           >
             XÓA
           </button>
@@ -253,7 +260,7 @@ const UserShift = () => {
             <select
               name="user"
               className="border p-2 rounded w-full"
-              value={selectedUserShift.userId}
+              value={selectedUserShift?.userId}
               onChange={(e) =>
                 setSelectedUserShift({
                   ...selectedUserShift,
@@ -274,7 +281,7 @@ const UserShift = () => {
             <select
               name="shift"
               className="border p-2 rounded w-full"
-              value={selectedUserShift.shiftId}
+              value={selectedUserShift?.shiftId}
               onChange={(e) =>
                 setSelectedUserShift({
                   ...selectedUserShift,
