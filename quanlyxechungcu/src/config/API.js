@@ -1,7 +1,9 @@
 export const API = "http://localhost:3001/api/v1";
+
 export const LOGIN = `${API}/users/login`;
 export const SIGNUP = `${API}/users/sinup`;
 export const UPDATE_USER = `${API}/users/UpdateUser`;
+export const ALL_USER = `${API}/users/GetAllUsers`;
 
 export const ALL_APARTMENT = `${API}/apartment/GetAllApartments`;
 export const APARTMENT_BY_ID = `${API}/apartment/GetApartmentById`;
@@ -59,6 +61,9 @@ export const COUNT_VEHICLE_EXIT = `${API}/exitRecord/CountVehicleExitRecord`;
 export const COUNT_VEHICLE_NON_EXIT = `${API}/entryRecord/CountVehicleNonExit`;
 
 export const MONEY_BY_DAY = `${API}/visitorHistoryMoney/GetMoneyByDay`;
+
+export const ADD_USER_SHIFT = `${API}/userShift/CreateUserShift`;
+export const DELETE_USER_SHIFT = `${API}/userShift/DeleteUserShift`;
 
 export const FILTER_USER_SHIFT = `${API}/userShift/FilterUserShift`;
 export const UPDATE_USER_SHIFT = `${API}/userShift/UpdateUserShift`;
