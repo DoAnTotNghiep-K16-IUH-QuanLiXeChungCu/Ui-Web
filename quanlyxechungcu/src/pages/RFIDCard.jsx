@@ -1,26 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { addCard, deleteCard, getAllCard } from "../useAPI/useCardAPI";
+import React, { useContext, useEffect, useState } from "react";
+import { addCard, deleteCard } from "../useAPI/useCardAPI";
+import { getData, saveData } from "../context/indexedDB";
 
 const RFIDCard = () => {
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [newCardUUID, setNewCardUUID] = useState(""); // Khởi tạo state cho mã số thẻ mới
-
-  const fetchData = async () => {
-    try {
-      const card = await getAllCard();
-      console.log("card", card);
-      setCards(card || []);
-    } catch (error) {
-      console.log("Lỗi khi lấy danh sách thẻ", error);
-    }
-  };
-
+  const [newCardUUID, setNewCardUUID] = useState("");
   useEffect(() => {
-    fetchData();
-  }, []);
+    const fetchCardData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setCards(data.cards);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Card data:", err);
+      }
+    };
 
+    fetchCardData(); // Gọi hàm để lấy dữ liệu
+  }, []);
   const filteredCard =
     cards.length > 0
       ? cards.filter(
@@ -44,11 +45,19 @@ const RFIDCard = () => {
 
   const handleAddCard = async (newCardUUID) => {
     if (newCardUUID) {
-      console.log("UUID", newCardUUID);
+      // console.log("UUID", newCardUUID);
       const addedCard = await addCard(newCardUUID); // Kiểm tra xem addedCard có đúng không
       console.log("Thẻ mới được thêm:", addedCard); // Thêm log để kiểm tra
       setCards((prev) => [...prev, addedCard]); // Thêm thẻ mới vào danh sách
-      setNewCardUUID(""); // Reset giá trị input sau khi thêm
+      setNewCardUUID("");
+      const data = await getData("userData");
+      if (data) {
+        await saveData({
+          id: "userData",
+          ...data,
+          cards: [...data.cards, addedCard], // Cập nhật danh sách thẻ mới
+        });
+      }
     }
   };
 
@@ -135,8 +144,8 @@ const RFIDCard = () => {
                 XÓA
               </button>
               {/* <button className="bg-yellow-500 text-white px-4 py-2 rounded">
-                Sửa
-              </button> */}
+                  Sửa
+                </button> */}
             </div>
           </div>
         </div>

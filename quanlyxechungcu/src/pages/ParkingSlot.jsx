@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Notification from "../components/Notification";
-import {
-  getAllAvailabeParkingSlotByType,
-  getAllParkingSlot,
-} from "../useAPI/useParkingSlotAPI";
+import { getAllAvailabeParkingSlotByType } from "../useAPI/useParkingSlotAPI";
 import { changeTypeVehicle } from "../utils/index";
+import UserContext from "../context/UserContext";
+import { getData } from "../context/indexedDB";
 
 const ParkingSlot = () => {
   const [parkingSlots, setParkingSlots] = useState([]);
@@ -15,16 +14,21 @@ const ParkingSlot = () => {
     type: "",
     show: false,
   });
+  useEffect(() => {
+    const fetchCardData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setParkingSlots(data.parkingSlots);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Card data:", err);
+      }
+    };
 
-  const fetchData = async () => {
-    try {
-      const slots = await getAllParkingSlot(1);
-      setParkingSlots(slots || []);
-    } catch (error) {
-      console.error("Có lỗi xảy ra:", error);
-    }
-  };
-
+    fetchCardData(); // Gọi hàm để lấy dữ liệu
+  }, []);
   const fetchDataByCode = async (code) => {
     try {
       const slots = await getAllAvailabeParkingSlotByType(code);
@@ -39,8 +43,6 @@ const ParkingSlot = () => {
     setSlotTypeFilter(type);
     if (type) {
       fetchDataByCode(type);
-    } else {
-      fetchData();
     }
   };
 
@@ -66,10 +68,6 @@ const ParkingSlot = () => {
       }
     }
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   return (
     <div className="min-h-screen bg-gray-100 p-6 ">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">

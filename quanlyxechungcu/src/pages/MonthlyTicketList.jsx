@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   addMonthlyTicket,
   filterMonthlyTicket,
 } from "../useAPI/useMonthlyTicketAPI";
-import { getAllVehicle } from "../useAPI/useVehicleAPI"; // Import hàm lấy thông tin khách hàng
 import { formatDate } from "../utils/index";
 import { changeTypeVehicle } from "../utils/index";
 import MonthlyTicketModal from "./MonthlyTicketModal";
-import { findCustomerByID } from "../useAPI/useCustomerAPI";
 import Notification from "../components/Notification";
+import UserContext from "../context/UserContext";
+import { getData, saveData } from "../context/indexedDB";
 
 const MonthlyTicketList = () => {
   const [tickets, setTickets] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const totalPages = Math.ceil(tickets.length / pageSize);
+  const [searchTerm, setSearchTerm] = useState(""); // Kích thước trang
+
+  const [filteredTickets, setFilteredTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTickets, setNewTickets] = useState({
@@ -23,12 +31,7 @@ const MonthlyTicketList = () => {
   });
   const [listChoosenTickets, setListChoosenTickets] = useState([]);
   const [newEndDate, setNewEndDate] = useState("");
-  const [vehicles, setVehicles] = useState([]);
   const [showExtend, setShowExtend] = useState(false);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // Kích thước trang
 
   //// Filter
   const [statusFilter, setStatusFilter] = useState(""); // State cho tình trạng
@@ -42,62 +45,22 @@ const MonthlyTicketList = () => {
     type: "",
     show: false,
   });
-  const fetchMonthlyTicket = async (
-    isExpired,
-    type,
-    slotCode,
-    month,
-    year,
-    page = currentPage
-  ) => {
-    const all = await filterMonthlyTicket(
-      isExpired,
-      type,
-      slotCode,
-      month,
-      year,
-      page,
-      10
-    );
-    const allMonthlyTickets = all?.residentHistoryMoneys;
-    console.log("fetchMonthlyTicket__", allMonthlyTickets);
-    setTotalPages(all.totalPages);
-    setPageSize(all.pageSize);
-    setTickets(allMonthlyTickets);
-  };
-  const fetchData = async () => {
-    try {
-      const all = await filterMonthlyTicket("", " ", " ", " ", " ", 1, 10);
-      const allMonthlyTickets = all.residentHistoryMoneys;
-      setTotalPages(all.totalPages);
-      setPageSize(all.pageSize);
-      setTickets(allMonthlyTickets);
-      // console.log("ticketsWithCustomer: ", ticketsWithCustomer);
-      const c = await getAllVehicle(1, 1000);
-      const vehilces = c.vehicles;
-      const vehilceDetail = await Promise.all(
-        vehilces.map(async (vehicle) => {
-          const customer = await findCustomerByID(vehicle.customerId._id);
-          // console.log("customer___", customer);
-
-          return {
-            ...vehicle,
-            customerId: customer, // Cập nhật thông tin khu đỗ xe
-          };
-        })
-      );
-      console.log("vehilceDetail", vehilceDetail);
-
-      setVehicles(vehilceDetail || []);
-    } catch (error) {
-      console.error("Có lỗi xảy ra:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    const fetchTicketData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setTickets(data.tickets);
+          setVehicles(data.vehicles);
+          console.log("vehicles", data.vehicles);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Tickets data:", err);
+      }
+    };
+    fetchTicketData(); // Gọi hàm để lấy dữ liệu
   }, []);
-
   const handleRowClick = (ticket) => {
     if (selectedTicket && selectedTicket._id === ticket._id) {
       setSelectedTicket(null);
@@ -121,7 +84,6 @@ const MonthlyTicketList = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     addNewMonthlyTicket(newTickets, "Thông báo tạo vé tháng mới thành công");
-    fetchData();
     setShowAddForm(false);
   };
   const addNewMonthlyTicket = async (newTicket, content) => {
@@ -138,14 +100,21 @@ const MonthlyTicketList = () => {
 
     const addTicket = await addMonthlyTicket(newTicket);
     if (addTicket._id) {
-      // setTickets((prev) => [...prev, addTicket]);
+      setTickets((prev) => [...prev, addTicket]);
+      const data = await getData("userData");
+      if (data) {
+        await saveData({
+          id: "userData",
+          ...data,
+          tickets: [...data.tickets, addTicket], // Cập nhật danh sách thẻ mới
+        });
+      }
       setSelectedTicket(addTicket);
       setShowNotification({
         content: content,
         type: "Notification",
         show: true,
       });
-      // Cập nhật selectedVehicle
     } else {
       setShowNotification({
         content: addTicket,
@@ -160,7 +129,6 @@ const MonthlyTicketList = () => {
       await addNewMonthlyTicket(ticket, "Thông báo danh sách đã được gia hạn"); // Gọi hàm thêm vé tháng cho từng ticket
     });
     await Promise.all(ticketPromises);
-    fetchData();
     setListChoosenTickets([]);
     setShowExtend(false);
   };
@@ -185,46 +153,6 @@ const MonthlyTicketList = () => {
       );
     } else {
       setListChoosenTickets([...listChoosenTickets, ticket._id]);
-    }
-  };
-  const handleFilter = () => {
-    fetchMonthlyTicket(
-      statusFilter,
-      vehicleTypeFilter,
-      parkingSlotFilter,
-      monthFilter,
-      yearFilter,
-      1,
-      10
-    );
-  };
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      fetchMonthlyTicket(
-        statusFilter,
-        vehicleTypeFilter,
-        parkingSlotFilter,
-        monthFilter,
-        yearFilter,
-        currentPage + 1,
-        10
-      );
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      fetchMonthlyTicket(
-        statusFilter,
-        vehicleTypeFilter,
-        parkingSlotFilter,
-        monthFilter,
-        yearFilter,
-        currentPage - 1,
-        10
-      );
     }
   };
   const handleExtend = async () => {
@@ -263,12 +191,93 @@ const MonthlyTicketList = () => {
 
     handleExtendSubmit(validUpdatedTickets);
   };
+  // Lọc và phân trang
+  const applyPaginationAndFilter = () => {
+    let filtered = tickets.filter((ticket) => {
+      const matchesStatusFilter =
+        statusFilter === "" || ticket.isExpired === (statusFilter === "true");
+
+      const matchesVehicleTypeFilter =
+        vehicleTypeFilter === "" || ticket.vehicle?.type === vehicleTypeFilter;
+
+      const matchesParkingSlotFilter =
+        parkingSlotFilter === "" ||
+        ticket.parkingSlot?.slotCode === parkingSlotFilter;
+
+      const matchesMonthFilter =
+        monthFilter === "" ||
+        new Date(ticket.startDate).getMonth() + 1 === parseInt(monthFilter) ||
+        new Date(ticket.endDate).getMonth() + 1 === parseInt(monthFilter);
+
+      const matchesYearFilter =
+        yearFilter === "" ||
+        new Date(ticket.startDate).getFullYear() === parseInt(yearFilter) ||
+        new Date(ticket.endDate).getFullYear() === parseInt(yearFilter);
+
+      return (
+        matchesStatusFilter &&
+        matchesVehicleTypeFilter &&
+        matchesParkingSlotFilter &&
+        matchesMonthFilter &&
+        matchesYearFilter
+      );
+    });
+
+    // Tìm kiếm theo từ khóa
+    filtered = filtered.filter(
+      (ticket) =>
+        ticket.vehicle?.customer?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        ticket.vehicle?.licensePlate
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase())
+    );
+
+    // Cập nhật vé đã lọc và áp dụng phân trang
+    setFilteredTickets(filtered);
+    setCurrentPage(1); // Reset trang về 1 khi filter
+  };
+
+  const currentTickets = filteredTickets.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  useEffect(() => {
+    applyPaginationAndFilter();
+  }, [
+    tickets,
+    statusFilter,
+    vehicleTypeFilter,
+    parkingSlotFilter,
+    monthFilter,
+    yearFilter,
+    searchTerm,
+  ]);
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">DANH SÁCH VÉ THÁNG</h1>
         </div>
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          className="border p-2 rounded w-[500px]"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <div className="flex justify-end items-center mb-4">
           <div className="flex space-x-2">
             <button
@@ -378,9 +387,9 @@ const MonthlyTicketList = () => {
           </select>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded"
-            onClick={() => handleFilter()}
+            onClick={() => applyPaginationAndFilter()}
           >
-            LỌC
+            TÌM
           </button>
         </div>
         <div>
@@ -420,7 +429,7 @@ const MonthlyTicketList = () => {
                 </tr>
               </thead>
               <tbody>
-                {tickets.map((ticket, index) => (
+                {currentTickets.map((ticket, index) => (
                   <tr
                     key={ticket._id}
                     className={`text-center cursor-pointer ${
@@ -477,23 +486,21 @@ const MonthlyTicketList = () => {
                 ))}
               </tbody>
             </table>
-            <div className="flex justify-center items-center mt-4">
+            <div className="flex justify-between mt-4">
               <button
                 onClick={handlePreviousPage}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="bg-gray-500 text-white px-4 py-2 rounded"
               >
-                Trước
+                Trang trước
               </button>
-              <span className="mx-5">
-                Trang {currentPage} / {totalPages}
-              </span>
+              <span>{`Trang ${currentPage} / ${totalPages}`}</span>
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="bg-gray-500 text-white px-4 py-2 rounded"
               >
-                Sau
+                Trang sau
               </button>
             </div>
           </div>

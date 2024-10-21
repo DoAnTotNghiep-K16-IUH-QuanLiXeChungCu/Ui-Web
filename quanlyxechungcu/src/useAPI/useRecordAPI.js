@@ -290,7 +290,7 @@ export const filterRecord = async (
 
     const data = await response.json();
     if (response.ok) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
+      return data.data.records; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
       console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
       return data.error;

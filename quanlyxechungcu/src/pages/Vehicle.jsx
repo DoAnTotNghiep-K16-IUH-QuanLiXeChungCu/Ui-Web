@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   addVehicle,
   getAllVehicle,
@@ -10,9 +10,14 @@ import { findCustomerByID, getAllCustomer } from "../useAPI/useCustomerAPI";
 import { deleteVehicle } from "../useAPI/useVehicleAPI";
 import VehicleModal from "./VehicleModal";
 import Notification from "../components/Notification";
+import UserContext from "../context/UserContext";
 
 const Vehicle = () => {
-  const [vehicles, setVehicles] = useState([]);
+  const { vehicles, setVehicles } = useContext(UserContext);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const totalPages = Math.ceil(vehicles.length / pageSize);
+  const [vehiclesHere, setVehiclesHere] = useState(vehicles.slice(0, pageSize));
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [customers, setCustomers] = useState([]);
@@ -30,43 +35,6 @@ const Vehicle = () => {
     type: "",
     show: false,
   });
-
-  // Trạng thái cho phân trang
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  const fetchVehicles = async (page = currentPage) => {
-    try {
-      const vehiclesData = await getAllVehicle(page, 10);
-      setVehicles(vehiclesData.vehicles || []);
-
-      // Cập nhật tổng số trang và kích thước trang
-      setTotalPages(vehiclesData.totalPages);
-      setPageSize(vehiclesData.pageSize);
-
-      const customers = await getAllCustomer(1, 1000);
-      console.log("customers___", customers);
-
-      setCustomers(customers.customers || []);
-    } catch (error) {
-      console.error("Có lỗi xảy ra:", error);
-    }
-  };
-
-  const fetchVehiclesByType = async (type) => {
-    try {
-      const vehiclesData = await getAllVehicleByType(type);
-      setVehicles(vehiclesData || []);
-    } catch (error) {
-      console.error("Có lỗi xảy ra:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchVehicles();
-  }, []);
-
   const handleAddClick = () => {
     setNewVehicle(null);
     setShowAddForm(true);
@@ -196,24 +164,30 @@ const Vehicle = () => {
   const handleVehicleTypeChange = (e) => {
     const type = e.target.value;
     setVehicleTypeFilter(type);
-    if (type) {
-      fetchVehiclesByType(type);
-    } else {
-      fetchVehicles();
-    }
+    // if (type) {
+    //   fetchVehiclesByType(type);
+    // } else {
+    //   fetchVehicles();
+    // }
   };
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      fetchVehicles(currentPage + 1);
+      const start = currentPage * pageSize; // Vị trí bắt đầu của 10 tickets tiếp theo
+      const end = start + pageSize; // Vị trí kết thúc của 10 tickets
+      const nextTickets = vehicles.slice(start, end);
+      setVehicles(nextTickets);
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      fetchVehicles(currentPage - 1);
+      const start = (currentPage - 2) * pageSize; // Vị trí bắt đầu của 10 tickets trước đó
+      const end = start + pageSize; // Vị trí kết thúc của 10 tickets
+      const prevTickets = vehicles.slice(start, end);
+      setVehicles(prevTickets);
     }
   };
 

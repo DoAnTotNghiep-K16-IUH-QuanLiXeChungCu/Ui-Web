@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Notification from "../components/Notification";
 import { addDays, startOfWeek, format, addWeeks } from "date-fns";
 import {
@@ -7,9 +7,10 @@ import {
   filterUserShift,
   updateUserShift,
 } from "../useAPI/useUserShiftAPI";
-import { getAllShift } from "../useAPI/useShiftAPI"; // Import API lấy tất cả ca
-import { getAllUser } from "../useAPI/useUserAPI";
+
 import UserShiftModal from "./UserShiftModal";
+import UserContext from "../context/UserContext";
+import { getData } from "../context/indexedDB";
 
 const UserShift = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(
@@ -24,11 +25,10 @@ const UserShift = () => {
     format(new Date(), "yyyy-MM-dd")
   );
   const [userShifts, setUserShifts] = useState([]);
-  const [shifts, setShifts] = useState([]);
-  const [users, setUsers] = useState([]);
   const [dateShift, setDateShift] = useState([]);
+  const [shifts, setShift] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  // State to hold all shifts
   const [selectedUserShift, setSelectedUserShift] = useState({
     id: "",
     userId: "",
@@ -53,9 +53,31 @@ const UserShift = () => {
   );
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setUsers(data.users);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get User data:", err);
+      }
+    };
+    const fetchShiftData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setUsers(data.shifts);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Shift data:", err);
+      }
+    };
+    fetchShiftData();
+    fetchUserData();
     fetchUserShifts(currentWeekStart);
-    fetchAllShifts();
-    fetchAllUser(); // Gọi API để lấy tất cả các ca làm việc
   }, [currentWeekStart]);
 
   // Fetch user shifts for the current week
@@ -72,24 +94,6 @@ const UserShift = () => {
     } catch (error) {
       console.error("Error fetching shifts:", error);
       setUserShifts([]); // Đặt userShifts là mảng rỗng nếu có lỗi
-    }
-  };
-
-  // Fetch all shifts
-  const fetchAllShifts = async () => {
-    try {
-      const allShifts = await getAllShift(); // Gọi API để lấy tất cả các ca
-      setShifts(allShifts); // Lưu các ca vào state
-    } catch (error) {
-      console.error("Error fetching all shifts:", error);
-    }
-  };
-  const fetchAllUser = async () => {
-    try {
-      const allUser = await getAllUser(); // Gọi API để lấy tất cả các ca
-      setUsers(allUser); // Lưu các ca vào state
-    } catch (error) {
-      console.error("Error fetching all shifts:", error);
     }
   };
 

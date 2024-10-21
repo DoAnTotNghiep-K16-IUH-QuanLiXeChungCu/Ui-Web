@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie"; // Thêm import js-cookie
 import { LOGIN } from "../config/API";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
+import UserContext from "../context/UserContext";
+import { fetchDataFromAPI } from "../useAPI/useAPIFetchData";
 
 const Login = () => {
   const [userName, setUserName] = useState("");
@@ -10,7 +12,20 @@ const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
+  const {
+    setApartments,
+    setCustomers,
+    setTickets,
+    setRecords,
+    setProfile,
+    setParkingSlots,
+    setCards,
+    setUsers,
+    setVehicles,
+    setUserShifts,
+    setShifts,
+    setFees,
+  } = useContext(UserContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -27,7 +42,6 @@ const Login = () => {
       const data = await response.json();
       if (response.ok) {
         // Xử lý nếu đăng nhập thành công
-        console.log("Đăng nhập thành công:", data.data);
         Cookies.set("accessToken", data.data.accessToken, {
           expires: 1, // Cookie sẽ hết hạn sau 1 ngày
           secure: true, // Chỉ gửi cookie qua HTTPS
@@ -38,11 +52,24 @@ const Login = () => {
           secure: true, // Chỉ gửi cookie qua HTTPS
           sameSite: "Strict", // Ngăn chặn CSRF
         });
-        Cookies.set("dataUser", JSON.stringify(data.data), {
-          expires: 1, // Cookie sẽ hết hạn sau 1 ngày
-          secure: true, // Chỉ gửi cookie qua HTTPS
-          sameSite: "Strict", // Ngăn chặn CSRF
-        });
+        const { role, accessToken, ...filteredProfile } = data.data;
+        const profile = filteredProfile;
+        setProfile(profile);
+        fetchDataFromAPI(
+          setProfile,
+          setApartments,
+          setCustomers,
+          setTickets,
+          setRecords,
+          setParkingSlots,
+          setCards,
+          setUsers,
+          setVehicles,
+          setUserShifts,
+          setShifts,
+          setFees,
+          profile
+        );
         navigate("/home");
       } else {
         setError(data.error || "Đăng nhập không thành công");
