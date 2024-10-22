@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import Notification from "../components/Notification";
 import { addDays, startOfWeek, format, addWeeks } from "date-fns";
 import {
@@ -9,7 +9,6 @@ import {
 } from "../useAPI/useUserShiftAPI";
 
 import UserShiftModal from "./UserShiftModal";
-import UserContext from "../context/UserContext";
 import { getData } from "../context/indexedDB";
 
 const UserShift = () => {
@@ -26,7 +25,7 @@ const UserShift = () => {
   );
   const [userShifts, setUserShifts] = useState([]);
   const [dateShift, setDateShift] = useState([]);
-  const [shifts, setShift] = useState([]);
+  const [shifts, setShifts] = useState([]);
   const [users, setUsers] = useState([]);
 
   const [selectedUserShift, setSelectedUserShift] = useState({
@@ -58,24 +57,13 @@ const UserShift = () => {
         const data = await getData("userData");
         if (data) {
           setUsers(data.users);
+          setShifts(data.shifts);
         } else {
         }
       } catch (err) {
         console.error("Failed to get User data:", err);
       }
     };
-    const fetchShiftData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setUsers(data.shifts);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Shift data:", err);
-      }
-    };
-    fetchShiftData();
     fetchUserData();
     fetchUserShifts(currentWeekStart);
   }, [currentWeekStart]);

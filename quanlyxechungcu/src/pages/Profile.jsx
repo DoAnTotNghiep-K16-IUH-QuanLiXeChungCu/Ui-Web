@@ -1,11 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { UPDATE_USER } from "../config/API";
 import Notification from "../components/Notification";
 import UserContext from "../context/UserContext";
+import { getData, saveData } from "../context/indexedDB";
 
 const Profile = () => {
-  const { profile, setProfile } = useContext(UserContext);
+  const [profile, setProfile] = useState({});
 
   const [showNotification, setShowNotification] = useState({
     content: "",
@@ -28,7 +29,20 @@ const Profile = () => {
     currentPassword: "",
     newPassword: "",
   });
-
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setProfile(data.profile);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Tickets data:", err);
+      }
+    };
+    fetchProfileData(); // Gọi hàm để lấy dữ liệu
+  }, []);
   const handleEditClick = () => {
     setIsEditing(!isEditing);
   };
@@ -71,6 +85,14 @@ const Profile = () => {
           phoneNumber: formData.phoneNumber,
         };
         setProfile(updatedDataUser);
+        const data = await getData("userData");
+        if (data) {
+          await saveData({
+            id: "userData",
+            ...data,
+            profile: [...(data.profile || []), updatedDataUser], // Cập nhật danh sách thẻ mới, khởi tạo là mảng rỗng nếu không có thẻ
+          });
+        }
         setIsEditing(false);
       } else {
         setShowNotification({
@@ -108,10 +130,8 @@ const Profile = () => {
         type: "Error",
         show: true,
       });
-      return; // Dừng thực hiện nếu mật khẩu mới không hợp lệ
+      return;
     }
-
-    // Cập nhật mật khẩu mới vào formData
     setFormData((prevData) => ({
       ...prevData,
       password: newPassword,

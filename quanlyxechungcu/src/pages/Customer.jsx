@@ -6,13 +6,12 @@ import {
   updateCustomer,
 } from "../useAPI/useCustomerAPI";
 import Notification from "../components/Notification";
-import UserContext from "../context/UserContext";
 import { getData, saveData } from "../context/indexedDB";
 
 const Customer = () => {
   const [customers, setCustomers] = useState([]);
   const [apartments, setApartments] = useState([]);
-  console.log("customers", customers);
+  // console.log("customers", customers);
 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -247,7 +246,7 @@ const Customer = () => {
   );
   useEffect(() => {
     applyPaginationAndFilter();
-  }, [apartmentFilter, customerTypeFilter, searchTerm]);
+  }, [customers, apartmentFilter, customerTypeFilter, searchTerm]);
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);

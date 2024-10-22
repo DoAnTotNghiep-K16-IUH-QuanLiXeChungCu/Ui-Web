@@ -11,16 +11,21 @@ import { deleteVehicle } from "../useAPI/useVehicleAPI";
 import VehicleModal from "./VehicleModal";
 import Notification from "../components/Notification";
 import UserContext from "../context/UserContext";
+import { getData } from "../context/indexedDB";
 
 const Vehicle = () => {
-  const { vehicles, setVehicles } = useContext(UserContext);
+  const [vehicles, setVehicles] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(vehicles.length / pageSize);
-  const [vehiclesHere, setVehiclesHere] = useState(vehicles.slice(0, pageSize));
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [filteredVehicles, setFilteredVehicles] = useState([]);
+
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [customers, setCustomers] = useState([]);
   const [newVehicle, setNewVehicle] = useState({
     id: "",
     licensePlate: "",
@@ -35,6 +40,22 @@ const Vehicle = () => {
     type: "",
     show: false,
   });
+  useEffect(() => {
+    const fetchVehicleData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setCustomers(data.customers);
+          setVehicles(data.vehicles);
+          console.log("data.vehicles", data.vehicles);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Customers data:", err);
+      }
+    };
+    fetchVehicleData(); // Gọi hàm để lấy dữ liệu
+  }, []);
   const handleAddClick = () => {
     setNewVehicle(null);
     setShowAddForm(true);
@@ -170,24 +191,41 @@ const Vehicle = () => {
     //   fetchVehicles();
     // }
   };
+  const applyPaginationAndFilter = () => {
+    let filtered = vehicles.filter((vehicle) => {
+      const matchesVehicleType =
+        vehicleTypeFilter === "" || vehicle.type === vehicleTypeFilter;
+      return matchesVehicleType;
+    });
+    filtered = filtered.filter(
+      (vehicle) =>
+        (vehicle.licensePlate &&
+          vehicle.licensePlate
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (vehicle.brand &&
+          vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredVehicles(filtered);
+    setCurrentPage(1);
+  };
+  const currentVehicle = filteredVehicles.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  useEffect(() => {
+    applyPaginationAndFilter();
+  }, [vehicles, vehicleTypeFilter, searchTerm]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      const start = currentPage * pageSize; // Vị trí bắt đầu của 10 tickets tiếp theo
-      const end = start + pageSize; // Vị trí kết thúc của 10 tickets
-      const nextTickets = vehicles.slice(start, end);
-      setVehicles(nextTickets);
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      const start = (currentPage - 2) * pageSize; // Vị trí bắt đầu của 10 tickets trước đó
-      const end = start + pageSize; // Vị trí kết thúc của 10 tickets
-      const prevTickets = vehicles.slice(start, end);
-      setVehicles(prevTickets);
     }
   };
 
@@ -198,7 +236,13 @@ const Vehicle = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">DANH SÁCH XE</h1>
         </div>
-        {/* Search and Action Buttons */}
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          className="border p-2 rounded w-[500px] mb-2"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <div className="flex justify-end items-center mb-4">
           <div className="flex space-x-2">
             <button
@@ -217,7 +261,7 @@ const Vehicle = () => {
             className="border p-2 rounded"
           >
             <option value="">Tất cả</option>
-            <option value="car">Xe hơi</option>
+            <option value="car">Ô tô</option>
             <option value="motor">Xe máy</option>
           </select>
         </div>
@@ -251,7 +295,7 @@ const Vehicle = () => {
                 </tr>
               </thead>
               <tbody>
-                {vehicles.map((vehicle, index) => (
+                {currentVehicle.map((vehicle, index) => (
                   <tr
                     key={vehicle._id}
                     className={`text-center cursor-pointer ${
