@@ -11,23 +11,8 @@ const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const accessToken = Cookies.get("accessToken");
-  const [profile, setProfile] = useState(null);
+  const { profile } = useContext(UserContext);
   // console.log("profile", profile);
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setProfile(data.profile);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get profile data:", err);
-      }
-    };
-
-    fetchProfileData(); // Gọi hàm để lấy dữ liệu
-  }, []);
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
     Cookies.remove("accessToken"); // Xóa token khỏi cookie

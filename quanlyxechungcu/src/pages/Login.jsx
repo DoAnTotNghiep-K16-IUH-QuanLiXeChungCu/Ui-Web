@@ -5,6 +5,8 @@ import { LOGIN } from "../config/API";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import UserContext from "../context/UserContext";
 import { fetchDataFromAPI } from "../useAPI/useAPIFetchData";
+import { setUpSerialPortEntry } from "../useAPI/useCardAPI";
+import { getAllSetting } from "../useAPI/useSettingAPI";
 
 const Login = () => {
   const [userName, setUserName] = useState("");
@@ -25,6 +27,8 @@ const Login = () => {
     setUserShifts,
     setShifts,
     setFees,
+    setEntryRecords,
+    setExitRecords,
   } = useContext(UserContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,6 +59,12 @@ const Login = () => {
         const { role, accessToken, ...filteredProfile } = data.data;
         const profile = filteredProfile;
         setProfile(profile);
+        const settings = await getAllSetting();
+        console.log("settings[0].entryPort", settings[0].entryPort);
+        console.log("settings[0].entryBau", settings[0].entryBau);
+        setUpSerialPortEntry(settings[0].entryPort, settings[0].entryBau);
+        // setUpSerialPortEntry("COM5", 9600);
+
         fetchDataFromAPI(
           setProfile,
           setApartments,
@@ -68,6 +78,8 @@ const Login = () => {
           setUserShifts,
           setShifts,
           setFees,
+          setEntryRecords,
+          setExitRecords,
           profile
         );
         navigate("/home");

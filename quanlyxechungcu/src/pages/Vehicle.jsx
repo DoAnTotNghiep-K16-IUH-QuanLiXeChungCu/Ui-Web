@@ -47,7 +47,7 @@ const Vehicle = () => {
         if (data) {
           setCustomers(data.customers);
           setVehicles(data.vehicles);
-          console.log("data.vehicles", data.vehicles);
+          // console.log("data.vehicles", data.vehicles);
         } else {
         }
       } catch (err) {

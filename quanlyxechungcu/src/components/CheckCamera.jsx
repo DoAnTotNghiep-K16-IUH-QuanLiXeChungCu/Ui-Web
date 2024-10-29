@@ -1,54 +1,88 @@
-import React from "react";
+import React, { useContext, useState } from "react";
+import CameraCapture from "./CameraCapture";
+import UserContext from "../context/UserContext";
 
-const CheckCamera = ({ type }) => {
+const CheckCamera = ({
+  type,
+  openSetting,
+  entryLicensePlate,
+  setEntryLicensePlate,
+  exitLicensePlate,
+  setExitLicensePlate,
+}) => {
+  // Hàm xử lý sự thay đổi cho input biển số xe
+  const handleLicensePlateChange = (e) => {
+    if (type === "entry") {
+      setEntryLicensePlate(e.target.value);
+    } else {
+      setExitLicensePlate(e.target.value);
+    }
+  };
+  const [vehicleType, setVehicleType] = useState("");
   return (
-    <div className="bg-white shadow-lg p-4 rounded-lg">
-      {/* Images */}
-      <div className="grid grid-cols-2 gap-2">
-        <img
-          src="https://i1-vnexpress.vnecdn.net/2024/09/19/HyundaiSantaFevnexpressnet1JPG-1726701224.jpg?w=500&h=300&q=100&dpr=1&fit=crop&s=va_O9Cz7G1No2bKli1ClGA&t=image"
-          alt="1"
-        ></img>
-        <img
-          src="https://i1-vnexpress.vnecdn.net/2024/09/19/HyundaiSantaFevnexpressnet1JPG-1726701224.jpg?w=500&h=300&q=100&dpr=1&fit=crop&s=va_O9Cz7G1No2bKli1ClGA&t=image"
-          alt="1"
-        ></img>
-      </div>
-
+    <div className="bg-white shadow-lg px-4 rounded-lg">
+      <CameraCapture
+        type={type}
+        openSetting={openSetting}
+        entryLicensePlate={entryLicensePlate}
+        setEntryLicensePlate={setEntryLicensePlate}
+        exitLicensePlate={exitLicensePlate}
+        setExitLicensePlate={setExitLicensePlate}
+        vehicleType={vehicleType}
+        setVehicleType={setVehicleType}
+      />
       {/* Car Info */}
-      <div className="grid grid-cols-2 gap-2 mt-4">
-        <div>
-          <h3 className="text-lg font-bold"> Biển số xe: 123123123</h3>
-          <p>
-            <span className="font-semibold">Loại xe:</span> 123123
-          </p>
-          <p>
-            <span className="font-semibold">Giá vào:</span> 123213
-          </p>
-          <p>
-            <span className="font-semibold">Thời gian vào: 123</span>{" "}
-          </p>
-          <p>
-            <span className="font-semibold">Thời gian ra: 123</span>{" "}
-          </p>
+      <div className="grid grid-cols-4 gap-1 mt-1">
+        <div className="col-span-3">
+          <div className="grid grid-cols-2">
+            <h3 className="p-2 rounded w-full text-lg font-bold">
+              {" "}
+              Biển số xe
+            </h3>
+            <input
+              type="text"
+              value={type === "entry" ? entryLicensePlate : exitLicensePlate}
+              className="border rounded mb-1 border-gray-300 text-center"
+              onChange={handleLicensePlateChange}
+              required
+            />
+            <h3 className="p-2 rounded w-full font-semibold">Loại xe:</h3>
+            <select
+              name="type"
+              className="border p-2 rounded w-full"
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
+            >
+              <option value="">Chọn loại phương tiện</option>
+              <option value="car">Ô tô</option>
+              <option value="motor">Xe máy</option>
+            </select>
+            {/* <p>
+              <span className="font-semibold">
+                {type === "entry" ? "Thời gian vào" : "Thời gian ra"}
+              </span>
+              :123
+            </p> */}
+          </div>
         </div>
-        <div className="flex justify-center items-center">
+
+        <div className="col-span-1 flex justify-center items-center">
           <img
             className="max-h-[120px] max-w-[120px]"
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4D10s164IMG_GEyk14TKBIV6PrWpfje-5UA&s"
             alt=""
-          ></img>
+          />
         </div>
-        <div className="flex justify-between items-center mt-4">
-          <div className="block bg-[#ec7a00] border border-gray-100 w-[100px] rounded-md">
-            <p className="p-1 text-center">
-              {type === "entry" ? "Làn vào" : "Làn ra"}
-            </p>
-          </div>
-          <span className="font-semibold text-red-700 text-center">
-            BIỂN SỐ KHÔNG GIỐNG NHAU
-          </span>
+      </div>
+      <div className="flex justify-between items-center mt-1">
+        <div className="block bg-[#ec7a00] border border-gray-100 w-[100px] rounded-md mb-1">
+          <p className="p-1 text-center">
+            {type === "entry" ? "Làn vào" : "Làn ra"}
+          </p>
         </div>
+        <span className="font-semibold text-red-700 text-center">
+          {/* BIỂN SỐ KHÔNG GIỐNG NHAU */}
+        </span>
       </div>
     </div>
   );

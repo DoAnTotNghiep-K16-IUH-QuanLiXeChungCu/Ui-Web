@@ -72,3 +72,91 @@ export const changeTypeVehicle = (type) => {
   }
   return type;
 };
+export const checkRFIDUUID = (listUUID, uuid) => {
+  return (
+    listUUID.find(
+      (card) => card.uuid && card.uuid.toLowerCase() === uuid.toLowerCase()
+    ) || null
+  );
+};
+
+// Hàm tìm ca trực hiện tại
+export const findCurrentShift = (shifts) => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+
+  // Hàm chuyển đổi thời gian từ chuỗi "HH:MM" thành giờ và phút hiện tại
+  const parseTime = (timeString) => {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return { hours, minutes };
+  };
+
+  return (
+    shifts.find((shift) => {
+      const { hours: startHour, minutes: startMinute } = parseTime(
+        shift.startTime
+      );
+      const { hours: endHour, minutes: endMinute } = parseTime(shift.endTime);
+
+      // Xử lý trường hợp ca đêm kéo dài qua ngày hôm sau
+      if (
+        startHour > endHour ||
+        (startHour === endHour && startMinute > endMinute)
+      ) {
+        return (
+          currentHour > startHour ||
+          (currentHour === startHour && currentMinute >= startMinute) ||
+          currentHour < endHour ||
+          (currentHour === endHour && currentMinute <= endMinute)
+        );
+      } else {
+        return (
+          (currentHour > startHour ||
+            (currentHour === startHour && currentMinute >= startMinute)) &&
+          (currentHour < endHour ||
+            (currentHour === endHour && currentMinute <= endMinute))
+        );
+      }
+    }) || null
+  );
+};
+
+// Hàm tìm ca trực của user dựa trên userID và danh sách ca trực
+export const findUserShift = (listUserShift, userID, shifts) => {
+  // Tìm ca trực hiện tại
+  const currentShift = findCurrentShift(shifts);
+
+  if (!currentShift) {
+    return null; // Không có ca trực hiện tại
+  }
+
+  // Tìm user shift phù hợp với userID và ca trực hiện tại
+  return (
+    listUserShift.find(
+      (us) =>
+        us.userId &&
+        us.userId._id.toLowerCase() === userID.toLowerCase() &&
+        us.shiftId &&
+        us.shiftId._id === currentShift._id
+    ) || null
+  );
+};
+
+export const findEntryRecord = (
+  listEntryRecord,
+  listlicensePlate,
+  rfidUUID
+) => {
+  // Tìm user shift phù hợp với userID và ca trực hiện tại
+  return (
+    listEntryRecord.find(
+      (entry) =>
+        entry.rfidId._id &&
+        entry.rfidId._id.toLowerCase() === rfidUUID.toLowerCase() &&
+        entry.licensePlate &&
+        entry.licensePlate.toLowerCase() === listlicensePlate.toLowerCase() &&
+        entry.isOut === false
+    ) || null
+  );
+};

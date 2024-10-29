@@ -1,27 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { addCard, deleteCard } from "../useAPI/useCardAPI";
 import { getData, saveData } from "../context/indexedDB";
+import UserContext from "../context/UserContext";
 
 const RFIDCard = () => {
-  const [cards, setCards] = useState([]);
+  const { cards, setCards } = useContext(UserContext);
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newCardUUID, setNewCardUUID] = useState("");
-  useEffect(() => {
-    const fetchCardData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setCards(data.cards);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Card data:", err);
-      }
-    };
-
-    fetchCardData(); // Gọi hàm để lấy dữ liệu
-  }, []);
   const filteredCard =
     cards.length > 0
       ? cards.filter(
@@ -69,7 +55,18 @@ const RFIDCard = () => {
 
     try {
       await deleteCard(id);
+      const data = await getData("userData");
+      if (data && data.cards) {
+        const updatedCards = data.cards.filter((card) => card._id !== id);
+        await saveData({
+          id: "userData",
+          ...data,
+          cards: updatedCards, // Cập nhật danh sách thẻ sau khi xóa
+        });
+      }
+
       setCards((prev) => prev.filter((card) => card._id !== id));
+
       setSelectedCard(null);
       console.log(`thẻ ID ${id} đã được xóa thành công.`);
     } catch (error) {

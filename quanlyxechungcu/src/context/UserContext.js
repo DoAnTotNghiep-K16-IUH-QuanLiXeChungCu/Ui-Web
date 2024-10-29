@@ -18,6 +18,9 @@ export const UserProvider = ({ children }) => {
   const [userShifts, setUserShifts] = useState([]);
   const [shifts, setShifts] = useState([]);
   const [fees, setFees] = useState([]);
+  const [entryRecords, setEntryRecords] = useState([]);
+  const [exitRecords, setExitRecords] = useState([]);
+  const [setting, setSetting] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true); // Trạng thái loading
 
@@ -41,6 +44,9 @@ export const UserProvider = ({ children }) => {
             setUserShifts(userData.userShifts || []);
             setShifts(userData.shifts || []);
             setFees(userData.fees || []);
+            setEntryRecords(userData.entryRecords || []);
+            setExitRecords(userData.exitRecords || []);
+            setSetting(userData.setting || []);
           }
         }
       } catch (error) {
@@ -88,6 +94,12 @@ export const UserProvider = ({ children }) => {
         setShifts,
         fees,
         setFees,
+        entryRecords,
+        setEntryRecords,
+        exitRecords,
+        setExitRecords,
+        setting,
+        setSetting,
       }}
     >
       {children}

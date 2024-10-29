@@ -4,11 +4,17 @@ import { getAllParkingRate } from "../useAPI/useParkingRateAPI";
 import { getAllVehicle } from "../useAPI/useVehicleAPI";
 import { filterCustomer, findCustomerByID } from "../useAPI/useCustomerAPI";
 import { filterMonthlyTicket } from "../useAPI/useMonthlyTicketAPI";
-import { filterRecord } from "../useAPI/useRecordAPI";
+import {
+  filterRecord,
+  getALLEntryRecord,
+  getALLExitRecord,
+} from "../useAPI/useRecordAPI";
 import { getAllParkingSlot } from "../useAPI/useParkingSlotAPI";
 import { getAllShift } from "../useAPI/useShiftAPI";
 import { getAllUser } from "../useAPI/useUserAPI";
 import { saveData } from "../context/indexedDB";
+import { getAllUserShift } from "./useUserShiftAPI";
+import { getAllSetting } from "./useSettingAPI";
 export const fetchDataFromAPI = async (
   setProfile,
   setApartments,
@@ -22,7 +28,10 @@ export const fetchDataFromAPI = async (
   setUserShifts,
   setShifts,
   setFees,
-  profile
+  setEntryRecords,
+  setExitRecords,
+  profile,
+  setSetting
 ) => {
   console.log("fetchDataFromAPI");
   try {
@@ -56,6 +65,14 @@ export const fetchDataFromAPI = async (
     setShifts(shifts);
     const users = await getAllUser();
     setUsers(users);
+    const entryRecords = await getALLEntryRecord();
+    setEntryRecords(entryRecords);
+    const exitRecords = await getALLExitRecord();
+    setExitRecords(exitRecords);
+    const userShifts = await getAllUserShift();
+    setUserShifts(userShifts);
+    const settings = await getAllSetting();
+    setSetting(settings);
     await saveData({
       id: "userData",
       apartments,
@@ -69,8 +86,23 @@ export const fetchDataFromAPI = async (
       shifts,
       fees,
       profile,
+      entryRecords,
+      exitRecords,
+      userShifts,
+      settings,
     });
   } catch (error) {
     console.error("Failed to fetch data from API:", error);
   }
 };
+const syncDataFromAPI = async () => {
+  try {
+    await fetchDataFromAPI(); // Fetch dữ liệu mới từ API và tự động lưu vào IndexedDB
+    console.log("Data synchronized successfully");
+  } catch (error) {
+    console.error("Error syncing data:", error);
+  }
+};
+
+// Đồng bộ dữ liệu mỗi 15 phút (900000ms)
+setInterval(syncDataFromAPI, 900000);
