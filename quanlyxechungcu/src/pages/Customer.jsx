@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { getAllApartment } from "../useAPI/useApartmentAPI";
+import React, { useContext, useEffect, useState } from "react";
 import CustomerModal from "./CustomerModal";
 import {
   addCustomer,
   deleteCustomer,
-  filterCustomer,
-  getAllCustomer,
   updateCustomer,
 } from "../useAPI/useCustomerAPI";
 import Notification from "../components/Notification";
+import { getData, saveData } from "../context/indexedDB";
 
 const Customer = () => {
   const [customers, setCustomers] = useState([]);
+  const [apartments, setApartments] = useState([]);
+  // console.log("customers", customers);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const totalPages = Math.ceil(customers.length / pageSize);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
+
   const [showAddForm, setShowAddForm] = useState(false); // State để hiển thị form thêm xe
   const [newCustomer, setNewCustomer] = useState({
     _id: "",
@@ -20,60 +28,35 @@ const Customer = () => {
     phoneNumber: "",
     address: "",
     isResident: "",
-  }); // State lưu trữ thông tin xe mới
-  const [apartments, setApartments] = useState([]);
+  });
+
+  const [apartmentFilter, setApartmentFilter] = useState("");
+  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
     show: false,
   });
-  // Trạng thái cho phân trang
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
-  const [apartmentFilter, setApartmentFilter] = useState("");
-  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
-
-  const fetchCustomer = async (
-    isResident,
-    apartmentName,
-    pageNumber,
-    pageSize
-  ) => {
-    const all = await filterCustomer(
-      isResident,
-      apartmentName,
-      pageNumber,
-      pageSize
-    );
-    const allCustomer = all?.customers;
-    setTotalPages(all.totalPages);
-    setPageSize(all.pageSize);
-    setCustomers(allCustomer);
-  };
-
-  const fetchData = async () => {
-    try {
-      const all = await filterCustomer("", "", 1, 10);
-      const allCustomer = all?.customers;
-      setTotalPages(all.totalPages);
-      setPageSize(all.pageSize);
-      setCustomers(allCustomer);
-      const apartments = await getAllApartment();
-      setApartments(apartments || []);
-    } catch (error) {
-      console.error("Có lỗi xảy ra:", error);
-    }
-  };
-  useEffect(() => {
-    fetchData();
-  }, []);
   const handleAddClick = () => {
     setNewCustomer(null);
     setShowAddForm(true);
   };
-
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setCustomers(data.customers);
+          setApartments(data.apartments);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Customers data:", err);
+      }
+    };
+    fetchCustomerData(); // Gọi hàm để lấy dữ liệu
+  }, []);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewCustomer({
@@ -94,6 +77,7 @@ const Customer = () => {
         setCustomers((prev) =>
           prev.filter((customer) => customer._id !== cus._id)
         );
+
         setShowNotification({
           content: `Khách hàng ${cus.fullName} đã bị xóa khỏi danh sách.`,
           type: "Notification",
@@ -168,6 +152,15 @@ const Customer = () => {
               customer._id === updateC._id ? updateC : customer
             )
           );
+          const data = await getData("userData");
+          if (data) {
+            await saveData({
+              id: "userData",
+              ...data,
+              customers: [...(data.customers || []), updateC], // Cập nhật danh sách thẻ mới, khởi tạo là mảng rỗng nếu không có thẻ
+            });
+          }
+
           setShowNotification({
             content: `Thông tin về khách hàng ${updateC.fullName} đã được cập nhật`,
             type: "Notification",
@@ -191,9 +184,15 @@ const Customer = () => {
             type: "Notification",
             show: true,
           });
-          // fetchData();
           setCustomers((prev) => [...prev, addC]);
-          // console.log("CUSTOMER___", customer);
+          const data = await getData("userData");
+          if (data) {
+            await saveData({
+              id: "userData",
+              ...data,
+              customers: [...data.customers, addC], // Cập nhật danh sách thẻ mới
+            });
+          }
         } else {
           setShowNotification({
             content: addC,
@@ -217,20 +216,46 @@ const Customer = () => {
   const handleCustomerTypeChange = (e) => {
     setCustomerTypeFilter(e.target.value);
   };
-  const handleFilter = () => {
-    fetchCustomer(customerTypeFilter, apartmentFilter, 1, 10);
+  const applyPaginationAndFilter = () => {
+    let filtered = customers.filter((customer) => {
+      const matchesCustomerType =
+        customerTypeFilter === "" ||
+        customer.isResident === (customerTypeFilter === "true");
+
+      const matchesApartment =
+        apartmentFilter === "" || customer.apartment?.name === apartmentFilter;
+      return matchesCustomerType && matchesApartment;
+    });
+    filtered = filtered.filter(
+      (customer) =>
+        (customer.fullName &&
+          customer.fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (customer.phoneNumber &&
+          customer.phoneNumber
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (customer.address &&
+          customer.address.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredCustomers(filtered);
+    setCurrentPage(1);
   };
+  const currentCustomer = filteredCustomers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  useEffect(() => {
+    applyPaginationAndFilter();
+  }, [customers, apartmentFilter, customerTypeFilter, searchTerm]);
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      fetchCustomer(customerTypeFilter, apartmentFilter, currentPage + 1, 10);
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      fetchCustomer(customerTypeFilter, apartmentFilter, currentPage - 1, 10);
     }
   };
   return (
@@ -239,7 +264,13 @@ const Customer = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">DANH SÁCH KHÁCH HÀNG</h1>
         </div>
-
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          className="border p-2 rounded w-[500px]"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <div className="flex justify-end items-center mb-4">
           <div className="flex space-x-2">
             <button
@@ -276,9 +307,9 @@ const Customer = () => {
           </select>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded"
-            onClick={() => handleFilter()}
+            onClick={() => applyPaginationAndFilter()}
           >
-            LỌC
+            TÌM
           </button>
         </div>
         <div className="grid grid-cols-7">
@@ -310,7 +341,7 @@ const Customer = () => {
                 </tr>
               </thead>
               <tbody>
-                {customers.map((customer, index) => (
+                {currentCustomer.map((customer, index) => (
                   <tr key={customer._id} className="text-center">
                     <td className="border p-2">
                       {index + 1 + (currentPage - 1) * pageSize}

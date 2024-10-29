@@ -1,23 +1,25 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie"; // Thêm import js-cookie
 import logo from "../assets/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
+import UserContext from "../context/UserContext";
+import { getData } from "../context/indexedDB";
 
 const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const accessToken = Cookies.get("accessToken");
-
+  const { profile } = useContext(UserContext);
+  // console.log("profile", profile);
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
     Cookies.remove("accessToken"); // Xóa token khỏi cookie
     Cookies.remove("role"); // Xóa role khỏi cookie nếu có
     navigate("/auth/login"); // Điều hướng về trang đăng nhập
   };
-  const dataUserCookie = Cookies.get("dataUser");
-  const dataUser = dataUserCookie ? JSON.parse(dataUserCookie) : null; // Parse JSON
+  // Parse JSON
 
   // Toggle dropdown
   const toggleDropdown = () => {
@@ -43,7 +45,7 @@ const Header = () => {
               className="text-black hover:text-blue-600 mr-5 focus:outline-none"
             >
               <FontAwesomeIcon icon={faCircleUser} className="text-2xl mr-2" />
-              {dataUser?.fullname}
+              {profile?.fullname}
             </button>
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">

@@ -214,8 +214,6 @@ export const filterCustomer = async (
 
     bodyData.pageSize = pageSize;
 
-    // console.log("BODYDATA______", bodyData);
-
     // Kiểm tra xem bodyData có trường nào để gửi hay không
     if (Object.keys(bodyData).length === 0) {
       console.error("Không có trường dữ liệu hợp lệ nào để gửi.");
@@ -236,7 +234,7 @@ export const filterCustomer = async (
     const data = await response.json();
     // console.log("DATA______", data.data);
     if (response.ok) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
+      return data.data.customers; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
       console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
       return data.error;

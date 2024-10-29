@@ -1,28 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { getAllApartment } from "./../useAPI/useApartmentAPI";
+import React, { useContext, useEffect, useState } from "react";
+import { getData } from "../context/indexedDB";
+import UserContext from "../context/UserContext";
 
 const Apartment = () => {
-  const [apartments, setApartments] = useState([]);
   const [selectedApartment, setSelectedApartment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newApartment, setNewApartment] = useState(""); // Khởi tạo state cho mã số thẻ mới
-
-  const fetchData = async () => {
-    try {
-      const apartment = await getAllApartment();
-      console.log("apartment", apartment);
-      setApartments(apartment || []);
-    } catch (error) {
-      console.log("Lỗi khi lấy danh sách thẻ", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+  const [] = useState([]);
+  const { apartments, setApartments } = useContext(UserContext);
   const filteredApartment =
-    apartments.length > 0
+    apartments?.length > 0
       ? apartments.filter(
           (apartment) =>
             apartment.name &&
@@ -40,7 +27,7 @@ const Apartment = () => {
     }
   };
 
-  const isapartmentApartmnetExists = apartments.some(
+  const isapartmentApartmnetExists = apartments?.some(
     (apartment) => apartment.name === newApartment
   );
 

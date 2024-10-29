@@ -8,7 +8,7 @@ const VehicleModal = ({
   handleSubmit,
   handleCloseModal,
 }) => {
-  console.log("newVehicle_____", newVehicle);
+  // console.log("newVehicle_____", newVehicle);
 
   if (!showAddForm) return null; // Nếu showAddForm là false, không hiển thị modal
 

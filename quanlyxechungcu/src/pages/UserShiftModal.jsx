@@ -21,12 +21,16 @@ const UserShiftModal = ({
               name="user"
               className="border p-2 rounded w-full"
               value={newUserShift.userId}
-              onChange={(e) =>
+              onChange={(e) => {
+                const selectedUser = users.find(
+                  (user) => user._id === e.target.value
+                );
                 setNewUserShift({
                   ...newUserShift,
-                  userId: e.target.value,
-                })
-              }
+                  userId: selectedUser._id,
+                  fullname: selectedUser.fullname, // Set fullname tại đây
+                });
+              }}
             >
               <option value="">Chọn nhân viên</option>
               {users.map((user) => (
@@ -42,12 +46,16 @@ const UserShiftModal = ({
               name="shift"
               className="border p-2 rounded w-full"
               value={newUserShift.shiftId}
-              onChange={(e) =>
+              onChange={(e) => {
+                const selectedShift = shifts.find(
+                  (shift) => shift._id === e.target.value
+                );
                 setNewUserShift({
                   ...newUserShift,
-                  shiftId: e.target.value,
-                })
-              }
+                  shiftId: selectedShift._id,
+                  shiftName: selectedShift.shiftName, // Set shiftName tại đây
+                });
+              }}
             >
               <option value="">Chọn ca trực</option>
               {shifts.map((shift) => (

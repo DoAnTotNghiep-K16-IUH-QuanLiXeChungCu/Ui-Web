@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { getAllParkingRate } from "../useAPI/useParkingRateAPI";
 import { changeTypeVehicle } from "../utils/index";
+import UserContext from "../context/UserContext";
+import { getData } from "../context/indexedDB";
 
 const ParkingFeeConfiguration = () => {
-  const [fee, setFee] = useState([]);
+  const [fees, setFees] = useState([]);
   const [selectedFee, setSelectedFee] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newFee, setNewFee] = useState({
@@ -11,24 +13,24 @@ const ParkingFeeConfiguration = () => {
     hourly: "",
     price: "",
   });
-
-  const fetchData = async () => {
-    try {
-      const fee = await getAllParkingRate();
-      console.log("fee", fee);
-      setFee(fee || []);
-    } catch (error) {
-      console.log("Lỗi khi lấy danh sách thẻ", error);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
-  }, []);
+    const fetchFeeData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setFees(data.fees);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Card data:", err);
+      }
+    };
 
+    fetchFeeData(); // Gọi hàm để lấy dữ liệu
+  }, []);
   const filteredfee =
-    fee.length > 0
-      ? fee.filter(
+    fees.length > 0
+      ? fees.filter(
           (fee) =>
             fee.vehicleType &&
             fee.vehicleType.toLowerCase().includes(searchTerm.toLowerCase()) // Kiểm tra fee.uuid tồn tại trước khi gọi toLowerCase
@@ -49,7 +51,7 @@ const ParkingFeeConfiguration = () => {
     }
   };
 
-  const isFeeExists = fee.some((fee) => fee.uuid === newFee);
+  const isFeeExists = fees.some((fee) => fee.uuid === newFee);
 
   const handleAddfee = async (newFee) => {
     if (newFee) {
@@ -69,7 +71,7 @@ const ParkingFeeConfiguration = () => {
 
     try {
       // await deletefee(id);
-      setFee((prev) => prev.filter((fee) => fee._id !== id));
+      setFees((prev) => prev.filter((fee) => fee._id !== id));
       setSelectedFee(null);
       console.log(`Fee có ID ${id} đã được xóa thành công.`);
     } catch (error) {

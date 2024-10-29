@@ -49,6 +49,7 @@ export const ALL_ENTRY_RECORD = `${API}/entryRecord/GetAllEntryRecords`;
 export const ALL_EXIT_RECORD = `${API}/exitRecord/GetAllExitRecords`;
 export const EXIT_RECORD_BY_ENTRY_RECORD_ID = `${API}/exitRecord/GetExitRecordByEntryRecordId`;
 export const FILTER_RECORD = `${API}/entryRecord/FilterEntryRecords`;
+export const CREATE_ENTRY_RECORD = `${API}/entryRecord/CreateEntryRecord`;
 
 // export const ALL_RECORD = `${API}/exitRecord/GetAllExitRecords`;
 
@@ -65,6 +66,18 @@ export const MONEY_BY_DAY = `${API}/visitorHistoryMoney/GetMoneyByDay`;
 export const ADD_USER_SHIFT = `${API}/userShift/CreateUserShift`;
 export const DELETE_USER_SHIFT = `${API}/userShift/DeleteUserShift`;
 
+export const ALL_USER_SHIFT = `${API}/userShift/GetAllUserShifts`;
 export const FILTER_USER_SHIFT = `${API}/userShift/FilterUserShift`;
 export const UPDATE_USER_SHIFT = `${API}/userShift/UpdateUserShift`;
 export const USER_SHIFT_BY_USER_RANGE_DATE = `${API}/userShift/GetUserShiftsByUserIdAndDateRange`;
+
+export const UPLOAD_MEDIA = `${API}/upload/UploadMedia`;
+export const LIST_PORT = `${API}/readRFID/ListPort`;
+
+export const READ_RFID_CARD_ENTRY = `${API}/readRFID/ReadRFIDCardEnTry`;
+export const READ_RFID_CARD_EXIT = `${API}/readRFID/ReadRFIDCardExit`;
+export const SET_UP_SERIAL_PORT_ENTRY = `${API}/readRFID/SetupSerialPortEntry`;
+export const SET_UP_SERIAL_PORT_EXIT = `${API}/readRFID/SetupSerialPortExit`;
+
+export const GET_SETTING = `${API}/setting/GetSetting`;
+export const UPDATE_SETTING = `${API}/setting/UpdateSetting`;

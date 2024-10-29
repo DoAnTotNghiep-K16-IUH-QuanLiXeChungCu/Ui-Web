@@ -17,7 +17,7 @@ export const getAllUser = async () => {
       },
       body: JSON.stringify({
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 100,
       }),
     });
 

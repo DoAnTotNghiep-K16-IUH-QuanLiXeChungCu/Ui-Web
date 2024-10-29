@@ -22,7 +22,7 @@ const CheckCard = ({ type, color }) => {
       setVehicleExitCount(countVE);
     }
     const countVNE = await countVehicleNonExit(new Date("2024-01-01"));
-    console.log("countVNE: ", countVNE);
+    // console.log("countVNE: ", countVNE);
 
     if (countVE) {
       setVehicleNonExitCount(countVNE);
@@ -63,55 +63,46 @@ const CheckCard = ({ type, color }) => {
   const nonExitData = getSortedVehicleData(vehicleNonExitCount);
 
   return (
-    <div className="border border-gray-400 rounded-lg">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold text-left text-blue-700">
-          {type === "entry"
-            ? "Xe vào"
-            : type === "exit"
-            ? "Xe ra"
-            : "Xe chưa ra"}
-        </h2>
-        <div className="flex space-x-4 justify-center">
-          {type === "entry" && (
-            <>
-              <p>
-                Ô tô:{" "}
-                <span className={`font-bold ${color}`}>{entryData.car}</span>
-              </p>
-              <p>
-                Xe máy:{" "}
-                <span className={`font-bold ${color}`}>{entryData.motor}</span>
-              </p>
-            </>
-          )}
-          {type === "exit" && (
-            <>
-              <p>
-                Ô tô:{" "}
-                <span className={`font-bold ${color}`}>{exitData.car}</span>
-              </p>
-              <p>
-                Xe máy:{" "}
-                <span className={`font-bold ${color}`}>{exitData.motor}</span>
-              </p>
-            </>
-          )}
-          {type !== "exit" && type !== "entry" && (
-            <>
-              <p>
-                Ô tô:{" "}
-                <span className={`font-bold ${color}`}>{nonExitData.car}</span>
-              </p>
-              <p>
-                Xe máy:{" "}
-                <span className={`font-bold ${color}`}>
-                  {nonExitData.motor}
-                </span>
-              </p>
-            </>
-          )}
-        </div>
+    <div className="p-2">
+      <h2 className="font-semibold text-left text-blue-700">
+        {type === "entry" ? "Xe vào" : type === "exit" ? "Xe ra" : "Xe chưa ra"}
+      </h2>
+      <div className="flex space-x-4 justify-center">
+        {type === "entry" && (
+          <>
+            <p>
+              Ô tô:{" "}
+              <span className={`font-bold ${color}`}>{entryData.car}</span>
+            </p>
+            <p>
+              Xe máy:{" "}
+              <span className={`font-bold ${color}`}>{entryData.motor}</span>
+            </p>
+          </>
+        )}
+        {type === "exit" && (
+          <>
+            <p>
+              Ô tô: <span className={`font-bold ${color}`}>{exitData.car}</span>
+            </p>
+            <p>
+              Xe máy:{" "}
+              <span className={`font-bold ${color}`}>{exitData.motor}</span>
+            </p>
+          </>
+        )}
+        {type !== "exit" && type !== "entry" && (
+          <>
+            <p>
+              Ô tô:{" "}
+              <span className={`font-bold ${color}`}>{nonExitData.car}</span>
+            </p>
+            <p>
+              Xe máy:{" "}
+              <span className={`font-bold ${color}`}>{nonExitData.motor}</span>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

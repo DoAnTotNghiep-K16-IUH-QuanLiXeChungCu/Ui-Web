@@ -1,97 +1,111 @@
 import React, { useEffect, useState } from "react";
 import CheckEE from "../components/ParkingHistory/CheckEE";
-import {
-  filterRecord,
-  FindExitRecordByEntryRecordID,
-} from "../useAPI/useRecordAPI";
-import { getALLEntryRecord } from "../useAPI/useRecordAPI";
-import { FindCustomerByLicensePlate } from "../useAPI/useVehicleAPI";
-
+import { getData } from "../context/indexedDB";
 const ParkingHistory = () => {
   const [records, setRecords] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // Kích thước trang
+  const pageSize = 10;
+  const totalPages = Math.ceil(records.length / pageSize);
+  const [searchTerm, setSearchTerm] = useState(""); // Kích thước trang
+  const [filteredRecords, setFilteredRecords] = useState([]);
 
   const [outFilter, setOutFilter] = useState("");
   const [fromDateFilter, setFromDateFilter] = useState("");
   const [toDateFilter, setToDateFilter] = useState("");
   const [customerTypeFilter, setCustomerTypeFilter] = useState(""); // State cho loại xe
 
-  const fetchRecord = async (
-    isOut,
-    fromDay,
-    toDay,
-    isResident,
-    page = currentPage,
-    pageSize
-  ) => {
-    const all = await filterRecord(
-      isOut,
-      fromDay,
-      toDay,
-      isResident,
-      (page = currentPage),
-      pageSize
-    );
-    const allRecord = all?.records;
-    console.log("fetchMonthlyTicket__", allRecord);
-    setTotalPages(all.totalPages);
-    setPageSize(all.pageSize);
-    setRecords(allRecord);
-  };
-  const fetchData = async () => {
-    try {
-      const all = await filterRecord(" ", " ", " ", " ", 1, 10);
-      const allRecord = all?.records;
-      setTotalPages(all.totalPages);
-      setPageSize(all.pageSize);
-      setRecords(allRecord);
-    } catch (error) {}
-  };
   useEffect(() => {
-    fetchData();
+    const fetchTicketData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          console.log("data.records", data.records);
+
+          setRecords(data.records);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Tickets data:", err);
+      }
+    };
+    fetchTicketData(); // Gọi hàm để lấy dữ liệu
   }, []);
   const handleRowClick = (record) => {
     setSelectedRecord(record);
   };
-  const handleFilter = () => {
-    fetchRecord(
-      outFilter,
-      fromDateFilter,
-      toDateFilter,
-      customerTypeFilter,
-      1,
-      10
+  const applyPaginationAndFilter = () => {
+    let filtered = records.filter((record) => {
+      const matchesOutFilter =
+        outFilter === "" || record.entryRecord.isOut === (outFilter === "true");
+
+      const matchesCustomerTypeFilter =
+        customerTypeFilter === "" ||
+        record.entryRecord.customer.isResident ===
+          (customerTypeFilter === "true");
+
+      // Chuyển đổi fromDateFilter và toDateFilter thành đối tượng Date
+      const fromDate = fromDateFilter ? new Date(fromDateFilter) : null;
+      const toDate = toDateFilter ? new Date(toDateFilter) : null;
+
+      // Chuyển đổi entryTime và exitTime thành đối tượng Date
+      const entryTime = new Date(record.entryRecord.entryTime);
+      const exitTime = record.exitRecord?.exitTime
+        ? new Date(record.exitRecord.exitTime)
+        : null;
+
+      const matchesFromDateFilter = !fromDate || entryTime >= fromDate; // Kiểm tra xem entryTime có lớn hơn hoặc bằng fromDate không
+      const matchesToDateFilter = !toDate || (exitTime && exitTime <= toDate); // Kiểm tra xem exitTime có nhỏ hơn hoặc bằng toDate không
+
+      return (
+        matchesOutFilter &&
+        matchesCustomerTypeFilter &&
+        matchesFromDateFilter &&
+        matchesToDateFilter
+      );
+    });
+
+    // Tìm kiếm theo từ khóa
+    filtered = filtered.filter(
+      (record) =>
+        record.entryRecord?.customer?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        record.entryRecord?.users_shift?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        record.entryRecord?.licensePlate
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase())
     );
+    // Cập nhật vé đã lọc và áp dụng phân trang
+    setFilteredRecords(filtered);
+    setCurrentPage(1); // Reset trang về 1 khi filter
   };
+  const currentRecords = filteredRecords.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  useEffect(() => {
+    applyPaginationAndFilter();
+  }, [
+    records,
+    outFilter,
+    fromDateFilter,
+    toDateFilter,
+    customerTypeFilter,
+    searchTerm,
+  ]);
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      fetchRecord(
-        outFilter,
-        fromDateFilter,
-        toDateFilter,
-        customerTypeFilter,
-        currentPage + 1,
-        10
-      );
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      fetchRecord(
-        outFilter,
-        fromDateFilter,
-        toDateFilter,
-        customerTypeFilter,
-        currentPage - 1,
-        10
-      );
     }
   };
   return (
@@ -100,6 +114,13 @@ const ParkingHistory = () => {
         <h1 className="text-lg font-semibold mb-4">
           Tra cứu thông tin xe vé, ra
         </h1>
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          className="border p-2 rounded w-[500px] mb-2"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <div className="flex space-x-4 mb-4 ">
           <label className="mr-2 p-2">Tình trạng:</label>
           <select
@@ -138,7 +159,7 @@ const ParkingHistory = () => {
           </select>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded"
-            onClick={() => handleFilter()}
+            onClick={() => applyPaginationAndFilter()}
           >
             LỌC
           </button>
@@ -175,7 +196,7 @@ const ParkingHistory = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {records?.map((record, index) => (
+                  {currentRecords?.map((record, index) => (
                     <tr
                       key={record._id}
                       className={`text-center cursor-pointer ${

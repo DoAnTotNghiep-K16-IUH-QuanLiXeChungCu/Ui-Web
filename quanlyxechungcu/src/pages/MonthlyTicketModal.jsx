@@ -81,7 +81,7 @@ const MonthlyTicketModal = ({
                 onChange={handleVehicleChange} // Thay đổi sự kiện onChange
               >
                 <option value="">Chọn xe</option>
-                {vehicles.map((vehicle) => (
+                {vehicles?.map((vehicle) => (
                   <option key={vehicle._id} value={vehicle._id}>
                     {vehicle.licensePlate}
                   </option>

@@ -1,6 +1,7 @@
 import Cookies from "js-cookie";
 import {
   ADD_USER_SHIFT,
+  ALL_USER_SHIFT,
   FILTER_USER_SHIFT,
   UPDATE_USER_SHIFT,
 } from "../config/API";
@@ -47,7 +48,6 @@ export const filterUserShift = async (date, shiftId) => {
     console.log("ERROR________-", error);
   }
 };
-
 export const addUserShift = async (userShift) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -63,15 +63,53 @@ export const addUserShift = async (userShift) => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(userShift),
+      body: JSON.stringify({
+        userId: userShift.userId,
+        shiftId: userShift.shiftId,
+        dateTime: userShift.dateTime,
+      }),
       credentials: "include", // Chỉ định việc gửi cookie
     });
 
     const data = await response.json();
-    // console.log("DATA______", data.data);
+    console.log("DATA______", data);
     if (response.ok) {
       // console.log("DATA______", data.data);
       return data.data; // Trả về dữ liệu nếu yêu cầu thành công
+    } else {
+      console.error("Có lỗi xảy ra khi tạo ca trực: ", data.error);
+      return {};
+    }
+  } catch (error) {
+    console.log("ERROR________-", error);
+  }
+};
+export const getAllUserShift = async () => {
+  const token = Cookies.get("accessToken");
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+  // console.log("USERSHIFT NÈ ");
+  try {
+    const response = await fetch(ALL_USER_SHIFT, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pageNumber: 1,
+        pageSize: 10000,
+      }),
+      credentials: "include", // Chỉ định việc gửi cookie
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log("USERSHIFT NÈ ", data.data.userShifts);
+
+      return data.data.userShifts;
     } else {
       // console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
       return {};
@@ -134,8 +172,8 @@ export const deleteUserShift = async (id) => {
     return;
   }
   try {
-    const response = await fetch(UPDATE_USER_SHIFT, {
-      method: "DELETE_USER_SHIFT",
+    const response = await fetch(DELETE_USER_SHIFT, {
+      method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

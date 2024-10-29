@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { UPDATE_USER } from "../config/API";
 import Notification from "../components/Notification";
+import UserContext from "../context/UserContext";
+import { getData, saveData } from "../context/indexedDB";
 
 const Profile = () => {
-  const dataUserCookie = Cookies.get("dataUser");
-  const dataUser = dataUserCookie ? JSON.parse(dataUserCookie) : null;
-  console.log("dataUser", dataUser);
+  const [profile, setProfile] = useState({});
 
   const [showNotification, setShowNotification] = useState({
     content: "",
@@ -16,20 +16,33 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    id: dataUser._id,
-    username: dataUser.username,
-    age: dataUser.age,
-    address: dataUser.address,
-    phoneNumber: dataUser.phoneNumber,
-    role: dataUser.role,
-    fullname: dataUser.fullname,
+    id: profile._id,
+    username: profile.username,
+    age: profile.age,
+    address: profile.address,
+    phoneNumber: profile.phoneNumber,
+    role: profile.role,
+    fullname: profile.fullname,
     password: "",
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
   });
-
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const data = await getData("userData");
+        if (data) {
+          setProfile(data.profile);
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to get Tickets data:", err);
+      }
+    };
+    fetchProfileData(); // Gọi hàm để lấy dữ liệu
+  }, []);
   const handleEditClick = () => {
     setIsEditing(!isEditing);
   };
@@ -65,20 +78,21 @@ const Profile = () => {
         });
         // Cập nhật lại fullname của formData trước khi lưu cookie
         const updatedDataUser = {
-          ...dataUser,
+          ...profile,
           age: formData.age,
           fullname: formData.fullname,
           address: formData.dataUser,
           phoneNumber: formData.phoneNumber,
         };
-        Cookies.remove("dataUser");
-        console.log("updatedDataUser", updatedDataUser);
-
-        Cookies.set("dataUser", JSON.stringify(updatedDataUser), {
-          expires: 1,
-          secure: true,
-          sameSite: "Strict",
-        });
+        setProfile(updatedDataUser);
+        const data = await getData("userData");
+        if (data) {
+          await saveData({
+            id: "userData",
+            ...data,
+            profile: [...(data.profile || []), updatedDataUser], // Cập nhật danh sách thẻ mới, khởi tạo là mảng rỗng nếu không có thẻ
+          });
+        }
         setIsEditing(false);
       } else {
         setShowNotification({
@@ -116,10 +130,8 @@ const Profile = () => {
         type: "Error",
         show: true,
       });
-      return; // Dừng thực hiện nếu mật khẩu mới không hợp lệ
+      return;
     }
-
-    // Cập nhật mật khẩu mới vào formData
     setFormData((prevData) => ({
       ...prevData,
       password: newPassword,
