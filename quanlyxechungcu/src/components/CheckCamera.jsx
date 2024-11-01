@@ -5,6 +5,7 @@ import UserContext from "../context/UserContext";
 const CheckCamera = ({
   type,
   openSetting,
+  isStart,
   entryLicensePlate,
   setEntryLicensePlate,
   exitLicensePlate,
@@ -24,6 +25,7 @@ const CheckCamera = ({
       <CameraCapture
         type={type}
         openSetting={openSetting}
+        isStart={isStart}
         entryLicensePlate={entryLicensePlate}
         setEntryLicensePlate={setEntryLicensePlate}
         exitLicensePlate={exitLicensePlate}

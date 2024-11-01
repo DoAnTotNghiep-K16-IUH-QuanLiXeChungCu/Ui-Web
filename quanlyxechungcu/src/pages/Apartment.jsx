@@ -6,7 +6,6 @@ const Apartment = () => {
   const [selectedApartment, setSelectedApartment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newApartment, setNewApartment] = useState(""); // Khởi tạo state cho mã số thẻ mới
-  const [] = useState([]);
   const { apartments, setApartments } = useContext(UserContext);
   const filteredApartment =
     apartments?.length > 0

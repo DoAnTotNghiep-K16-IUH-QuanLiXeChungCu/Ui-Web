@@ -11,9 +11,8 @@ import UserContext from "../context/UserContext";
 import { getData, saveData } from "../context/indexedDB";
 
 const MonthlyTicketList = () => {
-  const [tickets, setTickets] = useState([]);
-  const [vehicles, setVehicles] = useState([]);
-
+  const { tickets, setTickets, vehicles, setVehicles } =
+    useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(tickets.length / pageSize);
@@ -45,22 +44,6 @@ const MonthlyTicketList = () => {
     type: "",
     show: false,
   });
-  useEffect(() => {
-    const fetchTicketData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setTickets(data.tickets);
-          setVehicles(data.vehicles);
-          console.log("vehicles", data.vehicles);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Tickets data:", err);
-      }
-    };
-    fetchTicketData(); // Gọi hàm để lấy dữ liệu
-  }, []);
   const handleRowClick = (ticket) => {
     if (selectedTicket && selectedTicket._id === ticket._id) {
       setSelectedTicket(null);

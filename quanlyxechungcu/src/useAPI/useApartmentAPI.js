@@ -1,36 +1,37 @@
 import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
+import axios from "axios"; // Import axios
 import { ALL_APARTMENT, APARTMENT_BY_ID } from "../config/API";
+
 export const getAllApartment = async () => {
   const token = Cookies.get("accessToken");
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-
   try {
-    const response = await fetch(ALL_APARTMENT, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      ALL_APARTMENT,
+      {
         pageNumber: 1,
         pageSize: 20,
-      }),
-    });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
-
-    if (response.status === 200) {
-      return data.data.apartments; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi lấy danh sách vé tháng:", data.error);
-    }
+    return response.data.data.apartments; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(
+      "Có lỗi xảy ra khi lấy danh sách vé tháng:",
+      error.response?.data?.error || error.message
+    );
   }
 };
+
 export const findApartmentByID = async (id) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -39,25 +40,24 @@ export const findApartmentByID = async (id) => {
   }
 
   try {
-    const response = await fetch(APARTMENT_BY_ID, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      APARTMENT_BY_ID,
+      {
         id: id,
-      }),
-    });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
-
-    if (response.status === 200) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi lấy danh sách vé tháng:", data.error);
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(
+      "Có lỗi xảy ra khi lấy danh sách vé tháng:",
+      error.response?.data?.error || error.message
+    );
   }
 };

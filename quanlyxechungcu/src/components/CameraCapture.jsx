@@ -10,6 +10,7 @@ import { READ_RFID_CARD_ENTRY, UPLOAD_MEDIA } from "../config/API";
 const CameraCapture = ({
   type,
   openSetting,
+  isStart,
   entryLicensePlate,
   setEntryLicensePlate,
   exitLicensePlate,
@@ -145,8 +146,11 @@ const CameraCapture = ({
     };
   }, []);
 
-  // Kiểm tra thẻ RFID và hiển thị thông báo
   useEffect(() => {
+    console.log("isStart: ", isStart);
+    if (!isStart) {
+      return;
+    }
     if (!rfidData || isInitialLoad) {
       setIsInitialLoad(false); // Sau lần đầu tiên, không xử lý nữa
       return;
@@ -167,6 +171,7 @@ const CameraCapture = ({
     }
     previousRfidDataRef.current = rfidData;
   }, [rfidData]);
+  // Kiểm tra thẻ RFID và hiển thị thông báo
 
   const uploadImages = async (rfidID) => {
     if (userShiftId === null) {
@@ -257,7 +262,7 @@ const CameraCapture = ({
 
   return (
     <div>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {/* Camera 1 */}
         <Camera
           openSetting={openSetting}
@@ -289,7 +294,7 @@ const CameraCapture = ({
           {photos.camera1 ? (
             <img src={photos.camera1} alt="Captured from Camera 1" />
           ) : (
-            <div className="w-[360px] h-72 border border-gray-300 bg-gray-100 flex items-center justify-center">
+            <div className="w-96 h-72 border border-gray-300 bg-gray-100 flex items-center justify-center">
               <span className="text-gray-500">No photo captured</span>
             </div>
           )}
@@ -300,7 +305,7 @@ const CameraCapture = ({
           {photos.camera2 ? (
             <img src={photos.camera2} alt="Captured from Camera 2" />
           ) : (
-            <div className="w-[360px] h-72 border border-gray-300 bg-gray-100 flex items-center justify-center">
+            <div className="w-96 h-72 border border-gray-300 bg-gray-100 flex items-center justify-center">
               <span className="text-gray-500">No photo captured</span>
             </div>
           )}

@@ -7,12 +7,12 @@ import {
 } from "../useAPI/useCustomerAPI";
 import Notification from "../components/Notification";
 import { getData, saveData } from "../context/indexedDB";
+import UserContext from "../context/UserContext";
 
 const Customer = () => {
-  const [customers, setCustomers] = useState([]);
-  const [apartments, setApartments] = useState([]);
   // console.log("customers", customers);
-
+  const { customers, setCustomers, apartments, setApartments } =
+    useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(customers.length / pageSize);
@@ -42,21 +42,6 @@ const Customer = () => {
     setNewCustomer(null);
     setShowAddForm(true);
   };
-  useEffect(() => {
-    const fetchCustomerData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setCustomers(data.customers);
-          setApartments(data.apartments);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Customers data:", err);
-      }
-    };
-    fetchCustomerData(); // Gọi hàm để lấy dữ liệu
-  }, []);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewCustomer({

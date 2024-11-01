@@ -1,12 +1,13 @@
 import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
+import axios from "axios"; // Import axios
 import {
   ADD_CARD,
   ALL_CARD,
   DELETE_CARD,
   SET_UP_SERIAL_PORT_ENTRY,
   SET_UP_SERIAL_PORT_EXIT,
-  SET_UP_SERIALPORT,
 } from "../config/API";
+
 export const getAllCard = async () => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -15,139 +16,136 @@ export const getAllCard = async () => {
   }
 
   try {
-    const response = await fetch(ALL_CARD, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      ALL_CARD,
+      {
         pageNumber: 1,
         pageSize: 20,
-      }),
-    });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
-
-    if (response.status === 200) {
-      return data.data.rfidCards;
-    } else {
-      console.error("Có lỗi xảy ra khi lấy danh sách vé tháng:", data.error);
-    }
+    return response.data.data.rfidCards; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(
+      "Có lỗi xảy ra khi lấy danh sách thẻ:",
+      error.response?.data?.error || error.message
+    );
   }
 };
+
 export const addCard = async (uuid) => {
   const token = Cookies.get("accessToken");
-  // Kiểm tra nếu token không tồn tại
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-  // Kiểm tra giá trị của uuid
+
   console.log("Gửi dữ liệu:", { uuid }); // Ghi lại dữ liệu gửi đi
 
   try {
-    const response = await fetch(ADD_CARD, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      ADD_CARD,
+      {
+        uuid,
       },
-      body: JSON.stringify({ uuid }), // Truyền ID vào body dưới dạng JSON
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Lỗi API: ${errorData.message || response.status}`);
-    }
-    const data = await response.json();
-    console.log("Thẻ đã được thêm thành công.", data);
-    return data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+    console.log("Thẻ đã được thêm thành công.", response.data);
+    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
-    console.error("Lỗi khi thêm thẻ:", error);
+    console.error(
+      "Lỗi khi thêm thẻ:",
+      error.response?.data?.error || error.message
+    );
   }
 };
 
 export const deleteCard = async (id) => {
   const token = Cookies.get("accessToken");
-
-  // Kiểm tra nếu token không tồn tại
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
 
   try {
-    const response = await fetch(DELETE_CARD, {
-      method: "DELETE",
+    const response = await axios.delete(DELETE_CARD, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id }), // Truyền ID vào body dưới dạng JSON
+      data: {
+        id, // Truyền ID vào body dưới dạng JSON
+      },
     });
-
-    // Kiểm tra nếu API trả về thành công
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Lỗi API: ${errorData.message || response.status}`);
-    }
 
     console.log("Thẻ đã được xóa thành công.");
-    return response.json(); // Trả về dữ liệu phản hồi nếu cần sử dụng
+    return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
-    console.error("Lỗi khi xóa thẻ:", error);
+    console.error(
+      "Lỗi khi xóa thẻ:",
+      error.response?.data?.error || error.message
+    );
   }
 };
 
-export const setUpSerialPortEntry = (com, baudRate) => {
+export const setUpSerialPortEntry = async (com, baudRate) => {
   try {
-    const response = fetch(SET_UP_SERIAL_PORT_ENTRY, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      SET_UP_SERIAL_PORT_ENTRY,
+      {
+        comPort: com,
+        baudRate: baudRate,
       },
-      body: JSON.stringify({ comPort: com, baudRate: baudRate }), // Truyền ID vào body dưới dạng JSON
-    });
-
-    // Kiểm tra nếu API trả về thành công
-    if (!response.ok) {
-      if (!response.ok) {
-        throw new Error("Không thể khởi tạo cổng serial");
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-      return response.text();
-    }
-    console.log("Kết nối thành công qua cổng: ", com);
+    );
 
-    return response.json(); // Trả về dữ liệu phản hồi nếu cần sử dụng
+    console.log("Kết nối thành công qua cổng: ", com);
+    return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
-    console.error("Lỗi khi kết nối:", error);
+    console.error(
+      "Lỗi khi kết nối:",
+      error.response?.data?.error || error.message
+    );
   }
 };
 
-export const setUpSerialPortExit = (com, baudRate) => {
+export const setUpSerialPortExit = async (com, baudRate) => {
   try {
-    const response = fetch(SET_UP_SERIAL_PORT_EXIT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      SET_UP_SERIAL_PORT_EXIT,
+      {
+        comPort: com,
+        baudRate: baudRate,
       },
-      body: JSON.stringify({ comPort: com, baudRate: baudRate }), // Truyền ID vào body dưới dạng JSON
-    });
-
-    // Kiểm tra nếu API trả về thành công
-    if (!response.ok) {
-      if (!response.ok) {
-        throw new Error("Không thể khởi tạo cổng serial");
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-      return response.text();
-    }
-    console.log("Kết nối thành công qua cổng: ", com);
+    );
 
-    return response.json(); // Trả về dữ liệu phản hồi nếu cần sử dụng
+    console.log("Kết nối thành công qua cổng: ", com);
+    return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
-    console.error("Lỗi khi kết nối:", error);
+    console.error(
+      "Lỗi khi kết nối:",
+      error.response?.data?.error || error.message
+    );
   }
 };
