@@ -1,3 +1,4 @@
+import axios from "axios"; // Import axios
 import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
 import {
   ALL_VEHICLE,
@@ -8,6 +9,7 @@ import {
   VEHICLE_BY_LICENSEPLATE,
   VEHICLE_BY_TYPE,
 } from "../config/API";
+
 export const FindCustomerByVehicleID = async (vehicleID) => {
   const token = Cookies.get("accessToken"); // Lấy token từ cookie
   if (!token) {
@@ -20,27 +22,27 @@ export const FindCustomerByVehicleID = async (vehicleID) => {
   }
 
   try {
-    const response = await fetch(VEHICLE_BY_ID, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      VEHICLE_BY_ID,
+      {
         id: vehicleID,
-      }),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Lỗi từ server:", errorData);
-      return;
-    }
-    const data = await response.json();
-    return data.data && data.data.customerId ? data.data.customerId : null;
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data.data && response.data.data.customerId
+      ? response.data.data.customerId
+      : null;
   } catch (error) {
     console.error("Có lỗi xảy ra:", error);
   }
 };
+
 export const FindCustomerByLicensePlate = async (licensePlate) => {
   const token = Cookies.get("accessToken"); // Lấy token từ cookie
   if (!token) {
@@ -53,28 +55,28 @@ export const FindCustomerByLicensePlate = async (licensePlate) => {
   }
 
   try {
-    const response = await fetch(VEHICLE_BY_LICENSEPLATE, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      VEHICLE_BY_LICENSEPLATE,
+      {
         licensePlate: licensePlate,
-      }),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Lỗi từ server:", errorData);
-      return null;
-    }
-    const data = await response.json();
-    return data.data && data.data.customerId ? data.data.customerId : null;
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data.data && response.data.data.customerId
+      ? response.data.data.customerId
+      : null;
   } catch (error) {
     console.error("Có lỗi xảy ra:", error);
     return null;
   }
 };
+
 export const getAllVehicle = async (pageNumber, pageSize) => {
   const token = Cookies.get("accessToken");
 
@@ -84,29 +86,29 @@ export const getAllVehicle = async (pageNumber, pageSize) => {
   }
 
   try {
-    const response = await fetch(ALL_VEHICLE, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      ALL_VEHICLE,
+      {
         pageNumber: pageNumber,
         pageSize: pageSize,
-      }),
-    });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
-
-    if (response.ok) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi lấy danh sách xe:", data.error);
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("Error during fetching vehicle", error);
+    console.error(
+      "Có lỗi xảy ra khi lấy danh sách xe:",
+      error.response?.data?.error || error
+    );
   }
 };
+
 export const getAllVehicleByType = async (type) => {
   const token = Cookies.get("accessToken");
 
@@ -116,28 +118,28 @@ export const getAllVehicleByType = async (type) => {
   }
 
   try {
-    const response = await fetch(VEHICLE_BY_TYPE, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      VEHICLE_BY_TYPE,
+      {
         type: type,
-      }),
-    });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
-
-    if (response.ok) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi lấy xe:", data.error);
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(
+      "Có lỗi xảy ra khi lấy xe:",
+      error.response?.data?.error || error
+    );
   }
 };
+
 export const addVehicle = async (vehicle) => {
   const token = Cookies.get("accessToken");
   // Kiểm tra nếu token không tồn tại
@@ -145,36 +147,32 @@ export const addVehicle = async (vehicle) => {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
+
   try {
-    const response = await fetch(CREATE_VEHICLE, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      CREATE_VEHICLE,
+      {
         customerId: vehicle.customerId._id,
         licensePlate: vehicle.licensePlate,
         type: vehicle.type,
         color: vehicle.color,
         brand: vehicle.brand,
-      }), // Truyền ID vào body dưới dạng JSON
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`Lỗi API: ${errorData.message || response.status}`);
-      return errorData.error;
-    }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("Vehicle đã được thêm thành công.");
-    const data = await response.json();
-    // console.log("Data trả về: ", data.data);
-    return data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
-    console.error("Lỗi khi thêm thẻ:", error);
+    console.error("Lỗi khi thêm thẻ:", error.response?.data || error);
   }
 };
+
 export const deleteVehicle = async (id) => {
   const token = Cookies.get("accessToken");
   // Kiểm tra nếu token không tồn tại
@@ -184,28 +182,20 @@ export const deleteVehicle = async (id) => {
   }
 
   try {
-    const response = await fetch(DELETE_VEHICLE, {
-      method: "DELETE",
+    const response = await axios.delete(DELETE_VEHICLE, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+      data: {
         id: id,
-      }), // Truyền ID vào body dưới dạng JSON
+      },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`Lỗi API: ${errorData.message || response.status}`);
-      return errorData.data;
-    }
-
     console.log("Vehicle đã được xóa thành công.");
-    const data = await response.json();
-    return data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng // Trả về dữ liệu phản hồi nếu cần sử dụng
+    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
-    console.error("Lỗi khi xóa:", error);
+    console.error("Lỗi khi xóa:", error.response?.data || error);
   }
 };
 
@@ -215,34 +205,31 @@ export const updateVehicle = async (vehicle) => {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
+
   console.log("Gửi dữ liệu ở phần UPDATE:", { vehicle });
+
   try {
-    const response = await fetch(UPDATE_VEHICLE, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.put(
+      UPDATE_VEHICLE,
+      {
         id: vehicle._id,
         customerId: vehicle.customerId,
         licensePlate: vehicle.licensePlate,
         type: vehicle.type,
         color: vehicle.color,
         brand: vehicle.brand,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Lỗi API: ", errorData);
-      return errorData.error;
-    }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("Vehicle đã được sửa thành công.");
-    const data = await response.json();
-    return data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng // Trả về dữ liệu phản hồi nếu cần sử dụng
+    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
-    console.error("Lỗi khi thêm vehilce:", error);
+    console.error("Lỗi khi cập nhật vehicle:", error.response?.data || error);
   }
 };

@@ -14,9 +14,8 @@ import UserContext from "../context/UserContext";
 import { getData } from "../context/indexedDB";
 
 const Vehicle = () => {
-  const [vehicles, setVehicles] = useState([]);
-  const [customers, setCustomers] = useState([]);
-
+  const { vehicles, setVehicles, customers, setCustomers } =
+    useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(vehicles.length / pageSize);

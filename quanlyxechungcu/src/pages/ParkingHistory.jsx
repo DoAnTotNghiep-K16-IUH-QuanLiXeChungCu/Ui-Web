@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import CheckEE from "../components/ParkingHistory/CheckEE";
 import { getData } from "../context/indexedDB";
+import UserContext from "../context/UserContext";
 const ParkingHistory = () => {
-  const [records, setRecords] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
-
+  const { records, setRecords } = useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(records.length / pageSize);
@@ -15,23 +15,6 @@ const ParkingHistory = () => {
   const [fromDateFilter, setFromDateFilter] = useState("");
   const [toDateFilter, setToDateFilter] = useState("");
   const [customerTypeFilter, setCustomerTypeFilter] = useState(""); // State cho loại xe
-
-  useEffect(() => {
-    const fetchTicketData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          console.log("data.records", data.records);
-
-          setRecords(data.records);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Tickets data:", err);
-      }
-    };
-    fetchTicketData(); // Gọi hàm để lấy dữ liệu
-  }, []);
   const handleRowClick = (record) => {
     setSelectedRecord(record);
   };

@@ -30,8 +30,7 @@ export const fetchDataFromAPI = async (
   setFees,
   setEntryRecords,
   setExitRecords,
-  profile,
-  setSetting
+  profile
 ) => {
   console.log("fetchDataFromAPI");
   try {
@@ -55,8 +54,7 @@ export const fetchDataFromAPI = async (
     setVehicles(vehicleDetail || []);
     const customers = await filterCustomer("", "", 1, 10000);
     setCustomers(customers);
-    const tickets = await filterMonthlyTicket("", " ", " ", " ", " ", 1, 10000);
-    setTickets(tickets);
+
     const records = await filterRecord(" ", " ", " ", " ", 1, 10000);
     setRecords(records);
     const parkingSlots = await getAllParkingSlot();
@@ -71,8 +69,8 @@ export const fetchDataFromAPI = async (
     setExitRecords(exitRecords);
     const userShifts = await getAllUserShift();
     setUserShifts(userShifts);
-    const settings = await getAllSetting();
-    setSetting(settings);
+    const tickets = await filterMonthlyTicket("", " ", " ", " ", " ", 1, 10000);
+    setTickets(tickets);
     await saveData({
       id: "userData",
       apartments,
@@ -89,7 +87,6 @@ export const fetchDataFromAPI = async (
       entryRecords,
       exitRecords,
       userShifts,
-      settings,
     });
   } catch (error) {
     console.error("Failed to fetch data from API:", error);

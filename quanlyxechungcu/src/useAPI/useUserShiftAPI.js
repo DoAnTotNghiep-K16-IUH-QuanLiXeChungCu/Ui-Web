@@ -4,9 +4,11 @@ import {
   ALL_USER_SHIFT,
   FILTER_USER_SHIFT,
   UPDATE_USER_SHIFT,
+  DELETE_USER_SHIFT,
 } from "../config/API";
 import { format } from "date-fns";
-import { DELETE_USER_SHIFT } from "./../config/API";
+import axios from "axios"; // Import axios
+
 export const filterUserShift = async (date, shiftId) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -14,40 +16,37 @@ export const filterUserShift = async (date, shiftId) => {
     return;
   }
   try {
-    const bodyData = {};
-    bodyData.date = format(date, "MM-dd-yyyy");
-    if (shiftId && shiftId.trim() !== "") {
-      bodyData.shiftId = shiftId;
-    }
-    bodyData.pageNumber = 1;
-    bodyData.pageSize = 10;
+    const bodyData = {
+      date: format(date, "MM-dd-yyyy"),
+      shiftId: shiftId && shiftId.trim() !== "" ? shiftId : undefined,
+      pageNumber: 1,
+      pageSize: 10,
+    };
+
+    // Xóa các trường undefined
+    Object.keys(bodyData).forEach(
+      (key) => bodyData[key] === undefined && delete bodyData[key]
+    );
+
     if (Object.keys(bodyData).length === 0) {
       console.error("Không có trường dữ liệu hợp lệ nào để gửi.");
       return;
     }
-    const response = await fetch(FILTER_USER_SHIFT, {
-      method: "PATCH",
+
+    const response = await axios.patch(FILTER_USER_SHIFT, bodyData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(bodyData),
-      credentials: "include", // Chỉ định việc gửi cookie
+      withCredentials: true, // Gửi cookie cùng với yêu cầu
     });
 
-    const data = await response.json();
-    // console.log("DATA______", data.data);
-    if (response.ok) {
-      // console.log("DATA______", data.data);
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      // console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
-      return {};
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.log("ERROR________-", error);
+    console.error("ERROR________-", error);
   }
 };
+
 export const addUserShift = async (userShift) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -57,65 +56,61 @@ export const addUserShift = async (userShift) => {
   console.log("userShift____", userShift);
 
   try {
-    const response = await fetch(ADD_USER_SHIFT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      ADD_USER_SHIFT,
+      {
         userId: userShift.userId,
         shiftId: userShift.shiftId,
         dateTime: userShift.dateTime,
-      }),
-      credentials: "include", // Chỉ định việc gửi cookie
-    });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true, // Gửi cookie cùng với yêu cầu
+      }
+    );
 
-    const data = await response.json();
-    console.log("DATA______", data);
-    if (response.ok) {
-      // console.log("DATA______", data.data);
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi tạo ca trực: ", data.error);
-      return {};
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.log("ERROR________-", error);
+    console.error(
+      "Có lỗi xảy ra khi tạo ca trực: ",
+      error.response?.data?.error || error.message
+    );
+    return null;
   }
 };
+
 export const getAllUserShift = async () => {
   const token = Cookies.get("accessToken");
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-  // console.log("USERSHIFT NÈ ");
   try {
-    const response = await fetch(ALL_USER_SHIFT, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      ALL_USER_SHIFT,
+      {
         pageNumber: 1,
         pageSize: 10000,
-      }),
-      credentials: "include", // Chỉ định việc gửi cookie
-    });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true, // Gửi cookie cùng với yêu cầu
+      }
+    );
 
-    const data = await response.json();
-    if (response.ok) {
-      console.log("USERSHIFT NÈ ", data.data.userShifts);
-
-      return data.data.userShifts;
-    } else {
-      // console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
-      return {};
-    }
+    return response.data.data.userShifts; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.log("ERROR________-", error);
+    console.error(
+      "Có lỗi xảy ra khi lấy dữ liệu ca trực: ",
+      error.response?.data?.error || error.message
+    );
+    return null;
   }
 };
 
@@ -125,43 +120,47 @@ export const updateUserShift = async (userShift) => {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
+  console.log("userShift", userShift);
+
   try {
-    const bodyData = {};
-    bodyData.datetime = userShift.datetime;
-    if (userShift.shiftId && userShift.shiftId.trim() !== "") {
-      bodyData.shiftId = userShift.shiftId;
-    }
-    if (userShift.id && userShift.id.trim() !== "") {
-      bodyData.id = userShift.id;
-    }
-    if (userShift.userId && userShift.userId.trim() !== "") {
-      bodyData.userId = userShift.userId;
-    }
+    const bodyData = {
+      dateTime: userShift.dateTime,
+      shiftId:
+        userShift.shiftId && userShift.shiftId.trim() !== ""
+          ? userShift.shiftId
+          : undefined,
+      id: userShift.id && userShift.id.trim() !== "" ? userShift.id : undefined,
+      userId:
+        userShift.userId && userShift.userId.trim() !== ""
+          ? userShift.userId
+          : undefined,
+    };
+
+    // Xóa các trường undefined
+    Object.keys(bodyData).forEach(
+      (key) => bodyData[key] === undefined && delete bodyData[key]
+    );
+
     if (Object.keys(bodyData).length === 0) {
       console.error("Không có trường dữ liệu hợp lệ nào để gửi.");
       return;
     }
-    const response = await fetch(UPDATE_USER_SHIFT, {
-      method: "PUT",
+
+    const response = await axios.put(UPDATE_USER_SHIFT, bodyData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(bodyData),
-      credentials: "include", // Chỉ định việc gửi cookie
+      withCredentials: true, // Gửi cookie cùng với yêu cầu
     });
 
-    const data = await response.json();
-    // console.log("DATA______", data.data);
-    if (response.ok) {
-      // console.log("DATA______", data.data);
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      // console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
-      return {};
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.log("ERROR________-", error);
+    console.error(
+      "Có lỗi xảy ra khi cập nhật ca trực: ",
+      error.response?.data?.error || error.message
+    );
+    return null;
   }
 };
 
@@ -172,28 +171,21 @@ export const deleteUserShift = async (id) => {
     return;
   }
   try {
-    const response = await fetch(DELETE_USER_SHIFT, {
-      method: "DELETE",
+    const response = await axios.delete(DELETE_USER_SHIFT, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        id: id,
-      }),
-      credentials: "include", // Chỉ định việc gửi cookie
+      withCredentials: true, // Gửi cookie cùng với yêu cầu
+      data: { id: id }, // Dữ liệu cho phương thức DELETE
     });
 
-    const data = await response.json();
-    // console.log("DATA______", data.data);
-    if (response.ok) {
-      // console.log("DATA______", data.data);
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      // console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
-      return {};
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.log("ERROR________-", error);
+    console.error(
+      "Có lỗi xảy ra khi xóa ca trực: ",
+      error.response?.data?.error || error.message
+    );
+    return null;
   }
 };

@@ -1,4 +1,5 @@
 import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
+import axios from "axios"; // Import Axios
 import {
   ALL_CUSTOMER,
   CREATE_CUSTOMER,
@@ -7,6 +8,15 @@ import {
   FILTER_CUSTOMER,
   UPDATE_CUSTOMER,
 } from "../config/API";
+
+const axiosConfig = (token) => ({
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+});
+
+// Lấy tất cả khách hàng
 export const getAllCustomer = async (pageNumber, pageSize) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -15,31 +25,26 @@ export const getAllCustomer = async (pageNumber, pageSize) => {
   }
 
   try {
-    const response = await fetch(ALL_CUSTOMER, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      ALL_CUSTOMER,
+      {
         pageNumber: pageNumber,
         pageSize: pageSize,
-      }),
-    });
+      },
+      axiosConfig(token)
+    );
 
-    const data = await response.json();
-
-    if (response.status === 200) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi lấy danh sách khách hàng:", data.error);
-      return data.error;
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Có lỗi xảy ra khi lấy danh sách khách hàng:",
+      error.response?.data?.error || error.message
+    );
+    return error.response?.data?.error;
   }
 };
 
+// Tìm khách hàng theo ID
 export const findCustomerByID = async (id) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -48,27 +53,25 @@ export const findCustomerByID = async (id) => {
   }
 
   try {
-    const response = await fetch(CUSTOMER_BY_ID, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.patch(
+      CUSTOMER_BY_ID,
+      {
         id: id,
-      }),
-    });
+      },
+      axiosConfig(token)
+    );
 
-    const data = await response.json();
-
-    if (response.status === 200) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi tìm khách hàng:", data.error);
-      return data.error;
-    }
-  } catch (error) {}
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
+  } catch (error) {
+    console.error(
+      "Có lỗi xảy ra khi tìm khách hàng:",
+      error.response?.data?.error || error.message
+    );
+    return error.response?.data?.error;
+  }
 };
+
+// Thêm khách hàng
 export const addCustomer = async (customer) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -76,40 +79,32 @@ export const addCustomer = async (customer) => {
     return;
   }
   console.log("customer ", customer);
-  console.log("Type IsResident ", typeof customer.isResident);
-  console.log("IsResident ", customer.isResident);
 
   try {
-    const response = await fetch(CREATE_CUSTOMER, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      CREATE_CUSTOMER,
+      {
         apartmentsId: customer.apartmentsId,
         fullName: customer.fullName,
         phoneNumber: customer.phoneNumber,
         address: customer.address,
         isResident: customer.isResident,
-      }),
-    });
+      },
+      axiosConfig(token)
+    );
 
-    const data = await response.json();
-
-    if (response.ok) {
-      console.log("dữ liệu trả vê: ", data.data);
-      return data.data;
-      // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi thêm khách hàng:", data.error);
-      return data.error;
-    }
+    console.log("dữ liệu trả về: ", response.data.data);
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Có lỗi xảy ra khi thêm khách hàng:",
+      error.response?.data?.error || error.message
+    );
+    return error.response?.data?.error;
   }
 };
 
+// Cập nhật khách hàng
 export const updateCustomer = async (customer) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -119,33 +114,29 @@ export const updateCustomer = async (customer) => {
   console.log("dữ liệu trong update Customer API: ", customer);
 
   try {
-    const response = await fetch(UPDATE_CUSTOMER, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.put(
+      UPDATE_CUSTOMER,
+      {
         id: customer._id,
         apartmentsId: customer.apartmentsId,
         fullName: customer.fullName,
         phoneNumber: customer.phoneNumber,
         address: customer.address,
         isResident: customer.isResident,
-      }),
-    });
+      },
+      axiosConfig(token)
+    );
 
-    const data = await response.json();
-
-    if (response.status === 200) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi tìm khách hàng:", data.error);
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("Error during fetching monthly tickets:", error);
+    console.error(
+      "Có lỗi xảy ra khi cập nhật khách hàng:",
+      error.response?.data?.error || error.message
+    );
   }
 };
+
+// Xóa khách hàng
 export const deleteCustomer = async (id) => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -154,30 +145,25 @@ export const deleteCustomer = async (id) => {
   }
 
   try {
-    const response = await fetch(DELETE_CUSTOMER, {
-      method: "DELETE",
+    const response = await axios.delete(DELETE_CUSTOMER, {
+      data: { id: id }, // Dữ liệu gửi đi
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        id: id,
-      }),
     });
-    const data = await response.json();
-    console.log("data_____", data);
 
-    if (response.ok) {
-      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi xóa khách hàng:", data.error);
-      return data.error;
-    }
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Có lỗi xảy ra khi xóa khách hàng:",
+      error.response?.data?.error || error.message
+    );
+    return error.response?.data?.error;
   }
 };
 
+// Lọc khách hàng
 export const filterCustomer = async (
   isResident,
   apartmentName,
@@ -185,61 +171,47 @@ export const filterCustomer = async (
   pageSize
 ) => {
   const token = Cookies.get("accessToken");
-
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
 
   try {
-    // Khởi tạo đối tượng bodyData rỗng
-    const bodyData = {};
+    const bodyData = {
+      isResident:
+        isResident !== undefined && isResident.trim() !== ""
+          ? isResident.trim() === "true"
+          : undefined,
+      apartmentName:
+        apartmentName && apartmentName.trim() !== ""
+          ? apartmentName
+          : undefined,
+      pageNumber: pageNumber !== undefined ? pageNumber : undefined,
+      pageSize: pageSize,
+    };
 
-    // Chỉ thêm isExpired nếu nó không phải là undefined, null, hoặc rỗng
-    if (
-      isResident !== undefined &&
-      isResident !== null &&
-      isResident.trim() !== ""
-    ) {
-      bodyData.isResident = isResident.trim() === "true"; // Chuyển đổi chuỗi "true"/"false" thành boolean
-    }
+    // Lọc bỏ các thuộc tính undefined
+    const filteredBodyData = Object.fromEntries(
+      Object.entries(bodyData).filter(([_, v]) => v !== undefined)
+    );
 
-    // Kiểm tra và chỉ thêm các trường khác nếu có giá trị hợp lệ (không rỗng, không null, không undefined)
-    if (apartmentName && apartmentName.trim() !== "") {
-      bodyData.apartmentName = apartmentName;
-    }
-    if (pageNumber !== undefined && pageNumber !== null) {
-      bodyData.pageNumber = pageNumber;
-    }
-
-    bodyData.pageSize = pageSize;
-
-    // Kiểm tra xem bodyData có trường nào để gửi hay không
-    if (Object.keys(bodyData).length === 0) {
+    if (Object.keys(filteredBodyData).length === 0) {
       console.error("Không có trường dữ liệu hợp lệ nào để gửi.");
       return;
     }
 
-    const response = await fetch(FILTER_CUSTOMER, {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(bodyData),
-      credentials: "include", // Chỉ định việc gửi cookie
-    });
+    const response = await axios.patch(
+      FILTER_CUSTOMER,
+      filteredBodyData,
+      axiosConfig(token)
+    );
 
-    const data = await response.json();
-    // console.log("DATA______", data.data);
-    if (response.ok) {
-      return data.data.customers; // Trả về dữ liệu nếu yêu cầu thành công
-    } else {
-      console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
-      return data.error;
-    }
+    return response.data.data.customers; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("Error during creating monthly tickets:", error);
+    console.error(
+      "Có lỗi xảy ra khi lọc khách hàng:",
+      error.response?.data?.error || error.message
+    );
+    return error.response?.data?.error;
   }
 };

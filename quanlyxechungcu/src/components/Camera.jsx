@@ -42,10 +42,7 @@ const Camera = ({
           </button>
         </div>
       )}
-      <video
-        ref={videoRef}
-        className="w-96 h-72 border border-gray-300"
-      ></video>
+      <video ref={videoRef} className="w-96 h-72 border-gray-300"></video>
     </div>
   );
 };

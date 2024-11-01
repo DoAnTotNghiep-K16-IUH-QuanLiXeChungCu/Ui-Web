@@ -2,18 +2,15 @@ import React, { useEffect, useState } from "react";
 import CheckCard from "../components/CheckCard";
 import CheckCamera from "../components/CheckCamera";
 import { getMoneyByDay } from "../useAPI/useRecordAPI";
-import { checkRFIDUUID, formatCurrency } from "../utils/index";
+import { formatCurrency } from "../utils/index";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons"; // Nhập biểu tượng cụ thể
-import Notification from "../components/Notification";
-import { getData } from "../context/indexedDB";
-
+import { faGear, faPlay, faPause } from "@fortawesome/free-solid-svg-icons"; // Nhập biểu tượng cụ thể
 const ParkingManagement = () => {
   const [moneyPerDay, setMoneyPerDay] = useState([]);
   const [openSetting, setOpenSetting] = useState(false);
   const [entryLicensePlate, setEntryLicensePlate] = useState("");
   const [exitLicensePlate, setExitLicensePlate] = useState("");
-
+  const [isStart, setIsStart] = useState(false);
   const fetchData = async () => {
     const money = await getMoneyByDay(new Date("2024-01-01"));
     // console.log("Money___", money.totalMoney);
@@ -43,6 +40,15 @@ const ParkingManagement = () => {
           </div>
           <div className="">
             <button
+              onClick={(e) => setIsStart((prev) => !prev)}
+              className="bg-slate-300 text-white px-4 py-2 rounded my-2 mr-1"
+            >
+              <FontAwesomeIcon
+                icon={isStart === true ? faPause : faPlay}
+                color="black"
+              />
+            </button>
+            <button
               onClick={(e) => setOpenSetting((prev) => !prev)}
               className="bg-orange-400 text-white px-4 py-2 rounded my-2"
             >
@@ -56,12 +62,14 @@ const ParkingManagement = () => {
         <CheckCamera
           type={"entry"}
           openSetting={openSetting}
+          isStart={isStart}
           entryLicensePlate={entryLicensePlate}
           setEntryLicensePlate={setEntryLicensePlate}
         ></CheckCamera>
         <CheckCamera
           type={"exit"}
           openSetting={openSetting}
+          isStart={isStart}
           exitLicensePlate={exitLicensePlate}
           setExitLicensePlate={setExitLicensePlate}
         ></CheckCamera>

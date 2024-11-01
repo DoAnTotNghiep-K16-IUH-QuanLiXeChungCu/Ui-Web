@@ -3,6 +3,12 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import "./index.scss";
+import { Buffer } from "buffer";
+import path from "path-browserify";
+
+window.Buffer = Buffer;
+window.path = path;
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

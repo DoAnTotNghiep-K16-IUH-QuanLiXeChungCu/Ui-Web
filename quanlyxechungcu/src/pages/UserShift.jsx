@@ -8,7 +8,6 @@ import {
 } from "../useAPI/useUserShiftAPI";
 
 import UserShiftModal from "./UserShiftModal";
-import { getData, saveData } from "../context/indexedDB";
 import UserContext from "../context/UserContext";
 
 const UserShift = () => {
@@ -23,10 +22,9 @@ const UserShift = () => {
   const [dateFilter, setDateFilter] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
-  const [userShifts, setUserShifts] = useState([]);
+  const [userShiftsHere, setUserShiftsHere] = useState([]);
   const [dateShift, setDateShift] = useState([]);
-  const { shifts, users } = useContext(UserContext);
-  const [allUserShifts, setAllUserShifts] = useState([]); // Toàn bộ dữ liệu
+  const { shifts, users, userShifts, setUserShifts } = useContext(UserContext);
   const [selectedUserShift, setSelectedUserShift] = useState({
     id: "",
     userId: "",
@@ -51,29 +49,18 @@ const UserShift = () => {
   );
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setAllUserShifts(data.userShifts);
-          console.log("data.userShifts: ", data.userShifts);
-
-          filterUserShiftsForWeek(currentWeekStart); // Lọc dữ liệu ca trực cho tuần hiện tại
-        }
-      } catch (err) {
-        console.error("Failed to get User data:", err);
-      }
-    };
-    fetchUserData();
-  }, [currentWeekStart]);
+    filterUserShiftsForWeek(currentWeekStart);
+  }, [currentWeekStart, userShifts]);
 
   // Lọc dữ liệu ca trực cho tuần hiện tại
   const filterUserShiftsForWeek = (weekStart) => {
-    const weekShifts = allUserShifts?.filter((shift) => {
+    console.log("userShifts:______-", userShifts);
+
+    const weekShifts = userShifts?.filter((shift) => {
       const shiftDate = new Date(shift.dateTime);
       return shiftDate >= weekStart && shiftDate < addWeeks(weekStart, 1);
     });
-    setUserShifts(weekShifts);
+    setUserShiftsHere(weekShifts);
   };
 
   const handleNextWeek = () => {
@@ -103,10 +90,8 @@ const UserShift = () => {
 
   // Function to get shift for a specific day and time
   const getShiftForDayAndTime = (day, shiftName) => {
-    console.log("shiftName", shiftName);
-
     const dayStr = format(day, "yyyy-MM-dd");
-    const shift = userShifts.find(
+    const shift = userShiftsHere.find(
       (s) =>
         format(new Date(s.dateTime), "yyyy-MM-dd") === dayStr &&
         s.shiftId.shiftName === shiftName
@@ -130,12 +115,12 @@ const UserShift = () => {
 
       setSelectedShift(shift.shiftName);
       setSelectedDay(format(day, "yyyy-MM-dd"));
-      setDateShift(format(day, "yyyy-MM-dd"));
+      setDateShift(format(day, "yyyy-MM-dd")); // Cập nhật ngày trực
     } else {
       setSelectedUserShift({ userId: "", shiftId: "", dateTime: "" });
       setSelectedShift(null);
       setSelectedDay(null);
-      setDateShift("");
+      setDateShift(""); // Reset nếu không có ca
     }
   };
 
@@ -143,27 +128,26 @@ const UserShift = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const addedUserShift = await addUserShift(newUserShift);
-    if (addedUserShift) {
+    try {
+      const addedUserShift = await addUserShift(newUserShift);
+      console.log("addedUserShift", addedUserShift);
+
+      if (addedUserShift) {
+        setShowNotification({
+          content: `Đã phân Ca ${newUserShift.shiftName} ngày ${newUserShift.dateTime} cho nhân viên ${newUserShift.fullname}`,
+          type: "Notification",
+          show: true,
+        });
+        setUserShifts((prev) => [...prev, addedUserShift]);
+        filterUserShiftsForWeek(currentWeekStart);
+      }
+    } catch (error) {
+      console.error("Error adding user shift:", error);
       setShowNotification({
-        content: `Đã phân Ca ${newUserShift.shiftName} ngày ${newUserShift.dateTime} cho nhân viên ${newUserShift.fullname}`,
-        type: "Notification",
+        content: "Đã xảy ra lỗi khi thêm ca. Vui lòng thử lại.",
+        type: "Error",
         show: true,
       });
-      const updatedAllUserShifts = [...allUserShifts, addedUserShift];
-      setAllUserShifts([...allUserShifts, addedUserShift]);
-      setUserShifts((prev) => [...prev, addedUserShift]);
-      filterUserShiftsForWeek(currentWeekStart);
-      const data = await getData("userData");
-      if (data) {
-        await saveData({
-          id: "userData",
-          ...data,
-          userShifts: [...data.userShifts, addedUserShift], // Cập nhật danh sách thẻ mới
-        });
-      }
-      // Thêm vào dữ liệu đầy đủ
-      filterUserShiftsForWeek(currentWeekStart); // Cập nhật lại tuần hiện tại
     }
   };
 
@@ -184,33 +168,57 @@ const UserShift = () => {
           type: "Notification",
           show: true,
         });
-        setAllUserShifts(allUserShifts.filter((shift) => shift._id !== id)); // Xóa khỏi dữ liệu đầy đủ
+        setUserShifts(userShifts.filter((shift) => shift._id !== id)); // Xóa khỏi dữ liệu đầy đủ
         filterUserShiftsForWeek(currentWeekStart); // Cập nhật lại tuần hiện tại
       }
     }
   };
 
-  const handleEdit = async (usefShift) => {
-    if (!usefShift) {
+  const handleEdit = async (userShift) => {
+    // Kiểm tra nếu không có ca nào được chọn
+    if (!userShift) {
       setShowNotification({
         content: "Bạn chưa chọn ca để sửa",
         type: "Error",
         show: true,
       });
-    } else {
-      const upd = await updateUserShift(usefShift);
-      if (upd) {
+      return; // Thoát khỏi hàm nếu không có ca nào được chọn
+    }
+
+    try {
+      // Cập nhật ca làm việc
+      const updatedShift = await updateUserShift({
+        ...userShift,
+        dateTime: format(dateShift, "yyyy-MM-dd"), // Gửi giá trị ngày trực từ dateShift
+      });
+      console.log("Updated Shift:", updatedShift);
+
+      // Kiểm tra nếu cập nhật thành công
+      if (updatedShift) {
         setShowNotification({
           content: `Ca của nhân viên ${selectedUserShift.fullname} đã được sửa`,
           type: "Notification",
           show: true,
         });
-        const updatedShifts = allUserShifts.map((shift) =>
-          shift._id === usefShift._id ? upd : shift
+
+        // Cập nhật danh sách ca làm việc
+        const updatedShifts = userShifts.map((shift) =>
+          shift._id === updatedShift._id ? updatedShift : shift
         );
-        setAllUserShifts(updatedShifts); // Cập nhật dữ liệu đầy đủ
-        filterUserShiftsForWeek(currentWeekStart); // Cập nhật lại tuần hiện tại
+
+        // Cập nhật trạng thái userShifts nếu bạn đang sử dụng useState
+        setUserShifts(updatedShifts);
+
+        // Cập nhật lại tuần hiện tại
+        filterUserShiftsForWeek(currentWeekStart);
       }
+    } catch (error) {
+      console.error("Error updating shift:", error);
+      setShowNotification({
+        content: "Đã xảy ra lỗi khi cập nhật ca. Vui lòng thử lại.",
+        type: "Error",
+        show: true,
+      });
     }
   };
 
