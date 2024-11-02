@@ -13,7 +13,7 @@ export const getAllApartment = async () => {
       ALL_APARTMENT,
       {
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 100,
       },
       {
         headers: {

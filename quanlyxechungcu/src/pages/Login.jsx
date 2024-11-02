@@ -14,22 +14,7 @@ const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const {
-    setApartments,
-    setCustomers,
-    setTickets,
-    setRecords,
-    setProfile,
-    setParkingSlots,
-    setCards,
-    setUsers,
-    setVehicles,
-    setUserShifts,
-    setShifts,
-    setFees,
-    setEntryRecords,
-    setExitRecords,
-  } = useContext(UserContext);
+  const { setProfile } = useContext(UserContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -45,7 +30,6 @@ const Login = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        // Xử lý nếu đăng nhập thành công
         Cookies.set("accessToken", data.data.accessToken, {
           expires: 1, // Cookie sẽ hết hạn sau 1 ngày
           secure: true, // Chỉ gửi cookie qua HTTPS
@@ -64,24 +48,6 @@ const Login = () => {
         console.log("settings[0].entryBau", settings[0].entryBau);
         setUpSerialPortEntry(settings[0].entryPort, settings[0].entryBau);
         // setUpSerialPortEntry("COM5", 9600);
-
-        fetchDataFromAPI(
-          setProfile,
-          setApartments,
-          setCustomers,
-          setTickets,
-          setRecords,
-          setParkingSlots,
-          setCards,
-          setUsers,
-          setVehicles,
-          setUserShifts,
-          setShifts,
-          setFees,
-          setEntryRecords,
-          setExitRecords,
-          profile
-        );
         navigate("/home");
       } else {
         setError(data.error || "Đăng nhập không thành công");
@@ -98,7 +64,6 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-center mb-6">Đăng nhập</h2>
         {error && <p className="text-red-500 text-center">{error}</p>}
         <form onSubmit={handleSubmit}>
-          {/* Username Input */}
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"

@@ -14,7 +14,6 @@ import { getAllShift } from "../useAPI/useShiftAPI";
 import { getAllUser } from "../useAPI/useUserAPI";
 import { saveData } from "../context/indexedDB";
 import { getAllUserShift } from "./useUserShiftAPI";
-import { getAllSetting } from "./useSettingAPI";
 export const fetchDataFromAPI = async (
   setProfile,
   setApartments,
@@ -40,6 +39,9 @@ export const fetchDataFromAPI = async (
     setCards(cards || []);
     const fees = await getAllParkingRate();
     setFees(fees || []);
+    const parkingSlots = await getAllParkingSlot();
+    setParkingSlots(parkingSlots || []);
+
     const c = await getAllVehicle(1, 1000);
     const vehicles = c.vehicles;
     const vehicleDetail = await Promise.all(
@@ -52,13 +54,12 @@ export const fetchDataFromAPI = async (
       })
     );
     setVehicles(vehicleDetail || []);
+
     const customers = await filterCustomer("", "", 1, 10000);
     setCustomers(customers);
-
     const records = await filterRecord(" ", " ", " ", " ", 1, 10000);
     setRecords(records);
-    const parkingSlots = await getAllParkingSlot();
-    setParkingSlots(parkingSlots || []);
+
     const shifts = await getAllShift();
     setShifts(shifts);
     const users = await getAllUser();

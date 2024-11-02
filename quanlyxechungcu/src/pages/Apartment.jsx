@@ -1,12 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
-import { getData } from "../context/indexedDB";
-import UserContext from "../context/UserContext";
-
+import React, { useEffect, useState } from "react";
+import { getAllApartment } from "../useAPI/useApartmentAPI";
 const Apartment = () => {
   const [selectedApartment, setSelectedApartment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newApartment, setNewApartment] = useState(""); // Khởi tạo state cho mã số thẻ mới
-  const { apartments, setApartments } = useContext(UserContext);
+  const [apartments, setApartments] = useState([]);
+  useEffect(() => {
+    const fetchApartmentData = async () => {
+      const apartments = await getAllApartment();
+      setApartments(apartments || []);
+    };
+    fetchApartmentData();
+  }, []);
   const filteredApartment =
     apartments?.length > 0
       ? apartments.filter(

@@ -10,17 +10,16 @@ import { getData, saveData } from "../context/indexedDB";
 import UserContext from "../context/UserContext";
 
 const Customer = () => {
-  // console.log("customers", customers);
-  const { customers, setCustomers, apartments, setApartments } =
-    useContext(UserContext);
+  const [customers, setCustomers] = useState([]);
+  const [apartments, setApartments] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(customers.length / pageSize);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [filteredCustomers, setFilteredCustomers] = useState([]);
-
   const [showAddForm, setShowAddForm] = useState(false); // State để hiển thị form thêm xe
+  const [apartmentFilter, setApartmentFilter] = useState("");
+  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
   const [newCustomer, setNewCustomer] = useState({
     _id: "",
     apartmentsId: "",
@@ -29,9 +28,6 @@ const Customer = () => {
     address: "",
     isResident: "",
   });
-
-  const [apartmentFilter, setApartmentFilter] = useState("");
-  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",

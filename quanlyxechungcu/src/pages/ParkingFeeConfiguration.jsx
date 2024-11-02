@@ -15,17 +15,9 @@ const ParkingFeeConfiguration = () => {
   });
   useEffect(() => {
     const fetchFeeData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setFees(data.fees);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Card data:", err);
-      }
+      const fees = await getAllParkingRate();
+      setFees(fees || []);
     };
-
     fetchFeeData(); // Gọi hàm để lấy dữ liệu
   }, []);
   const filteredfee =

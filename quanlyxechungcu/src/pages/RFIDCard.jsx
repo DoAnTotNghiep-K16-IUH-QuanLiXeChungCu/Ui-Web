@@ -1,13 +1,20 @@
-import React, { useContext, useEffect, useState } from "react";
-import { addCard, deleteCard } from "../useAPI/useCardAPI";
+import React, { useEffect, useState } from "react";
+import { addCard, deleteCard, getAllCard } from "../useAPI/useCardAPI";
 import { getData, saveData } from "../context/indexedDB";
-import UserContext from "../context/UserContext";
-
 const RFIDCard = () => {
-  const { cards, setCards } = useContext(UserContext);
+  const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newCardUUID, setNewCardUUID] = useState("");
+
+  useEffect(() => {
+    const fetchCardData = async () => {
+      const cards = await getAllCard();
+      setCards(cards || []);
+    };
+    fetchCardData();
+  }, []);
+
   const filteredCard =
     cards.length > 0
       ? cards.filter(

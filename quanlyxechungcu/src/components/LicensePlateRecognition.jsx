@@ -3,69 +3,38 @@ import axios from "axios";
 
 const LicensePlateRecognition = () => {
   const [image, setImage] = useState(null);
-  const [predictions, setPredictions] = useState([]);
+  const [predictions, setPredictions] = useState([]); // Dữ liệu dự đoán
   const [imageUrl, setImageUrl] = useState(null);
   const canvasRef = useRef(null);
 
   const handleImageChange = (e) => {
+    console.log(e.target.files[0]); // Kiểm tra xem file được chọn hay chưa
     setImage(e.target.files[0]);
     setImageUrl(URL.createObjectURL(e.target.files[0])); // Tạo URL cho ảnh đã upload
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!image) {
+      console.error("No image selected!");
+      return;
+    }
     const formData = new FormData();
     formData.append("file", image);
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/predict",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        "http://localhost:5000/DetectLicensePlate",
+        formData
       );
-      setPredictions(response.data);
-      drawBoundingBoxes(response.data); // Vẽ bounding box khi nhận được dự đoán
+      console.log("Response data:", response.data); // Kiểm tra dữ liệu trả về
+      const licensePlates = response.data.license_plates || [];
+      setPredictions(licensePlates); // Lưu các biển số xe vào predictions
+      // drawImageOnCanvas(imageUrl); // Vẽ hình ảnh lên canvas
     } catch (error) {
       console.error("Error uploading image:", error);
     }
   };
-
-  const drawBoundingBoxes = (predictions) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-
-    img.src = imageUrl;
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-
-      predictions.forEach((pred) => {
-        ctx.beginPath();
-        ctx.rect(
-          pred.xmin,
-          pred.ymin,
-          pred.xmax - pred.xmin,
-          pred.ymax - pred.ymin
-        );
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "red";
-        ctx.stroke();
-        ctx.fillStyle = "red";
-        ctx.fillText(
-          `${pred.name} (${(pred.confidence * 100).toFixed(2)}%)`,
-          pred.xmin,
-          pred.ymin > 10 ? pred.ymin - 5 : 10
-        );
-      });
-    };
-  };
-
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -74,19 +43,21 @@ const LicensePlateRecognition = () => {
       </form>
       {imageUrl && (
         <div>
-          <canvas ref={canvasRef} style={{ border: "1px solid black" }} />
+          <img
+            src={imageUrl}
+            alt="Selected preview"
+            style={{ display: "block", width: "100%", maxWidth: "500px" }} // Đặt style để hiển thị hình ảnh
+          />
         </div>
       )}
+
       <div>
-        {predictions.map((pred, index) => (
-          <div key={index}>
-            <p>{`Label: ${pred.name}, Confidence: ${(
-              pred.confidence * 100
-            ).toFixed(2)}%, Coordinates: [${pred.xmin}, ${pred.ymin}, ${
-              pred.xmax
-            }, ${pred.ymax}]`}</p>
-          </div>
-        ))}
+        {Array.isArray(predictions) &&
+          predictions.map((plate, index) => (
+            <div key={index}>
+              <p>{`License Plate: ${plate}`}</p>
+            </div>
+          ))}
       </div>
     </div>
   );

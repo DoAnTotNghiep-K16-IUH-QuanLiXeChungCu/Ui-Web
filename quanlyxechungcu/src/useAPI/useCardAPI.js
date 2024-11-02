@@ -20,7 +20,7 @@ export const getAllCard = async () => {
       ALL_CARD,
       {
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 100,
       },
       {
         headers: {
