@@ -5,11 +5,11 @@ import { getMoneyByDay } from "../useAPI/useRecordAPI";
 import { formatCurrency } from "../utils/index";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear, faPlay, faPause } from "@fortawesome/free-solid-svg-icons"; // Nhập biểu tượng cụ thể
+import CheckCameraEntry from "../components/CheckCameraEntry";
+import CheckCameraExit from "../components/CheckCameraExit";
 const ParkingManagement = () => {
   const [moneyPerDay, setMoneyPerDay] = useState([]);
   const [openSetting, setOpenSetting] = useState(false);
-  const [entryLicensePlate, setEntryLicensePlate] = useState("");
-  const [exitLicensePlate, setExitLicensePlate] = useState("");
   const [isStart, setIsStart] = useState(false);
   const fetchData = async () => {
     const money = await getMoneyByDay(new Date("2024-01-01"));
@@ -22,7 +22,6 @@ const ParkingManagement = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
   return (
     <div className="p-4">
       <header className="bg-gray-100 p-2 flex justify-between items-center">
@@ -40,7 +39,9 @@ const ParkingManagement = () => {
           </div>
           <div className="">
             <button
-              onClick={(e) => setIsStart((prev) => !prev)}
+              onClick={(e) => {
+                setIsStart((prev) => !prev);
+              }}
               className="bg-slate-300 text-white px-4 py-2 rounded my-2 mr-1"
             >
               <FontAwesomeIcon
@@ -49,7 +50,9 @@ const ParkingManagement = () => {
               />
             </button>
             <button
-              onClick={(e) => setOpenSetting((prev) => !prev)}
+              onClick={(e) => {
+                setOpenSetting((prev) => !prev);
+              }}
               className="bg-orange-400 text-white px-4 py-2 rounded my-2"
             >
               <FontAwesomeIcon icon={faGear} />
@@ -59,20 +62,16 @@ const ParkingManagement = () => {
       </header>
 
       <div className="grid grid-cols-2 gap-4 mt-4">
-        <CheckCamera
-          type={"entry"}
+        <CheckCameraEntry
           openSetting={openSetting}
           isStart={isStart}
-          entryLicensePlate={entryLicensePlate}
-          setEntryLicensePlate={setEntryLicensePlate}
-        ></CheckCamera>
-        <CheckCamera
-          type={"exit"}
+          type={"main"}
+        ></CheckCameraEntry>
+        <CheckCameraExit
           openSetting={openSetting}
           isStart={isStart}
-          exitLicensePlate={exitLicensePlate}
-          setExitLicensePlate={setExitLicensePlate}
-        ></CheckCamera>
+          type={"main"}
+        ></CheckCameraExit>
       </div>
     </div>
   );

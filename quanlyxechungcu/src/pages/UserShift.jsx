@@ -4,15 +4,18 @@ import { addDays, startOfWeek, format, addWeeks } from "date-fns";
 import {
   addUserShift,
   deleteUserShift,
+  filterUserShift,
+  getAllUserShift,
   updateUserShift,
 } from "../useAPI/useUserShiftAPI";
-
 import UserShiftModal from "./UserShiftModal";
-import UserContext from "../context/UserContext";
+import { getAllShift } from "../useAPI/useShiftAPI";
+import { getAllUser } from "../useAPI/useUserAPI";
+import Loading from "./../components/Loading";
 
 const UserShift = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(
-    startOfWeek(new Date())
+    startOfWeek(new Date(), { weekStartsOn: 1 }) // Thay đổi ở đây
   );
   const [showNotification, setShowNotification] = useState({
     content: "",
@@ -24,7 +27,6 @@ const UserShift = () => {
   );
   const [userShiftsHere, setUserShiftsHere] = useState([]);
   const [dateShift, setDateShift] = useState([]);
-  const { shifts, users, userShifts, setUserShifts } = useContext(UserContext);
   const [selectedUserShift, setSelectedUserShift] = useState({
     id: "",
     userId: "",
@@ -44,6 +46,32 @@ const UserShift = () => {
   const [selectedShift, setSelectedShift] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [shifts, setShifts] = useState([]);
+  const [userShifts, setUserShifts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [highlightedUser, setHighlightedUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true); // Bắt đầu loading
+      try {
+        const shifts = await getAllShift();
+        setShifts(shifts);
+        const users = await getAllUser();
+        setUsers(users);
+        const userShifts = await getAllUserShift();
+        setUserShifts(userShifts);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const daysInWeek = Array.from({ length: 7 }, (_, i) =>
     addDays(currentWeekStart, i)
   );
@@ -52,15 +80,12 @@ const UserShift = () => {
     filterUserShiftsForWeek(currentWeekStart);
   }, [currentWeekStart, userShifts]);
 
-  // Lọc dữ liệu ca trực cho tuần hiện tại
-  const filterUserShiftsForWeek = (weekStart) => {
-    console.log("userShifts:______-", userShifts);
-
-    const weekShifts = userShifts?.filter((shift) => {
-      const shiftDate = new Date(shift.dateTime);
-      return shiftDate >= weekStart && shiftDate < addWeeks(weekStart, 1);
-    });
-    setUserShiftsHere(weekShifts);
+  const filterUserShiftsForWeek = async (weekStart) => {
+    const weekStartDate = new Date(weekStart); // Chuyển weekStart thành đối tượng Date
+    const weekEndDate = addDays(weekStartDate, 6); // Ngày Chủ nhật
+    const filUserShift = await filterUserShift(weekStartDate, weekEndDate);
+    // console.log("filUserShift", filUserShift);
+    setUserShiftsHere(filUserShift);
   };
 
   const handleNextWeek = () => {
@@ -91,31 +116,62 @@ const UserShift = () => {
   // Function to get shift for a specific day and time
   const getShiftForDayAndTime = (day, shiftName) => {
     const dayStr = format(day, "yyyy-MM-dd");
-    const shift = userShiftsHere.find(
+    if (!Array.isArray(userShiftsHere) || userShiftsHere.length === 0) {
+      return [];
+    }
+    const shifts = userShiftsHere.filter(
       (s) =>
         format(new Date(s.dateTime), "yyyy-MM-dd") === dayStr &&
         s.shiftId.shiftName === shiftName
     );
-    return shift ? shift : null;
+
+    // Trả về kết quả hoặc mảng rỗng nếu không tìm thấy
+    return shifts.length > 0 ? shifts : [];
   };
 
   // Handle shift selection
   const handleShiftClick = (shift, day) => {
     const selectedShiftData = getShiftForDayAndTime(day, shift.shiftName);
-
     if (selectedShiftData) {
-      setSelectedUserShift({
-        id: selectedShiftData._id,
-        userId: selectedShiftData.userId._id,
-        shiftId: selectedShiftData.shiftId._id,
-        dateTime: format(day, "yyyy-MM-dd"),
-        fullname: selectedShiftData.userId.fullname,
-        shiftName: selectedShiftData.shiftId.shiftName,
-      });
+      if (selectedShiftData.length === 1) {
+        setSelectedUserShift({
+          id: selectedShiftData[0]._id,
+          userId: selectedShiftData[0].userId._id,
+          shiftId: selectedShiftData[0].shiftId._id,
+          dateTime: format(day, "yyyy-MM-dd"),
+          fullname: selectedShiftData[0].userId.fullname,
+          shiftName: selectedShiftData[0].shiftId.shiftName,
+        });
+      } else if (selectedShiftData.length > 1) {
+        // console.log("selectedShiftData", selectedShiftData);
+        // console.log("selectedUser", selectedUser);
 
+        if (selectedUser) {
+          const userShift = selectedShiftData.find(
+            (s) => s.userId._id === selectedUser.userId._id
+          );
+          setSelectedUserShift({
+            id: userShift._id,
+            userId: userShift.userId._id,
+            shiftId: userShift.shiftId._id,
+            dateTime: format(day, "yyyy-MM-dd"),
+            fullname: userShift.userId.fullname,
+            shiftName: userShift.shiftId.shiftName,
+          });
+        } else {
+          setSelectedUserShift({
+            id: selectedShiftData[0]._id,
+            userId: selectedShiftData[0].userId._id,
+            shiftId: selectedShiftData[0].shiftId._id,
+            dateTime: format(day, "yyyy-MM-dd"),
+            fullname: selectedShiftData[0].userId.fullname,
+            shiftName: selectedShiftData[0].shiftId.shiftName,
+          });
+        }
+      }
       setSelectedShift(shift.shiftName);
       setSelectedDay(format(day, "yyyy-MM-dd"));
-      setDateShift(format(day, "yyyy-MM-dd")); // Cập nhật ngày trực
+      setDateShift(format(day, "yyyy-MM-dd"));
     } else {
       setSelectedUserShift({ userId: "", shiftId: "", dateTime: "" });
       setSelectedShift(null);
@@ -125,7 +181,7 @@ const UserShift = () => {
   };
 
   const handleAddClick = () => setShowAddForm(true);
-
+  const handleCloseModal = () => setShowAddForm(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -151,24 +207,24 @@ const UserShift = () => {
     }
   };
 
-  const handleCloseModal = () => setShowAddForm(false);
-
-  const handleDelete = async (id) => {
-    if (!id) {
+  const handleDelete = async (selectedUserShift) => {
+    if (!selectedUserShift) {
       setShowNotification({
         content: "Bạn chưa chọn ca để xóa",
         type: "Error",
         show: true,
       });
     } else {
-      const del = await deleteUserShift(id);
+      const del = await deleteUserShift(selectedUserShift?.id);
       if (del) {
         setShowNotification({
           content: `Ca ${selectedUserShift.dateTime} của nhân viên ${selectedUserShift.fullname} đã được xóa`,
           type: "Notification",
           show: true,
         });
-        setUserShifts(userShifts.filter((shift) => shift._id !== id)); // Xóa khỏi dữ liệu đầy đủ
+        setUserShifts(
+          userShifts.filter((shift) => shift._id !== selectedUserShift.id)
+        ); // Xóa khỏi dữ liệu đầy đủ
         filterUserShiftsForWeek(currentWeekStart); // Cập nhật lại tuần hiện tại
       }
     }
@@ -221,7 +277,9 @@ const UserShift = () => {
       });
     }
   };
-
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
   return (
     <div className="min-h-screen bg-gray-100 p-6 ">
       <div className="mx-auto bg-white shadow-lg rounded-lg p-6">
@@ -238,7 +296,7 @@ const UserShift = () => {
           </button>
           <button
             className="bg-red-500 text-white px-4 py-2 rounded"
-            onClick={() => handleDelete(selectedUserShift?.id)}
+            onClick={() => handleDelete(selectedUserShift)}
           >
             XÓA
           </button>
@@ -345,7 +403,7 @@ const UserShift = () => {
                   <tr key={i}>
                     <td className="border p-2 text-center">
                       {shift.shiftName}
-                    </td>{" "}
+                    </td>
                     {/* Hiển thị tên ca */}
                     {daysInWeek.map((day, index) => {
                       const shiftData = getShiftForDayAndTime(
@@ -357,21 +415,33 @@ const UserShift = () => {
                           key={index}
                           className={`border p-2 text-center ${
                             selectedShift === shift.shiftName &&
-                            selectedDay === format(day, "yyyy-MM-dd") // So sánh với chuỗi
+                            selectedDay === format(day, "yyyy-MM-dd")
                               ? "bg-gray-300"
                               : ""
                           }`}
-                          onClick={() => handleShiftClick(shift, day)} // Thêm sự kiện click vào ô
+                          onClick={() => handleShiftClick(shift, day)}
                         >
-                          {shiftData ? (
-                            // Kiểm tra nếu shiftData hợp lệ
-                            <span>
-                              {shiftData.userId.fullname}{" "}
-                              {/* Hoặc một thuộc tính khác để hiển thị */}
-                            </span>
-                          ) : (
-                            ""
-                          )}
+                          {shiftData && shiftData.length > 0
+                            ? shiftData.map((user, idx) => (
+                                <span
+                                  key={idx}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedUser(user);
+                                    setHighlightedUser(user.userId);
+                                    handleShiftClick(shift, day);
+                                  }}
+                                  className={`cursor-pointer hover:text-blue-500 ${
+                                    highlightedUser === user.userId
+                                      ? "font-bold"
+                                      : ""
+                                  }`}
+                                >
+                                  {user.userId.fullname}
+                                  {idx < shiftData.length - 1 && ", "}
+                                </span>
+                              ))
+                            : ""}
                         </td>
                       );
                     })}

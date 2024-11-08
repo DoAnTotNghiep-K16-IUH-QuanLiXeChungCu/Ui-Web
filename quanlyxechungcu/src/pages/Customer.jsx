@@ -3,23 +3,27 @@ import CustomerModal from "./CustomerModal";
 import {
   addCustomer,
   deleteCustomer,
+  filterCustomer,
   updateCustomer,
 } from "../useAPI/useCustomerAPI";
 import Notification from "../components/Notification";
 import { getData, saveData } from "../context/indexedDB";
 import UserContext from "../context/UserContext";
+import { getAllApartment } from "../useAPI/useApartmentAPI";
+import Loading from "../components/Loading";
 
 const Customer = () => {
   const [customers, setCustomers] = useState([]);
   const [apartments, setApartments] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(customers.length / pageSize);
   const [searchTerm, setSearchTerm] = useState("");
+
   const [filteredCustomers, setFilteredCustomers] = useState([]);
+
   const [showAddForm, setShowAddForm] = useState(false); // State để hiển thị form thêm xe
-  const [apartmentFilter, setApartmentFilter] = useState("");
-  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
   const [newCustomer, setNewCustomer] = useState({
     _id: "",
     apartmentsId: "",
@@ -28,12 +32,32 @@ const Customer = () => {
     address: "",
     isResident: "",
   });
+
+  const [apartmentFilter, setApartmentFilter] = useState("");
+  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
     show: false,
   });
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true); // Bắt đầu loading
+      try {
+        const apartments = await getAllApartment();
+        setApartments(apartments || []);
+        const customers = await filterCustomer("", "", 1, 1000);
+        setCustomers(customers);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
+      }
+    };
+    fetchData();
+  }, []);
   const handleAddClick = () => {
     setNewCustomer(null);
     setShowAddForm(true);
@@ -239,6 +263,10 @@ const Customer = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="mx-auto bg-white shadow-lg rounded-lg p-6">

@@ -4,10 +4,6 @@ import Cookies from "js-cookie"; // Thêm import js-cookie
 import { LOGIN } from "../config/API";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import UserContext from "../context/UserContext";
-import { fetchDataFromAPI } from "../useAPI/useAPIFetchData";
-import { setUpSerialPortEntry } from "../useAPI/useCardAPI";
-import { getAllSetting } from "../useAPI/useSettingAPI";
-
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -30,6 +26,7 @@ const Login = () => {
       });
       const data = await response.json();
       if (response.ok) {
+        // Xử lý nếu đăng nhập thành công
         Cookies.set("accessToken", data.data.accessToken, {
           expires: 1, // Cookie sẽ hết hạn sau 1 ngày
           secure: true, // Chỉ gửi cookie qua HTTPS
@@ -40,14 +37,19 @@ const Login = () => {
           secure: true, // Chỉ gửi cookie qua HTTPS
           sameSite: "Strict", // Ngăn chặn CSRF
         });
+        Cookies.set("fullname", data.data.fullname, {
+          expires: 1, // Cookie sẽ hết hạn sau 1 ngày
+          secure: true, // Chỉ gửi cookie qua HTTPS
+          sameSite: "Strict", // Ngăn chặn CSRF
+        });
+        Cookies.set("profileID", data.data._id, {
+          expires: 1, // Cookie sẽ hết hạn sau 1 ngày
+          secure: true, // Chỉ gửi cookie qua HTTPS
+          sameSite: "Strict", // Ngăn chặn CSRF
+        });
         const { role, accessToken, ...filteredProfile } = data.data;
         const profile = filteredProfile;
         setProfile(profile);
-        const settings = await getAllSetting();
-        console.log("settings[0].entryPort", settings[0].entryPort);
-        console.log("settings[0].entryBau", settings[0].entryBau);
-        setUpSerialPortEntry(settings[0].entryPort, settings[0].entryBau);
-        // setUpSerialPortEntry("COM5", 9600);
         navigate("/home");
       } else {
         setError(data.error || "Đăng nhập không thành công");
@@ -64,6 +66,7 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-center mb-6">Đăng nhập</h2>
         {error && <p className="text-red-500 text-center">{error}</p>}
         <form onSubmit={handleSubmit}>
+          {/* Username Input */}
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"

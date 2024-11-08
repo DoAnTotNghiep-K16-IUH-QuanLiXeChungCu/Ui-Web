@@ -22,7 +22,6 @@ import ReportPerDay from "../pages/ReportPerDay";
 import Profile from "../pages/Profile";
 import UserShift from "./../pages/UserShift";
 import SignUp from "../pages/SignUp";
-import LicensePlateRecognition from "../components/LicensePlateRecognition";
 
 const Routers = () => {
   const routers = [
@@ -51,7 +50,6 @@ const Routers = () => {
         { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
         { path: "/account/profile", element: <Profile /> },
         { path: "/userShift", element: <UserShift /> },
-        { path: "/test", element: <LicensePlateRecognition /> },
       ],
     },
     {

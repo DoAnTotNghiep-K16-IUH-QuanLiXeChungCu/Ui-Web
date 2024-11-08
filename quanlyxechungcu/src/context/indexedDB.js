@@ -37,3 +37,24 @@ export const deleteData = async (id) => {
   const db = await initDB();
   await db.delete(storeName, id);
 };
+
+const dbPromise = openDB("userShiftsDB", 1, {
+  upgrade(db) {
+    db.createObjectStore("shifts", { keyPath: "id" });
+  },
+});
+
+export const saveUserShift = async (userShift) => {
+  const db = await dbPromise;
+  await db.put("shifts", userShift);
+};
+
+export const getAllUserShiftsFromDB = async () => {
+  const db = await dbPromise;
+  return await db.getAll("shifts");
+};
+
+export const deleteUserShiftFromDB = async (id) => {
+  const db = await dbPromise;
+  await db.delete("shifts", id);
+};

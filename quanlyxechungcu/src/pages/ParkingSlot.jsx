@@ -7,6 +7,7 @@ import {
 import { changeTypeVehicle } from "../utils/index";
 import UserContext from "../context/UserContext";
 import { getData } from "../context/indexedDB";
+import Loading from "../components/Loading";
 
 const ParkingSlot = () => {
   const [parkingSlots, setParkingSlots] = useState([]);
@@ -17,10 +18,19 @@ const ParkingSlot = () => {
     type: "",
     show: false,
   });
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchParkingSlotData = async () => {
-      const parkingSlots = await getAllParkingSlot();
-      setParkingSlots(parkingSlots || []);
+      setLoading(true); // Bắt đầu loading
+      try {
+        const parkingSlots = await getAllParkingSlot();
+        setParkingSlots(parkingSlots || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
+      }
     };
 
     fetchParkingSlotData(); // Gọi hàm để lấy dữ liệu
@@ -65,6 +75,10 @@ const ParkingSlot = () => {
       }
     }
   };
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 ">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">

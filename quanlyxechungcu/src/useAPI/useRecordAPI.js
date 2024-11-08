@@ -7,7 +7,7 @@ import {
   COUNT_VEHICLE_EXIT,
   COUNT_VEHICLE_NON_EXIT,
   CREATE_ENTRY_RECORD,
-  EXIT_RECORD_BY_ENTRY_RECORD_ID,
+  ENTRY_RECORD_TO_EXIT_RECORD,
   FILTER_RECORD,
   MONEY_BY_DAY,
 } from "../config/API";
@@ -40,37 +40,6 @@ export const getALLEntryRecord = async () => {
       "Có lỗi xảy ra khi lấy danh sách vé tháng:",
       error.response?.data?.error || error.message
     );
-  }
-};
-
-export const FindExitRecordByEntryRecordID = async (id) => {
-  const token = Cookies.get("accessToken");
-  if (!token) {
-    console.error("Token không tồn tại. Vui lòng đăng nhập.");
-    return;
-  }
-
-  try {
-    const response = await axios.patch(
-      EXIT_RECORD_BY_ENTRY_RECORD_ID,
-      {
-        entry_recordId: id,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
-  } catch (error) {
-    console.error(
-      "Có lỗi xảy ra khi lấy dữ liệu:",
-      error.response?.data?.error || error.message
-    );
-    return null;
   }
 };
 
@@ -347,5 +316,41 @@ export const createExitRecord = async (exitRecord) => {
       "Lỗi khi thêm ExitRecord:",
       error.response?.data?.error || error.message
     );
+  }
+};
+export const getEntryRecordByisOutAndUuidAndLicensePlate = async (
+  isOut,
+  uuid,
+  licensePlate
+) => {
+  const token = Cookies.get("accessToken");
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+
+  try {
+    const response = await axios.patch(
+      ENTRY_RECORD_TO_EXIT_RECORD,
+      {
+        isOut,
+        uuid,
+        licensePlate, // Truyền ID vào body dưới dạng JSON
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+  } catch (error) {
+    console.error(
+      "Lỗi khi tìm entryRecords:",
+      error.response?.data?.error || error.message
+    );
+    return null;
   }
 };

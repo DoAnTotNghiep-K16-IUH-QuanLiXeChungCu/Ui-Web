@@ -11,12 +11,13 @@ const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const accessToken = Cookies.get("accessToken");
-  const { profile } = useContext(UserContext);
-  // console.log("profile", profile);
-  // Hàm xử lý đăng xuất
+  const fullname = Cookies.get("fullname");
   const handleLogout = () => {
     Cookies.remove("accessToken"); // Xóa token khỏi cookie
-    Cookies.remove("role"); // Xóa role khỏi cookie nếu có
+    Cookies.remove("role");
+    Cookies.remove("fullname"); // Xóa role khỏi cookie nếu có
+    Cookies.remove("profileID"); // Xóa role khỏi cookie nếu có
+    // Xóa role khỏi cookie nếu có
     navigate("/auth/login"); // Điều hướng về trang đăng nhập
   };
   // Parse JSON
@@ -45,7 +46,7 @@ const Header = () => {
               className="text-black hover:text-blue-600 mr-5 focus:outline-none"
             >
               <FontAwesomeIcon icon={faCircleUser} className="text-2xl mr-2" />
-              {profile?.fullname}
+              {fullname}
             </button>
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">

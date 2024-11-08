@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import Camera from "./Camera";
-import { checkRFIDUUID, findUserShift } from "../utils";
 import Notification from "./Notification";
-import { UserContext } from "./../context/UserContext";
 import { createEntryRecord, createExitRecord } from "../useAPI/useRecordAPI";
 import axios from "axios";
-import { getData, saveData } from "../context/indexedDB";
 import { READ_RFID_CARD_ENTRY, UPLOAD_MEDIA } from "../config/API";
+import { findCardByUUID } from "../useAPI/useCardAPI";
+import { getAllShift } from "../useAPI/useShiftAPI";
+import { getUserShiftsByUserIdAndShiftIdAndDateTime } from "../useAPI/useUserShiftAPI";
+import { findCurrentShift } from "../utils";
+import { format } from "date-fns";
+import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
 const CameraCapture = ({
   type,
   openSetting,
@@ -18,16 +21,6 @@ const CameraCapture = ({
   vehicleType,
   setVehicleType,
 }) => {
-  const {
-    cards,
-    shifts,
-    userShifts,
-    profile,
-    entryRecords,
-    setEntryRecords,
-    exitRecords,
-    setExitRecords,
-  } = useContext(UserContext);
   const [devices, setDevices] = useState([]);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState({
     camera1: "",
@@ -47,13 +40,34 @@ const CameraCapture = ({
   });
   const [rfidData, setRfidData] = useState("");
   const previousRfidDataRef = useRef("");
-  const userShiftId = findUserShift(userShifts, profile._id, shifts);
+  // const userShiftId = findUserShift(userShifts, profile._id, shifts);
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
     show: false,
   });
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [userShiftHere, setUserShiftHere] = useState("");
+  const [shifts, setShifts] = useState([]);
+  const myUserID = Cookies.get("profileID");
+  useEffect(() => {
+    const fetchShiftsAndUserShift = async () => {
+      const shifts = await getAllShift();
+      setShifts(shifts);
+      const myShift = findCurrentShift(shifts);
+      const dayStr = format(new Date(), "yyyy-MM-dd");
+      const UShiftHere = await getUserShiftsByUserIdAndShiftIdAndDateTime(
+        myUserID,
+        myShift._id,
+        dayStr
+      );
+
+      if (UShiftHere) {
+        setUserShiftHere(UShiftHere);
+      }
+    };
+    fetchShiftsAndUserShift();
+  }, [myUserID]); // Thêm myUserID vào dependencies để tối ưu
 
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then((deviceInfos) => {
@@ -109,7 +123,6 @@ const CameraCapture = ({
   };
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Kiểm tra phím tắt, sử dụng 'P' hoặc 'p' cho entry và 'Q' hoặc 'q' cho exit
       if (
         (type === "entry" && (event.key === "p" || event.key === "P")) ||
         (type === "exit" && (event.key === "q" || event.key === "Q"))
@@ -127,13 +140,22 @@ const CameraCapture = ({
   }, [type]);
 
   useEffect(() => {
+    if (isStart === false) {
+      return;
+    }
     if (window.eventSource) return; // Kiểm tra xem EventSource đã tồn tại hay chưa
     const eventSource = new EventSource(READ_RFID_CARD_ENTRY);
     window.eventSource = eventSource; // Lưu eventSource vào đối tượng global để dùng cho lần sau
 
     eventSource.onmessage = (event) => {
       const newRfidData = event.data;
+
       if (newRfidData !== previousRfidDataRef.current) {
+        console.log(
+          "previousRfidDataRef.current !===",
+          previousRfidDataRef.current
+        );
+
         setRfidData(newRfidData);
         previousRfidDataRef.current = newRfidData; // Cập nhật dữ liệu cũ
       }
@@ -144,42 +166,58 @@ const CameraCapture = ({
       eventSource.close(); // Đóng kết nối khi component unmount
       window.eventSource = null; // Reset flag để có thể tái kết nối nếu cần thiết
     };
-  }, []);
+  }, [isStart]);
 
   useEffect(() => {
-    console.log("isStart: ", isStart);
-    if (!isStart) {
-      return;
-    }
-    if (!rfidData || isInitialLoad) {
-      setIsInitialLoad(false); // Sau lần đầu tiên, không xử lý nữa
-      return;
-    }
-    const check = checkRFIDUUID(cards, rfidData);
-    if (check === null) {
-      setShowNotification({
-        content: `Không có thẻ ${rfidData} nào trong danh sách.`,
-        type: "Error",
-        show: true,
-      });
-      console.log("không được:");
-      return;
-    } else {
-      console.log("được:");
-      uploadImages(check._id);
-      setVehicleType("");
-    }
-    previousRfidDataRef.current = rfidData;
-  }, [rfidData]);
+    const handleRFIDCheck = async () => {
+      if (isStart === false) {
+        return;
+      }
+      if (!rfidData || isInitialLoad) {
+        setIsInitialLoad(false); // Sau lần đầu tiên, không xử lý nữa
+        return;
+      }
+      try {
+        const check = await findCardByUUID(rfidData);
+        // console.log("check", check);
+
+        if (check === null || check === undefined) {
+          setShowNotification({
+            content: `Không có thẻ ${rfidData} nào trong danh sách.`,
+            type: "Error",
+            show: true,
+          });
+          // setRfidData("");
+          previousRfidDataRef.current = "";
+          // console.log("không được:");
+          return;
+        } else {
+          // console.log("được:");
+          await uploadImages(check._id); // Gọi hàm uploadImages
+          setVehicleType("");
+        }
+
+        // Cập nhật giá trị rfidData cuối cùng đã xử lý
+        previousRfidDataRef.current = rfidData;
+      } catch (error) {
+        console.error("Lỗi khi xử lý RFID:", error);
+      }
+    };
+
+    handleRFIDCheck(); // Gọi hàm xử lý RFID
+  }, [rfidData, isStart]);
+
   // Kiểm tra thẻ RFID và hiển thị thông báo
 
   const uploadImages = async (rfidID) => {
-    if (userShiftId === null) {
+    if (userShiftHere === null) {
       setShowNotification({
         content: `Hôm nay không phải ca trực của bạn`,
         type: "Error",
         show: true,
       });
+      // setRfidData("");
+      previousRfidDataRef.current = "";
       return;
     }
     if (!photos.camera1 || !photos.camera2) {
@@ -189,6 +227,8 @@ const CameraCapture = ({
         type: "Error",
         show: true,
       });
+      // setRfidData("");
+      previousRfidDataRef.current = "";
       return;
     }
     if (vehicleType === "") {
@@ -198,6 +238,8 @@ const CameraCapture = ({
         type: "Error",
         show: true,
       });
+      // setRfidData("");
+      previousRfidDataRef.current = "";
       return;
     }
     try {
@@ -232,21 +274,13 @@ const CameraCapture = ({
           licensePlate: entryLicensePlate,
           isResident: true,
           vehicleType: vehicleType,
-          users_shiftId: userShiftId._id,
+          users_shiftId: userShiftHere._id,
           rfidId: rfidID,
         };
         console.log("newEntryRecord", newEnTry);
 
         const addNewEntry = await createEntryRecord(newEnTry);
-        setEntryRecords((prev) => [...prev, addNewEntry]);
-        const data = await getData("userData");
-        if (data) {
-          await saveData({
-            id: "userData",
-            ...data,
-            entryRecords: [...data.entryRecords, addNewEntry], // Cập nhật danh sách thẻ mới
-          });
-        }
+        // setEntryRecords((prev) => [...prev, addNewEntry]);
         console.log("addNewEntry", addNewEntry);
         setPhotos({
           camera1: null,
@@ -287,7 +321,6 @@ const CameraCapture = ({
       </div>
       <canvas ref={canvasRefs.camera1} style={{ display: "none" }}></canvas>
       <canvas ref={canvasRefs.camera2} style={{ display: "none" }}></canvas>
-
       <div className="flex gap-2">
         {/* Camera 1 Photo */}
         <div>

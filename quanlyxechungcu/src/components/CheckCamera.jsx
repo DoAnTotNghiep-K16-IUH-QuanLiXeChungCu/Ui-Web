@@ -1,7 +1,5 @@
 import React, { useContext, useState } from "react";
 import CameraCapture from "./CameraCapture";
-import UserContext from "../context/UserContext";
-
 const CheckCamera = ({
   type,
   openSetting,
@@ -68,13 +66,7 @@ const CheckCamera = ({
           </div>
         </div>
 
-        <div className="col-span-1 flex justify-center items-center">
-          <img
-            className="max-h-[120px] max-w-[120px]"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4D10s164IMG_GEyk14TKBIV6PrWpfje-5UA&s"
-            alt=""
-          />
-        </div>
+        <div className="col-span-1 flex justify-center items-center"></div>
       </div>
       <div className="flex justify-between items-center mt-1">
         <div className="block bg-[#ec7a00] border border-gray-100 w-[100px] rounded-md mb-1">

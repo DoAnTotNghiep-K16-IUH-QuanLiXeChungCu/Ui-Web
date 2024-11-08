@@ -6,8 +6,7 @@ import UserContext from "../context/UserContext";
 import { getData, saveData } from "../context/indexedDB";
 
 const Profile = () => {
-  const [profile, setProfile] = useState({});
-
+  const { profile, setProfile } = useContext(UserContext);
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
@@ -29,20 +28,6 @@ const Profile = () => {
     currentPassword: "",
     newPassword: "",
   });
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const data = await getData("userData");
-        if (data) {
-          setProfile(data.profile);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Tickets data:", err);
-      }
-    };
-    fetchProfileData(); // Gọi hàm để lấy dữ liệu
-  }, []);
   const handleEditClick = () => {
     setIsEditing(!isEditing);
   };

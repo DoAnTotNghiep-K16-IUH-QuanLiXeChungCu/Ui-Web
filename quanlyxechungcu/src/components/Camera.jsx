@@ -1,13 +1,12 @@
 import React from "react";
-
 const Camera = ({
+  openSetting,
   cameraKey,
   selectedDeviceId,
   devices,
   startCamera,
   videoRef,
   setSelectedDeviceIds,
-  openSetting,
 }) => {
   return (
     <div>
@@ -33,7 +32,6 @@ const Camera = ({
               <option disabled>No camera devices found</option>
             )}
           </select>
-
           <button
             className="bg-blue-500 text-white px-2 py-1 rounded my-1"
             onClick={() => startCamera(cameraKey)}
@@ -42,6 +40,9 @@ const Camera = ({
           </button>
         </div>
       )}
+      <p className=" font-bold p-1 text-center">
+        {cameraKey === "camera1" ? "Camera trước" : "Camera sau"}
+      </p>
       <video ref={videoRef} className="w-96 h-72 border-gray-300"></video>
     </div>
   );
