@@ -5,11 +5,12 @@ import {
   FILTER_USER_SHIFT,
   UPDATE_USER_SHIFT,
   DELETE_USER_SHIFT,
+  USER_SHIFT_BY_USER_SHIFT_DATE,
 } from "../config/API";
 import { format } from "date-fns";
 import axios from "axios"; // Import axios
 
-export const filterUserShift = async (date, shiftId) => {
+export const filterUserShift = async (startDate, endDate) => {
   const token = Cookies.get("accessToken");
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
@@ -17,10 +18,11 @@ export const filterUserShift = async (date, shiftId) => {
   }
   try {
     const bodyData = {
-      date: format(date, "MM-dd-yyyy"),
-      shiftId: shiftId && shiftId.trim() !== "" ? shiftId : undefined,
+      startDate: format(startDate, "MM-dd-yyyy"),
+      endDate: format(endDate, "MM-dd-yyyy"),
+      shiftId: "",
       pageNumber: 1,
-      pageSize: 10,
+      pageSize: 40,
     };
 
     // Xóa các trường undefined
@@ -41,9 +43,13 @@ export const filterUserShift = async (date, shiftId) => {
       withCredentials: true, // Gửi cookie cùng với yêu cầu
     });
 
-    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
+    return response.data.data.userShifts; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error("ERROR________-", error);
+    // Kiểm tra xem mã trạng thái có phải là 404 không
+    if (error.response && error.response.status !== 404) {
+      return [];
+    }
+    return []; // Hoặc bạn có thể trả về null hoặc giá trị khác tùy thuộc vào nhu cầu
   }
 };
 
@@ -184,6 +190,43 @@ export const deleteUserShift = async (id) => {
   } catch (error) {
     console.error(
       "Có lỗi xảy ra khi xóa ca trực: ",
+      error.response?.data?.error || error.message
+    );
+    return null;
+  }
+};
+
+export const getUserShiftsByUserIdAndShiftIdAndDateTime = async (
+  userId,
+  shiftId,
+  dateTime
+) => {
+  const token = Cookies.get("accessToken");
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+
+  try {
+    const response = await axios.patch(
+      USER_SHIFT_BY_USER_SHIFT_DATE,
+      {
+        userId,
+        shiftId,
+        dateTime, // Truyền ID vào body dưới dạng JSON
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+  } catch (error) {
+    console.error(
+      "Lỗi khi tìm userShift:",
       error.response?.data?.error || error.message
     );
     return null;

@@ -1,9 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import Notification from "../components/Notification";
-import { getAllAvailabeParkingSlotByType } from "../useAPI/useParkingSlotAPI";
+import {
+  getAllAvailabeParkingSlotByType,
+  getAllParkingSlot,
+} from "../useAPI/useParkingSlotAPI";
 import { changeTypeVehicle } from "../utils/index";
 import UserContext from "../context/UserContext";
 import { getData } from "../context/indexedDB";
+import Loading from "../components/Loading";
 
 const ParkingSlot = () => {
   const [parkingSlots, setParkingSlots] = useState([]);
@@ -14,21 +18,24 @@ const ParkingSlot = () => {
     type: "",
     show: false,
   });
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchCardData = async () => {
+    const fetchParkingSlotData = async () => {
+      setLoading(true); // Bắt đầu loading
       try {
-        const data = await getData("userData");
-        if (data) {
-          setParkingSlots(data.parkingSlots);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Card data:", err);
+        const parkingSlots = await getAllParkingSlot();
+        setParkingSlots(parkingSlots || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
       }
     };
 
-    fetchCardData(); // Gọi hàm để lấy dữ liệu
+    fetchParkingSlotData(); // Gọi hàm để lấy dữ liệu
   }, []);
+
   const fetchDataByCode = async (code) => {
     try {
       const slots = await getAllAvailabeParkingSlotByType(code);
@@ -68,6 +75,10 @@ const ParkingSlot = () => {
       }
     }
   };
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 ">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">

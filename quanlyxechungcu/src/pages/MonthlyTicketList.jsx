@@ -9,10 +9,14 @@ import MonthlyTicketModal from "./MonthlyTicketModal";
 import Notification from "../components/Notification";
 import UserContext from "../context/UserContext";
 import { getData, saveData } from "../context/indexedDB";
+import { getAllVehicle } from "../useAPI/useVehicleAPI";
+import { findCustomerByID } from "../useAPI/useCustomerAPI";
+import Loading from "../components/Loading";
 
 const MonthlyTicketList = () => {
-  const { tickets, setTickets, vehicles, setVehicles } =
-    useContext(UserContext);
+  const [tickets, setTickets] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(tickets.length / pageSize);
@@ -44,6 +48,43 @@ const MonthlyTicketList = () => {
     type: "",
     show: false,
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true); // Bắt đầu loading
+      try {
+        const tickets = await filterMonthlyTicket(
+          "",
+          " ",
+          " ",
+          " ",
+          " ",
+          1,
+          10000
+        );
+        setTickets(tickets);
+        const c = await getAllVehicle(1, 5000);
+        const vehicles = c.vehicles;
+        const vehicleDetail = await Promise.all(
+          vehicles.map(async (vehicle) => {
+            const customer = await findCustomerByID(vehicle.customerId._id);
+            return {
+              ...vehicle,
+              customerId: customer,
+            };
+          })
+        );
+        setVehicles(vehicleDetail || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const handleRowClick = (ticket) => {
     if (selectedTicket && selectedTicket._id === ticket._id) {
       setSelectedTicket(null);
@@ -248,6 +289,10 @@ const MonthlyTicketList = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="mx-auto bg-white shadow-lg rounded-lg p-6">

@@ -3,6 +3,7 @@ import { getAllParkingRate } from "../useAPI/useParkingRateAPI";
 import { changeTypeVehicle } from "../utils/index";
 import UserContext from "../context/UserContext";
 import { getData } from "../context/indexedDB";
+import Loading from "../components/Loading";
 
 const ParkingFeeConfiguration = () => {
   const [fees, setFees] = useState([]);
@@ -13,19 +14,18 @@ const ParkingFeeConfiguration = () => {
     hourly: "",
     price: "",
   });
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchFeeData = async () => {
       try {
-        const data = await getData("userData");
-        if (data) {
-          setFees(data.fees);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Card data:", err);
+        const fees = await getAllParkingRate();
+        setFees(fees || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
       }
     };
-
     fetchFeeData(); // Gọi hàm để lấy dữ liệu
   }, []);
   const filteredfee =
@@ -78,7 +78,9 @@ const ParkingFeeConfiguration = () => {
       console.error("Có lỗi khi xóa Fee:", error);
     }
   };
-
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">

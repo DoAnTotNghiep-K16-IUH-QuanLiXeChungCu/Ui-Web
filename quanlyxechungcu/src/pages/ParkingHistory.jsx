@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import CheckEE from "../components/ParkingHistory/CheckEE";
-import { getData } from "../context/indexedDB";
-import UserContext from "../context/UserContext";
+import { filterRecord } from "../useAPI/useRecordAPI";
+import { format } from "date-fns";
+import Loading from "../components/Loading";
 const ParkingHistory = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const { records, setRecords } = useContext(UserContext);
+  const [records, setRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(records.length / pageSize);
@@ -14,7 +15,31 @@ const ParkingHistory = () => {
   const [outFilter, setOutFilter] = useState("");
   const [fromDateFilter, setFromDateFilter] = useState("");
   const [toDateFilter, setToDateFilter] = useState("");
-  const [customerTypeFilter, setCustomerTypeFilter] = useState(""); // State cho loại xe
+  const [customerTypeFilter, setCustomerTypeFilter] = useState("");
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const today = new Date();
+        const threeDaysAgo = new Date(today);
+        threeDaysAgo.setDate(today.getDate() - 3);
+        const fromDay = format(threeDaysAgo, "yyyy-MM-dd");
+        const toDay = format(today, "yyyy-MM-dd");
+
+        if (fromDay && toDay) {
+          const records = await filterRecord(" ", fromDay, toDay, " ", 1, 5000);
+          setRecords(records);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
+      }
+    };
+    fetchData();
+  }, []);
+
   const handleRowClick = (record) => {
     setSelectedRecord(record);
   };
@@ -91,6 +116,10 @@ const ParkingHistory = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="mx-auto bg-white shadow-md rounded p-4">

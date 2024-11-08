@@ -1,13 +1,29 @@
-import React, { useContext, useEffect, useState } from "react";
-import { addCard, deleteCard } from "../useAPI/useCardAPI";
+import React, { useEffect, useState } from "react";
+import { addCard, deleteCard, getAllCard } from "../useAPI/useCardAPI";
 import { getData, saveData } from "../context/indexedDB";
-import UserContext from "../context/UserContext";
-
+import Loading from "../components/Loading";
 const RFIDCard = () => {
-  const { cards, setCards } = useContext(UserContext);
+  const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newCardUUID, setNewCardUUID] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCardData = async () => {
+      setLoading(true); // Bắt đầu loading
+      try {
+        const cards = await getAllCard();
+        setCards(cards || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
+      }
+    };
+    fetchCardData();
+  }, []);
+
   const filteredCard =
     cards.length > 0
       ? cards.filter(
@@ -73,7 +89,9 @@ const RFIDCard = () => {
       console.error("Có lỗi khi xóa xe:", error);
     }
   };
-
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">

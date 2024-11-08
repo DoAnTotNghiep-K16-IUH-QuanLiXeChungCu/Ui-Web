@@ -4,32 +4,13 @@ import Cookies from "js-cookie"; // Thêm import js-cookie
 import { LOGIN } from "../config/API";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import UserContext from "../context/UserContext";
-import { fetchDataFromAPI } from "../useAPI/useAPIFetchData";
-import { setUpSerialPortEntry } from "../useAPI/useCardAPI";
-import { getAllSetting } from "../useAPI/useSettingAPI";
-
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const {
-    setApartments,
-    setCustomers,
-    setTickets,
-    setRecords,
-    setProfile,
-    setParkingSlots,
-    setCards,
-    setUsers,
-    setVehicles,
-    setUserShifts,
-    setShifts,
-    setFees,
-    setEntryRecords,
-    setExitRecords,
-  } = useContext(UserContext);
+  const { setProfile } = useContext(UserContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -56,32 +37,19 @@ const Login = () => {
           secure: true, // Chỉ gửi cookie qua HTTPS
           sameSite: "Strict", // Ngăn chặn CSRF
         });
+        Cookies.set("fullname", data.data.fullname, {
+          expires: 1, // Cookie sẽ hết hạn sau 1 ngày
+          secure: true, // Chỉ gửi cookie qua HTTPS
+          sameSite: "Strict", // Ngăn chặn CSRF
+        });
+        Cookies.set("profileID", data.data._id, {
+          expires: 1, // Cookie sẽ hết hạn sau 1 ngày
+          secure: true, // Chỉ gửi cookie qua HTTPS
+          sameSite: "Strict", // Ngăn chặn CSRF
+        });
         const { role, accessToken, ...filteredProfile } = data.data;
         const profile = filteredProfile;
         setProfile(profile);
-        const settings = await getAllSetting();
-        console.log("settings[0].entryPort", settings[0].entryPort);
-        console.log("settings[0].entryBau", settings[0].entryBau);
-        setUpSerialPortEntry(settings[0].entryPort, settings[0].entryBau);
-        // setUpSerialPortEntry("COM5", 9600);
-
-        fetchDataFromAPI(
-          setProfile,
-          setApartments,
-          setCustomers,
-          setTickets,
-          setRecords,
-          setParkingSlots,
-          setCards,
-          setUsers,
-          setVehicles,
-          setUserShifts,
-          setShifts,
-          setFees,
-          setEntryRecords,
-          setExitRecords,
-          profile
-        );
         navigate("/home");
       } else {
         setError(data.error || "Đăng nhập không thành công");

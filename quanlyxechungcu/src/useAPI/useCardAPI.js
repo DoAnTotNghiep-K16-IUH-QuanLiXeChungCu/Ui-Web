@@ -3,7 +3,10 @@ import axios from "axios"; // Import axios
 import {
   ADD_CARD,
   ALL_CARD,
+  CARD_BY_UUID,
   DELETE_CARD,
+  SET_UP_ANOTHER_SERIAL_PORT_ENTRY,
+  SET_UP_ANOTHER_SERIAL_PORT_EXIT,
   SET_UP_SERIAL_PORT_ENTRY,
   SET_UP_SERIAL_PORT_EXIT,
 } from "../config/API";
@@ -20,7 +23,7 @@ export const getAllCard = async () => {
       ALL_CARD,
       {
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 100,
       },
       {
         headers: {
@@ -45,9 +48,6 @@ export const addCard = async (uuid) => {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-
-  console.log("Gửi dữ liệu:", { uuid }); // Ghi lại dữ liệu gửi đi
-
   try {
     const response = await axios.post(
       ADD_CARD,
@@ -67,6 +67,36 @@ export const addCard = async (uuid) => {
   } catch (error) {
     console.error(
       "Lỗi khi thêm thẻ:",
+      error.response?.data?.error || error.message
+    );
+  }
+};
+
+export const findCardByUUID = async (uuid) => {
+  const token = Cookies.get("accessToken");
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+  try {
+    const response = await axios.patch(
+      CARD_BY_UUID,
+      {
+        uuid,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Dữ liệu trả về", response.data);
+    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+  } catch (error) {
+    console.error(
+      "Lỗi khi tìm thẻ:",
       error.response?.data?.error || error.message
     );
   }
@@ -129,6 +159,56 @@ export const setUpSerialPortExit = async (com, baudRate) => {
   try {
     const response = await axios.post(
       SET_UP_SERIAL_PORT_EXIT,
+      {
+        comPort: com,
+        baudRate: baudRate,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Kết nối thành công qua cổng: ", com);
+    return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+  } catch (error) {
+    console.error(
+      "Lỗi khi kết nối:",
+      error.response?.data?.error || error.message
+    );
+  }
+};
+
+export const setUpAnotherSerialPortEntry = async (com, baudRate) => {
+  try {
+    const response = await axios.post(
+      SET_UP_ANOTHER_SERIAL_PORT_ENTRY,
+      {
+        comPort: com,
+        baudRate: baudRate,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Kết nối thành công qua cổng: ", com);
+    return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+  } catch (error) {
+    console.error(
+      "Lỗi khi kết nối:",
+      error.response?.data?.error || error.message
+    );
+  }
+};
+
+export const setUpAnotherSerialPortExit = async (com, baudRate) => {
+  try {
+    const response = await axios.post(
+      SET_UP_ANOTHER_SERIAL_PORT_EXIT,
       {
         comPort: com,
         baudRate: baudRate,

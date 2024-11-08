@@ -1,28 +1,24 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   addVehicle,
   getAllVehicle,
-  getAllVehicleByType,
   updateVehicle,
 } from "../useAPI/useVehicleAPI";
 import { changeTypeVehicle } from "../utils/index";
-import { findCustomerByID, getAllCustomer } from "../useAPI/useCustomerAPI";
+import { filterCustomer, findCustomerByID } from "../useAPI/useCustomerAPI";
 import { deleteVehicle } from "../useAPI/useVehicleAPI";
 import VehicleModal from "./VehicleModal";
 import Notification from "../components/Notification";
-import UserContext from "../context/UserContext";
-import { getData } from "../context/indexedDB";
-
+import Loading from "../components/Loading";
 const Vehicle = () => {
-  const { vehicles, setVehicles, customers, setCustomers } =
-    useContext(UserContext);
+  const [vehicles, setVehicles] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(vehicles.length / pageSize);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [filteredVehicles, setFilteredVehicles] = useState([]);
-
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newVehicle, setNewVehicle] = useState({
@@ -39,22 +35,35 @@ const Vehicle = () => {
     type: "",
     show: false,
   });
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchVehicleData = async () => {
+    const fetchData = async () => {
+      setLoading(true); // Bắt đầu loading
       try {
-        const data = await getData("userData");
-        if (data) {
-          setCustomers(data.customers);
-          setVehicles(data.vehicles);
-          // console.log("data.vehicles", data.vehicles);
-        } else {
-        }
-      } catch (err) {
-        console.error("Failed to get Customers data:", err);
+        const c = await getAllVehicle(1, 5000);
+        const vehicles = c.vehicles;
+        const vehicleDetail = await Promise.all(
+          vehicles.map(async (vehicle) => {
+            const customer = await findCustomerByID(vehicle.customerId._id);
+            return {
+              ...vehicle,
+              customerId: customer,
+            };
+          })
+        );
+        setVehicles(vehicleDetail || []);
+        const customers = await filterCustomer("", "", 1, 1000);
+        setCustomers(customers);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
       }
     };
-    fetchVehicleData(); // Gọi hàm để lấy dữ liệu
+    fetchData();
   }, []);
+
   const handleAddClick = () => {
     setNewVehicle(null);
     setShowAddForm(true);
@@ -227,7 +236,9 @@ const Vehicle = () => {
       setCurrentPage(currentPage - 1);
     }
   };
-
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
   return (
     <div className="min-h-screen bg-gray-100 p-6 ">
       <div className="mx-auto bg-white shadow-lg rounded-lg p-6">

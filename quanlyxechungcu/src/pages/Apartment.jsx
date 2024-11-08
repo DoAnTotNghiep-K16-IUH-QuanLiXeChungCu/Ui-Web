@@ -1,12 +1,27 @@
-import React, { useContext, useEffect, useState } from "react";
-import { getData } from "../context/indexedDB";
-import UserContext from "../context/UserContext";
-
+import React, { useEffect, useState } from "react";
+import { getAllApartment } from "../useAPI/useApartmentAPI";
+import Loading from "../components/Loading";
 const Apartment = () => {
   const [selectedApartment, setSelectedApartment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newApartment, setNewApartment] = useState(""); // Khởi tạo state cho mã số thẻ mới
-  const { apartments, setApartments } = useContext(UserContext);
+  const [apartments, setApartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const apartments = await getAllApartment();
+        setApartments(apartments || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
   const filteredApartment =
     apartments?.length > 0
       ? apartments.filter(
@@ -53,7 +68,9 @@ const Apartment = () => {
       console.error("Có lỗi khi xóa xe:", error);
     }
   };
-
+  if (loading) {
+    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
+  }
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
