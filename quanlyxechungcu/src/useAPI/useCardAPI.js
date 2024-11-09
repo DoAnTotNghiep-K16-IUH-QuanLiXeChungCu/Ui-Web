@@ -92,7 +92,7 @@ export const findCardByUUID = async (uuid) => {
       }
     );
 
-    console.log("Dữ liệu trả về", response.data);
+    // console.log("Dữ liệu trả về", response.data);
     return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
     console.error(

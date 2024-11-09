@@ -19,7 +19,9 @@ import { findCurrentShift } from "../utils";
 import { format } from "date-fns";
 import { getUserShiftsByUserIdAndShiftIdAndDateTime } from "../useAPI/useUserShiftAPI";
 import CameraConfiguration from "./CameraConfiguration";
-const CheckCameraExit = ({ isStart, openSetting, type }) => {
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMicrochip, faPen } from "@fortawesome/free-solid-svg-icons";
+const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
   const [exitLicensePlate, setExitLicensePlate] = useState("");
   const handleLicensePlateChange = (e) => {
     setExitLicensePlate(e.target.value);
@@ -56,6 +58,7 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
   const [userShiftHere, setUserShiftHere] = useState("");
   const [shifts, setShifts] = useState([]);
   const [vehicleType, setVehicleType] = useState("");
+  const [edit, setEdit] = useState(false);
 
   useEffect(() => {
     const fetchShiftsAndUserShift = async () => {
@@ -190,7 +193,7 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
       previousRfidDataRef.current = "";
       return;
     }
-    if (window.eventSource) return; // Kiểm tra xem EventSource đã tồn tại hay chưa
+    // if (window.eventSource) return; // Kiểm tra xem EventSource đã tồn tại hay chưa
     let eventSource;
     switch (type) {
       case "main":
@@ -251,7 +254,7 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
           return;
         } else {
           // console.log("được:");
-          await uploadImages(check._id); // Gọi hàm uploadImages
+          await uploadImages(check); // Gọi hàm uploadImages
         }
         // Cập nhật giá trị rfidData cuối cùng đã xử lý
         //   previousRfidDataRef.current = rfidData;
@@ -300,20 +303,23 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
       //   previousRfidDataRef.current = "";
       return;
     }
-    const entryRecordData = getEntryRecordByisOutAndUuidAndLicensePlate(
-      false,
-      rfidID,
-      exitLicensePlate
-    );
+    const entryRecordData =
+      (await getEntryRecordByisOutAndUuidAndLicensePlate(
+        false,
+        rfidID.uuid,
+        exitLicensePlate
+      )) || null;
+    console.log("entryRecordData", entryRecordData);
+
     if (entryRecordData === null) {
       setShowNotification({
-        content: `Không tìm thấy phương tiện nào có biển số ${exitLicensePlate}`,
+        content: `Không tìm thấy phương tiện có biển số là ${exitLicensePlate} và mã thẻ là ${rfidID.uuid} trong bãi`,
         type: "Error",
         show: true,
       });
       return;
     }
-    if (entryRecordData.licensePlate.trim() !== exitLicensePlate.trim()) {
+    if (entryRecordData.licensePlate !== exitLicensePlate) {
       setShowNotification({
         content: `Biển số xe ra và biển số xe vào không giống nhau. Biển số vào là ${entryRecordData.licensePlate} biển số ra là ${exitLicensePlate}`,
         type: "Error",
@@ -349,7 +355,7 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
         picture_front: imageUrlFront,
         picture_back: imageUrlBack,
         licensePlate: exitLicensePlate,
-        isResident: true,
+        isResident: entryRecordData.isResident,
         vehicleType: vehicleType,
       };
       console.log("newExitRecord", newExit);
@@ -357,12 +363,22 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
       const addNewExit = await createExitRecord(newExit);
       console.log("addNewExit", addNewExit);
       if (addNewExit) {
+        setDataCheckCard((prev) => prev + 1);
+
+        setShowNotification({
+          content: `Tạo dữ liệu vào thành công.`,
+          type: "Notification",
+          show: true,
+        });
         setPhotos({
           camera1: null,
           camera2: null,
         });
         setExitLicensePlate("");
         setVehicleType("");
+      } else {
+        setPrevRfidData("");
+        setExitRfidData("");
       }
     } catch (error) {
       console.error("Lỗi khi upload ảnh:", error);
@@ -370,6 +386,7 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
   };
   return (
     <div className="bg-white shadow-lg px-4 rounded-lg">
+      <p className="p-1 text-center font-bold text-orange-600">LÀN VÀO</p>
       <CameraConfiguration openSetting={openSetting} type={"exit"} />
       <div>
         <div className="grid grid-cols-2 gap-2">
@@ -433,13 +450,24 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
               {" "}
               Biển số xe
             </h3>
-            <input
-              type="text"
-              value={exitLicensePlate}
-              className="border rounded mb-1 border-gray-300 text-center"
-              onChange={handleLicensePlateChange}
-              required
-            />
+            <div className="flex">
+              <input
+                type="text"
+                value={exitLicensePlate}
+                className={`border rounded mb-1 border-gray-300 text-center ${
+                  edit ? "bg-white" : "bg-gray-200"
+                }`}
+                onChange={handleLicensePlateChange}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setEdit(!edit)}
+                className="ml-2 p-2"
+              >
+                <FontAwesomeIcon icon={edit ? faMicrochip : faPen} />
+              </button>
+            </div>
             <h3 className="p-2 rounded w-full font-semibold">Loại xe:</h3>
             <select
               name="type"
@@ -456,9 +484,6 @@ const CheckCameraExit = ({ isStart, openSetting, type }) => {
         <div className="col-span-1 flex justify-center items-center"></div>
       </div>
       <div className="flex justify-between items-center mt-1">
-        <div className="block bg-[#ec7a00] border border-gray-100 w-[100px] rounded-md mb-1">
-          <p className="p-1 text-center">làn vào</p>
-        </div>
         <span className="font-semibold text-red-700 text-center">
           {/* BIỂN SỐ KHÔNG GIỐNG NHAU */}
         </span>

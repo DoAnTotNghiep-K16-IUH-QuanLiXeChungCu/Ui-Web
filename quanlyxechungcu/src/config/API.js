@@ -51,6 +51,7 @@ export const EXIT_RECORD_BY_ENTRY_RECORD_ID = `${API}/exitRecord/GetExitRecordBy
 export const FILTER_RECORD = `${API}/entryRecord/FilterEntryRecords`;
 export const CREATE_ENTRY_RECORD = `${API}/entryRecord/CreateEntryRecord`;
 export const ENTRY_RECORD_TO_EXIT_RECORD = `${API}/entryRecord/GetEntryRecordByisOutAndUuidAndLicensePlate`;
+export const CREATE_EXIT_RECORD = `${API}/exitRecord/CreateExitRecord`;
 
 export const ALL_CARD = `${API}/RFIDCard/GetAllRFIDCards`;
 export const ADD_CARD = `${API}/RFIDCard/CreateRFIDCard`;
