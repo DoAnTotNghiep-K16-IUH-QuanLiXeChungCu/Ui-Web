@@ -16,8 +16,10 @@ import { findCardByUUID } from "../useAPI/useCardAPI";
 import axios from "axios";
 import { createEntryRecord } from "../useAPI/useRecordAPI";
 import CameraConfiguration from "./CameraConfiguration";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMicrochip, faPen } from "@fortawesome/free-solid-svg-icons";
 
-const CheckCameraEntry = ({ isStart, openSetting, type }) => {
+const CheckCameraEntry = ({ isStart, openSetting, type, setDataCheckCard }) => {
   const [entryLicensePlate, setEntryLicensePlate] = useState("");
   const [devices, setDevices] = useState([]);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState({
@@ -48,6 +50,8 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
   const [userShiftHere, setUserShiftHere] = useState("");
   const [shifts, setShifts] = useState([]);
   const [vehicleType, setVehicleType] = useState("");
+  const [edit, setEdit] = useState(false);
+
   const handleLicensePlateChange = (e) => {
     setEntryLicensePlate(e.target.value);
   };
@@ -183,7 +187,7 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
       previousRfidDataRef.current = "";
       return;
     }
-    if (window.eventSource) return;
+    // if (window.eventSource) return;
     let eventSource;
     switch (type) {
       case "main":
@@ -335,12 +339,21 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
       const addNewEntry = await createEntryRecord(newEnTry);
       console.log("addNewEntry", addNewEntry);
       if (addNewEntry) {
+        setDataCheckCard((prev) => prev + 1);
+        setShowNotification({
+          content: `Tạo dữ liệu vào thành công.`,
+          type: "Notification",
+          show: true,
+        });
         setPhotos({
           camera1: null,
           camera2: null,
         });
         setEntryLicensePlate("");
         setVehicleType("");
+      } else {
+        setPrevRfidData("");
+        setEntryRfidData("");
       }
     } catch (error) {
       console.error("Lỗi khi upload ảnh:", error);
@@ -349,6 +362,7 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
 
   return (
     <div className="bg-white shadow-lg px-4 rounded-lg">
+      <p className="p-1 text-center font-bold text-orange-600">LÀN VÀO</p>
       <CameraConfiguration openSetting={openSetting} type={"entry"} />
       <div>
         <div className="grid grid-cols-2 gap-2">
@@ -376,7 +390,7 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
         </div>
         <canvas ref={canvasRefs.camera1} style={{ display: "none" }}></canvas>
         <canvas ref={canvasRefs.camera2} style={{ display: "none" }}></canvas>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {/* Camera 1 Photo */}
           <div>
             {photos.camera1 ? (
@@ -387,7 +401,6 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
               </div>
             )}
           </div>
-
           {/* Camera 2 Photo */}
           <div>
             {photos.camera2 ? (
@@ -399,10 +412,6 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
             )}
           </div>
         </div>
-
-        <div className="flex justify-center">
-          {/* Nút chụp có thể thêm vào đây nếu cần */}
-        </div>
       </div>
       {/* Car Info */}
       <div className="grid grid-cols-4 gap-1 mt-1">
@@ -412,32 +421,42 @@ const CheckCameraEntry = ({ isStart, openSetting, type }) => {
               {" "}
               Biển số xe
             </h3>
-            <input
-              type="text"
-              value={entryLicensePlate}
-              className="border rounded mb-1 border-gray-300 text-center"
-              onChange={handleLicensePlateChange}
-              required
-            />
+            <div className="flex">
+              <input
+                type="text"
+                value={entryLicensePlate}
+                className={`border rounded mb-1 w-full p-2 border-gray-300 text-center ${
+                  edit ? "bg-white" : "bg-gray-200"
+                }`}
+                onChange={handleLicensePlateChange}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setEdit(!edit)}
+                className="ml-2 p-2"
+              >
+                <FontAwesomeIcon icon={edit ? faMicrochip : faPen} />
+              </button>
+            </div>
             <h3 className="p-2 rounded w-full font-semibold">Loại xe:</h3>
-            <select
-              name="type"
-              className="border p-2 rounded w-full"
-              value={vehicleType}
-              onChange={(e) => setVehicleType(e.target.value)}
-            >
-              <option value="">Chọn loại phương tiện</option>
-              <option value="car">Ô tô</option>
-              <option value="motor">Xe máy</option>
-            </select>
+            <div className="flex">
+              <select
+                name="type"
+                className="border p-2 rounded w-full"
+                value={vehicleType}
+                onChange={(e) => setVehicleType(e.target.value)}
+              >
+                <option value="">Chọn loại phương tiện</option>
+                <option value="car">Ô tô</option>
+                <option value="motor">Xe máy</option>
+              </select>
+            </div>
           </div>
         </div>
         <div className="col-span-1 flex justify-center items-center"></div>
       </div>
       <div className="flex justify-between items-center mt-1">
-        <div className="block bg-[#ec7a00] border border-gray-100 w-[100px] rounded-md mb-1">
-          <p className="p-1 text-center">làn vào</p>
-        </div>
         <span className="font-semibold text-red-700 text-center">
           {/* BIỂN SỐ KHÔNG GIỐNG NHAU */}
         </span>

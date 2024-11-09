@@ -29,7 +29,7 @@ const ParkingHistory = () => {
 
         if (fromDay && toDay) {
           const records = await filterRecord(" ", fromDay, toDay, " ", 1, 5000);
-          setRecords(records);
+          setRecords(records || []);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -273,21 +273,15 @@ const ParkingHistory = () => {
 
           {/* Image Section */}
           <div className="col-span-2 bg-white border p-4 rounded">
-            <div className="flex space-x-4 p-2 border border-gray-900">
+            {/* <div className="flex space-x-4 p-2 border border-gray-900">
               <p>
                 Ô Tô: <span className={`font-bold text-red-500`}>18</span>
               </p>
               <p>
                 Xe Máy: <span className={`font-bold text-red-500`}>18</span>
               </p>
-              {/* <p>
-                Xe đạp điện:{" "}
-                <span className={`font-bold text-red-500`}>18</span>
-              </p>
-              <p>
-                Nhà hầm: <span className={`font-bold text-red-500`}>18</span>
-              </p> */}
-            </div>
+              
+            </div> */}
 
             <CheckEE
               type="entry"

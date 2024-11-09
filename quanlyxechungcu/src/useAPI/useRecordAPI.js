@@ -7,10 +7,12 @@ import {
   COUNT_VEHICLE_EXIT,
   COUNT_VEHICLE_NON_EXIT,
   CREATE_ENTRY_RECORD,
+  CREATE_EXIT_RECORD,
   ENTRY_RECORD_TO_EXIT_RECORD,
   FILTER_RECORD,
   MONEY_BY_DAY,
 } from "../config/API";
+import { log } from "@tensorflow/tfjs";
 
 export const getALLEntryRecord = async () => {
   const token = Cookies.get("accessToken");
@@ -144,10 +146,13 @@ export const countVehicleNonExit = async (date) => {
   }
 
   const dateCount = date || new Date().toISOString().split("T")[0];
-
+  console.log("dateCount", dateCount);
   try {
-    const response = await axios.get(
-      `${COUNT_VEHICLE_NON_EXIT}?date=${dateCount}`,
+    const response = await axios.patch(
+      COUNT_VEHICLE_NON_EXIT,
+      {
+        date: dateCount,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -243,6 +248,7 @@ export const filterRecord = async (
         "Content-Type": "application/json",
       },
     });
+    console.log("response.data.data.records", response.data.data.records);
 
     return response.data.data.records; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
@@ -280,7 +286,7 @@ export const createEntryRecord = async (entryRecord) => {
       }
     );
 
-    return response.data.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
+    return response.data.entryRecord; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
     console.error(
       "Lỗi khi thêm EntryRecord:",
@@ -298,9 +304,14 @@ export const createExitRecord = async (exitRecord) => {
 
   try {
     const response = await axios.post(
-      CREATE_ENTRY_RECORD,
+      CREATE_EXIT_RECORD,
       {
-        exitRecord, // Truyền ID vào body dưới dạng JSON
+        entry_recordId: exitRecord.entry_recordId,
+        picture_front: exitRecord.picture_front,
+        picture_back: exitRecord.picture_back,
+        licensePlate: exitRecord.licensePlate,
+        isResident: exitRecord.isResident,
+        vehicleType: exitRecord.vehicleType,
       },
       {
         headers: {
@@ -323,6 +334,13 @@ export const getEntryRecordByisOutAndUuidAndLicensePlate = async (
   uuid,
   licensePlate
 ) => {
+  console.log("isOut", isOut);
+  console.log("type___isOut", typeof isOut);
+  console.log("uuid", uuid);
+  console.log("type___uuid", typeof uuid);
+  console.log("licensePlate", licensePlate);
+  console.log("type___licensePlate", typeof licensePlate);
+
   const token = Cookies.get("accessToken");
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");

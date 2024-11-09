@@ -4,34 +4,34 @@ import {
   countVehicleExit,
   countVehicleNonExit,
 } from "../useAPI/useRecordAPI";
+import { format } from "date-fns";
 
-const CheckCard = ({ type, color }) => {
+const CheckCard = ({ type, color, dataCheckCard }) => {
   const [vehicleEntryCount, setVehicleEntryCount] = useState([]);
   const [vehicleExitCount, setVehicleExitCount] = useState([]);
   const [vehicleNonExitCount, setVehicleNonExitCount] = useState([]);
 
   const fetchData = async () => {
-    const countV = await countVehicleEntry(new Date("2024-01-01"));
-    // console.log("countV", countV);
-
+    const countV = await countVehicleEntry(format(new Date(), "yyyy-MM-dd"));
     if (countV) {
       setVehicleEntryCount(countV);
     }
-    const countVE = await countVehicleExit(new Date("2024-01-01"));
+    const countVE = await countVehicleExit(format(new Date(), "yyyy-MM-dd"));
     if (countVE) {
       setVehicleExitCount(countVE);
     }
-    const countVNE = await countVehicleNonExit(new Date("2024-01-01"));
-    // console.log("countVNE: ", countVNE);
+    const countVNE = await countVehicleNonExit(
+      format(new Date(), "yyyy-MM-dd")
+    );
+    console.log("countVNE", countVNE);
 
-    if (countVE) {
+    if (countVNE) {
       setVehicleNonExitCount(countVNE);
     }
   };
-
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [dataCheckCard]);
 
   // Hàm sắp xếp dữ liệu luôn cố định thứ tự: Ô tô trước, Xe máy sau
   const getSortedVehicleData = (vehicleData) => {
@@ -61,6 +61,7 @@ const CheckCard = ({ type, color }) => {
   const entryData = getSortedVehicleData(vehicleEntryCount);
   const exitData = getSortedVehicleData(vehicleExitCount);
   const nonExitData = getSortedVehicleData(vehicleNonExitCount);
+  // console.log("nonExitData", nonExitData);
 
   return (
     <div className="p-2">
