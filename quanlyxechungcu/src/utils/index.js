@@ -1,11 +1,11 @@
 import {
   faIdCard,
-  faMotorcycle,
   faLocationDot,
-  faUser,
+  faClipboard,
   faGear,
   faChartColumn,
   faFileLines,
+  faBarsProgress,
 } from "@fortawesome/free-solid-svg-icons";
 export const ChangeNavCase = (str) => {
   if (typeof str === "string") {
@@ -13,12 +13,28 @@ export const ChangeNavCase = (str) => {
     else if (str === "PHÍ XE") return "parking-fee";
     else if (str === "CÀI ĐẶT") return "setting";
     else if (str === "BÃI ĐỖ") return "parking-manage";
-    else if (str === "KIỂM TRA") return "check";
     else if (str === "LỊCH SỬ") return "history";
     else if (str === "BÁO CÁO") return "report";
     else if (str === "THEO THÁNG") return "per-month";
     else if (str === "THEO NGÀY") return "per-day";
     else if (str === "DANH SÁCH BÃI ĐỖ") return "parking-slot";
+    else if (str === "QUẢN LÝ") return "manage";
+    else if (str === "KHÁCH HÀNG") return "customer";
+    else if (str === "XE") return "vehicle";
+    else if (str === "PHÒNG") return "apartment";
+    else if (str === "THẺ QUẸT") return "RFIDCard";
+    else if (str === "CA TRỰC") return "userShift";
+    else if (str === "LỊCH LÀM VIỆC") return "schedular";
+    else if (str === "CHẤM CÔNG") return "checking-job";
+  }
+  return "";
+};
+export const changeLabel = (str) => {
+  if (typeof str === "string") {
+    if (str === "entryLane") return "Cổng vào 1";
+    else if (str === "exitLane") return "Cổng ra 1";
+    else if (str === "secondaryEntryLane") return "Cổng vào 2";
+    else if (str === "secondaryExitLane") return "Cổng vào 2";
   }
   return "";
 };
@@ -49,18 +65,18 @@ export const FindIconName = (label) => {
   switch (label) {
     case "BÃI ĐỖ":
       return faLocationDot; // Trả về biểu tượng cụ thể
-    case "KHÁCH HÀNG":
-      return faUser;
     case "VÉ THÁNG":
       return faIdCard;
-    case "DANH SÁCH XE":
-      return faMotorcycle;
     case "CÀI ĐẶT":
       return faGear;
     case "THỐNG KÊ":
       return faChartColumn;
     case "BÁO CÁO":
       return faFileLines;
+    case "QUẢN LÝ":
+      return faBarsProgress;
+    case "CA TRỰC":
+      return faClipboard;
     default:
       return null; // Trả về null nếu không tìm thấy
   }

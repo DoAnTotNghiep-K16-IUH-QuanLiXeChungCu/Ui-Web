@@ -1,12 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Notification from "../components/Notification";
 import {
   getAllAvailabeParkingSlotByType,
   getAllParkingSlot,
 } from "../useAPI/useParkingSlotAPI";
 import { changeTypeVehicle } from "../utils/index";
-import UserContext from "../context/UserContext";
-import { getData } from "../context/indexedDB";
 import Loading from "../components/Loading";
 
 const ParkingSlot = () => {
@@ -75,6 +73,11 @@ const ParkingSlot = () => {
       }
     }
   };
+
+  const handleRowClick = (slot) => {
+    setSelectedSlot(slot); // Cập nhật selectedSlot khi nhấp vào dòng
+  };
+
   if (loading) {
     return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
   }
@@ -83,7 +86,7 @@ const ParkingSlot = () => {
     <div className="min-h-screen bg-gray-100 p-6 ">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-semibold">DANH SÁCH XE</h1>
+          <h1 className="text-xl font-semibold">DANH SÁCH BÃI ĐỖ</h1>
         </div>
         <div className="flex justify-end items-center mb-4">
           <div className="flex space-x-2">
@@ -140,6 +143,7 @@ const ParkingSlot = () => {
                             ? "bg-gray-200"
                             : ""
                         }`}
+                        onClick={() => handleRowClick(slot)} // Xử lý khi nhấp vào dòng
                       >
                         <td className="border p-2">{index + 1}</td>
                         <td className="border p-2">

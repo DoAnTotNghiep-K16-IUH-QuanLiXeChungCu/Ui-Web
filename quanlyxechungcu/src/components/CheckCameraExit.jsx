@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Notification from "./Notification";
 import Camera from "./Camera";
 import {
@@ -18,19 +18,15 @@ import { getAllShift } from "../useAPI/useShiftAPI";
 import { findCurrentShift } from "../utils";
 import { format } from "date-fns";
 import { getUserShiftsByUserIdAndShiftIdAndDateTime } from "../useAPI/useUserShiftAPI";
-import CameraConfiguration from "./CameraConfiguration";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrochip, faPen } from "@fortawesome/free-solid-svg-icons";
-const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
+const CheckCameraExit = ({
+  isStart,
+  type,
+  setDataCheckCard,
+  selectedSettings,
+}) => {
   const [exitLicensePlate, setExitLicensePlate] = useState("");
-  const handleLicensePlateChange = (e) => {
-    setExitLicensePlate(e.target.value);
-  };
-  const [devices, setDevices] = useState([]);
-  const [selectedDeviceIds, setSelectedDeviceIds] = useState({
-    camera1: "",
-    camera2: "",
-  });
   const videoRefs = {
     camera1: useRef(null),
     camera2: useRef(null),
@@ -45,10 +41,7 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
   });
   const [exitRfidData, setExitRfidData] = useState("");
   const [prevRfidData, setPrevRfidData] = useState("");
-
   const previousRfidDataRef = useRef("");
-
-  // const userShiftId = findUserShift(userShifts, profile._id, shifts);
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
@@ -60,6 +53,9 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
   const [vehicleType, setVehicleType] = useState("");
   const [edit, setEdit] = useState(false);
 
+  const handleLicensePlateChange = (e) => {
+    setExitLicensePlate(e.target.value);
+  };
   useEffect(() => {
     const fetchShiftsAndUserShift = async () => {
       const myUserID = Cookies.get("profileID");
@@ -78,48 +74,11 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
     };
     fetchShiftsAndUserShift();
   }, []);
-
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((deviceInfos) => {
-      const videoDevices = deviceInfos.filter(
-        (device) => device.kind === "videoinput"
-      );
-      setDevices(videoDevices);
-      if (videoDevices.length > 0) {
-        setSelectedDeviceIds({
-          camera1: videoDevices[0]?.deviceId || "",
-          camera2: videoDevices[1]?.deviceId || "",
-        });
-      }
-    });
-  }, []);
-  const startCamera = (cameraKey) => {
-    const selectedDeviceId = selectedDeviceIds[cameraKey];
-    if (selectedDeviceId) {
-      navigator.mediaDevices
-        .getUserMedia({
-          video: {
-            deviceId: selectedDeviceId
-              ? { exact: selectedDeviceId }
-              : undefined,
-          },
-        })
-        .then((stream) => {
-          let video = videoRefs[cameraKey].current;
-          video.srcObject = stream;
-          video.play();
-        })
-        .catch((err) => {
-          console.error("Error accessing the camera: ", err);
-        });
-    }
-  };
   const handleDetectLicensePlate = async (photo1, photo2) => {
     if (!photo1 && !photo2) {
       console.error("No image selected!");
       return;
     }
-
     const formData1 = new FormData();
     const blob1 = await fetch(photo1).then((res) => res.blob());
     formData1.append("file", blob1);
@@ -147,67 +106,63 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
       console.error("Error uploading image:", error);
     }
   };
-  const takePhotos = () => {
-    const width = 640;
-    const height = 480;
-    const updatedPhotos = {};
+  const useTakePhotos = (videoRefs, canvasRefs) => {
+    const takePhotos = useCallback(() => {
+      const width = 640;
+      const height = 480;
+      const updatedPhotos = {};
 
-    Object.keys(videoRefs).forEach((cameraKey) => {
-      const video = videoRefs[cameraKey].current;
-      const canvas = canvasRefs[cameraKey].current;
-      if (canvas && video) {
-        const context = canvas.getContext("2d");
-        canvas.width = width;
-        canvas.height = height;
-        context.drawImage(video, 0, 0, width, height);
-        const imageData = canvas.toDataURL("image/png");
-        updatedPhotos[cameraKey] = imageData;
-      } else {
-        console.warn(`Canvas not found for camera key: ${cameraKey}`);
-      }
-    });
+      Object.keys(videoRefs).forEach((cameraKey) => {
+        const video = videoRefs[cameraKey].current;
+        const canvas = canvasRefs[cameraKey].current;
+        if (canvas && video) {
+          const context = canvas.getContext("2d");
+          canvas.width = width;
+          canvas.height = height;
+          context.drawImage(video, 0, 0, width, height);
+          updatedPhotos[cameraKey] = canvas.toDataURL("image/png");
+        }
+      });
 
-    setPhotos((prevPhotos) => {
-      const newPhotos = { ...prevPhotos, ...updatedPhotos };
-      handleDetectLicensePlate(newPhotos.camera1, newPhotos.camera2); // Gọi hàm nhận diện biển số
-      return newPhotos;
-    });
+      return updatedPhotos;
+    }, [videoRefs, canvasRefs]);
+
+    return { takePhotos };
   };
 
+  // Trong component `CheckCameraEntry`
+  const { takePhotos } = useTakePhotos(videoRefs, canvasRefs);
+
+  // Sử dụng `takePhotos` khi cần chụp ảnh
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "q" || event.key === "Q") {
+      if (
+        (type === "main" && event.key.toLowerCase() === "q") ||
+        event.key === "Q" ||
+        (type === "another" && event.key.toLowerCase() === "W") ||
+        event.key === "w"
+      ) {
         event.preventDefault();
-        takePhotos();
+        const photos = takePhotos();
+        setPhotos((prevPhotos) => {
+          const newPhotos = { ...prevPhotos, ...photos };
+          return newPhotos;
+        });
+        handleDetectLicensePlate(photos.camera1, photos.camera2);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [type, takePhotos]);
 
   useEffect(() => {
     if (isStart === false) {
       previousRfidDataRef.current = "";
       return;
     }
-    // if (window.eventSource) return; // Kiểm tra xem EventSource đã tồn tại hay chưa
-    let eventSource;
-    switch (type) {
-      case "main":
-        eventSource = new EventSource(READ_RFID_CARD_EXIT);
-        break;
-      case "another":
-        eventSource = new EventSource(READ_ANOTHER_RFID_CARD_EXIT);
-        break;
-      default:
-        console.warn("Unknown RFID type:", type);
-        return;
-    }
-    window.eventSource = eventSource; // Lưu eventSource vào đối tượng global để dùng cho lần sau
-
+    const eventSource = new EventSource(
+      type === "main" ? READ_RFID_CARD_EXIT : READ_ANOTHER_RFID_CARD_EXIT
+    );
     eventSource.onmessage = (event) => {
       const newRfidData = event.data;
       // console.log("prevRfidData", prevRfidData);
@@ -317,6 +272,8 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
         type: "Error",
         show: true,
       });
+      setExitLicensePlate("");
+      setVehicleType("");
       return;
     }
     if (entryRecordData.licensePlate !== exitLicensePlate) {
@@ -325,6 +282,8 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
         type: "Error",
         show: true,
       });
+      setExitLicensePlate("");
+      setVehicleType("");
       return;
     }
     try {
@@ -366,7 +325,7 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
         setDataCheckCard((prev) => prev + 1);
 
         setShowNotification({
-          content: `Tạo dữ liệu vào thành công.`,
+          content: `Tạo dữ liệu ra thành công.`,
           type: "Notification",
           show: true,
         });
@@ -386,30 +345,21 @@ const CheckCameraExit = ({ isStart, openSetting, type, setDataCheckCard }) => {
   };
   return (
     <div className="bg-white shadow-lg px-4 rounded-lg">
-      <p className="p-1 text-center font-bold text-orange-600">LÀN VÀO</p>
-      <CameraConfiguration openSetting={openSetting} type={"exit"} />
+      <p className="p-1 text-center font-bold text-orange-600">LÀN RA</p>
       <div>
         <div className="grid grid-cols-2 gap-2">
           {/* Camera 1 */}
           <Camera
-            openSetting={openSetting}
-            cameraKey="camera1"
-            selectedDeviceId={selectedDeviceIds.camera1}
-            devices={devices}
-            startCamera={startCamera}
+            selectedDeviceId={selectedSettings?.camera1?.deviceID}
+            isStart={isStart}
             videoRef={videoRefs.camera1}
-            setSelectedDeviceIds={setSelectedDeviceIds}
           />
 
           {/* Camera 2 */}
           <Camera
-            openSetting={openSetting}
-            cameraKey="camera2"
-            selectedDeviceId={selectedDeviceIds.camera2}
-            devices={devices}
-            startCamera={startCamera}
+            selectedDeviceId={selectedSettings?.camera2?.deviceID}
+            isStart={isStart}
             videoRef={videoRefs.camera2}
-            setSelectedDeviceIds={setSelectedDeviceIds}
           />
         </div>
         <canvas ref={canvasRefs.camera1} style={{ display: "none" }}></canvas>

@@ -7,26 +7,35 @@ import {
 import { format } from "date-fns";
 
 const CheckCard = ({ type, color, dataCheckCard }) => {
-  const [vehicleEntryCount, setVehicleEntryCount] = useState([]);
-  const [vehicleExitCount, setVehicleExitCount] = useState([]);
-  const [vehicleNonExitCount, setVehicleNonExitCount] = useState([]);
-
+  const [dataVehicle, setDataVehicle] = useState([]);
   const fetchData = async () => {
-    const countV = await countVehicleEntry(format(new Date(), "yyyy-MM-dd"));
-    if (countV) {
-      setVehicleEntryCount(countV);
-    }
-    const countVE = await countVehicleExit(format(new Date(), "yyyy-MM-dd"));
-    if (countVE) {
-      setVehicleExitCount(countVE);
-    }
-    const countVNE = await countVehicleNonExit(
-      format(new Date(), "yyyy-MM-dd")
-    );
-    console.log("countVNE", countVNE);
-
-    if (countVNE) {
-      setVehicleNonExitCount(countVNE);
+    switch (type) {
+      case "entry":
+        const countV = await countVehicleEntry(
+          format(new Date(), "yyyy-MM-dd")
+        );
+        if (countV) {
+          setDataVehicle(countV);
+        }
+        break;
+      case "exit":
+        const countVE = await countVehicleExit(
+          format(new Date(), "yyyy-MM-dd")
+        );
+        if (countVE) {
+          setDataVehicle(countVE);
+        }
+        break;
+      case "non-exit":
+        const countVNE = await countVehicleNonExit(
+          format(new Date(), "yyyy-MM-dd")
+        );
+        if (countVNE) {
+          setDataVehicle(countVNE);
+        }
+        break;
+      default:
+        console.warn(`Unknown type: ${type}`);
     }
   };
   useEffect(() => {
@@ -58,9 +67,7 @@ const CheckCard = ({ type, color, dataCheckCard }) => {
     return sortedData;
   };
 
-  const entryData = getSortedVehicleData(vehicleEntryCount);
-  const exitData = getSortedVehicleData(vehicleExitCount);
-  const nonExitData = getSortedVehicleData(vehicleNonExitCount);
+  const data = getSortedVehicleData(dataVehicle);
   // console.log("nonExitData", nonExitData);
 
   return (
@@ -69,41 +76,12 @@ const CheckCard = ({ type, color, dataCheckCard }) => {
         {type === "entry" ? "Xe vào" : type === "exit" ? "Xe ra" : "Xe chưa ra"}
       </h2>
       <div className="flex space-x-4 justify-center">
-        {type === "entry" && (
-          <>
-            <p>
-              Ô tô:{" "}
-              <span className={`font-bold ${color}`}>{entryData.car}</span>
-            </p>
-            <p>
-              Xe máy:{" "}
-              <span className={`font-bold ${color}`}>{entryData.motor}</span>
-            </p>
-          </>
-        )}
-        {type === "exit" && (
-          <>
-            <p>
-              Ô tô: <span className={`font-bold ${color}`}>{exitData.car}</span>
-            </p>
-            <p>
-              Xe máy:{" "}
-              <span className={`font-bold ${color}`}>{exitData.motor}</span>
-            </p>
-          </>
-        )}
-        {type !== "exit" && type !== "entry" && (
-          <>
-            <p>
-              Ô tô:{" "}
-              <span className={`font-bold ${color}`}>{nonExitData.car}</span>
-            </p>
-            <p>
-              Xe máy:{" "}
-              <span className={`font-bold ${color}`}>{nonExitData.motor}</span>
-            </p>
-          </>
-        )}
+        <p>
+          Ô tô: <span className={`font-bold ${color}`}>{data.car}</span>
+        </p>
+        <p>
+          Xe máy: <span className={`font-bold ${color}`}>{data.motor}</span>
+        </p>
       </div>
     </div>
   );

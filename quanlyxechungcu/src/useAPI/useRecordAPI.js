@@ -146,7 +146,6 @@ export const countVehicleNonExit = async (date) => {
   }
 
   const dateCount = date || new Date().toISOString().split("T")[0];
-  console.log("dateCount", dateCount);
   try {
     const response = await axios.patch(
       COUNT_VEHICLE_NON_EXIT,
@@ -248,7 +247,7 @@ export const filterRecord = async (
         "Content-Type": "application/json",
       },
     });
-    console.log("response.data.data.records", response.data.data.records);
+    // console.log("response.data.data.records", response.data.data.records);
 
     return response.data.data.records; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
