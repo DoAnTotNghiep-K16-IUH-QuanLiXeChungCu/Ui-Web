@@ -1,49 +1,46 @@
-import React from "react";
-const Camera = ({
-  openSetting,
-  cameraKey,
-  selectedDeviceId,
-  devices,
-  startCamera,
-  videoRef,
-  setSelectedDeviceIds,
-}) => {
+import React, { useEffect, useRef, useState } from "react";
+
+const Camera = ({ selectedDeviceId, isStart, videoRef }) => {
+  const [videoStream, setVideoStream] = useState(null); // Đổi "" thành null cho rõ ràng hơn
+
+  const handleStartCamera = async (cameraDeviceId) => {
+    if (cameraDeviceId) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: cameraDeviceId } },
+        });
+        setVideoStream(stream);
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isStart && selectedDeviceId) {
+      handleStartCamera(selectedDeviceId);
+    } else if (videoStream) {
+      videoStream.getTracks().forEach((track) => track.stop());
+      setVideoStream(null);
+    }
+  }, [isStart, selectedDeviceId]);
+
+  useEffect(() => {
+    if (videoRef.current && videoStream) {
+      videoRef.current.srcObject = videoStream;
+    }
+  }, [videoStream]);
+
   return (
     <div>
-      {openSetting === false && (
-        <div>
-          <select
-            value={selectedDeviceId}
-            className="border-2 rounded"
-            onChange={(e) =>
-              setSelectedDeviceIds((prev) => ({
-                ...prev,
-                [cameraKey]: e.target.value,
-              }))
-            }
-          >
-            {devices.length > 0 ? (
-              devices.map((device) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label || `Camera ${device.deviceId}`}
-                </option>
-              ))
-            ) : (
-              <option disabled>No camera devices found</option>
-            )}
-          </select>
-          <button
-            className="bg-blue-500 text-white px-2 py-1 rounded my-1"
-            onClick={() => startCamera(cameraKey)}
-          >
-            Start camera
-          </button>
-        </div>
+      {selectedDeviceId && (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="w-96 h-72 border-black"
+        />
       )}
-      <p className=" font-bold p-1 text-center">
-        {cameraKey === "camera1" ? "Camera trước" : "Camera sau"}
-      </p>
-      <video ref={videoRef} className="w-96 h-72 border-gray-300"></video>
     </div>
   );
 };

@@ -111,7 +111,6 @@ export const updateCustomer = async (customer) => {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-  console.log("dữ liệu trong update Customer API: ", customer);
 
   try {
     const response = await axios.put(

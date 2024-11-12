@@ -22,6 +22,7 @@ import ReportPerDay from "../pages/ReportPerDay";
 import Profile from "../pages/Profile";
 import UserShift from "./../pages/UserShift";
 import SignUp from "../pages/SignUp";
+import CheckingJob from "./../pages/CheckingJob";
 
 const Routers = () => {
   const routers = [
@@ -35,21 +36,22 @@ const Routers = () => {
       element: <DashboardLayout />,
       children: [
         { path: "home", element: <Home /> },
-        { path: "parking-manage/check", element: <ParkingManagement /> },
+        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
         { path: "parking-manage/history", element: <ParkingHistory /> },
-        { path: "setting/parking-fee", element: <ParkingFeeConfiguration /> },
-        { path: "setting/connect", element: <ConnectConfiguration /> },
-        { path: "customer", element: <Customer /> },
-        { path: "apartment", element: <Apartment /> },
-        { path: "vehicle", element: <Vehicle /> },
+        { path: "manage/customer", element: <Customer /> },
+        { path: "manage/apartment", element: <Apartment /> },
+        { path: "manage/vehicle", element: <Vehicle /> },
+        { path: "manage/RFIDCard", element: <RFIDCard /> },
+        { path: "manage/parking-fee", element: <ParkingFeeConfiguration /> },
         { path: "report/per-month", element: <ReportPerMonth /> },
         { path: "report/per-day", element: <ReportPerDay /> },
-        { path: "RFID", element: <RFIDCard /> },
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
-        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
         { path: "/account/profile", element: <Profile /> },
-        { path: "/userShift", element: <UserShift /> },
+        { path: "/userShift/schedular", element: <UserShift /> },
+        { path: "/userShift/checking-job", element: <CheckingJob /> },
+        { path: "setting/connect", element: <ConnectConfiguration /> },
+        { path: "/parking-check", element: <ParkingManagement /> },
       ],
     },
     {

@@ -13,9 +13,18 @@ const Notification = ({ showNotification, setShowNotification }) => {
 
   if (!showNotification.show) return null;
 
-  const isError = showNotification.type === "Error";
-  const title = isError ? "Lỗi" : "Thông báo";
-  const bgColor = isError ? "bg-red-600" : "bg-green-600";
+  const title =
+    showNotification.type === "Error"
+      ? "LỖI"
+      : showNotification.type === "Notification"
+      ? "THÔNG BÁO"
+      : "CẢNH BÁO";
+  const bgColor =
+    showNotification.type === "Error"
+      ? "bg-red-600"
+      : showNotification.type === "Notification"
+      ? "bg-green-600"
+      : "bg-yellow-600";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

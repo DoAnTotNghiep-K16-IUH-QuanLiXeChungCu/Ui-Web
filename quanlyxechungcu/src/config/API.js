@@ -86,7 +86,20 @@ export const READ_ANOTHER_RFID_CARD_EXIT = `${API}/readRFID/ReadAnotherRFIDCardE
 export const SET_UP_ANOTHER_SERIAL_PORT_ENTRY = `${API}/readRFID/SetupAnotherSerialPortEntry`;
 export const SET_UP_ANOTHER_SERIAL_PORT_EXIT = `${API}/readRFID/SetupAnotherSerialPortExit`;
 
-export const GET_SETTING = `${API}/setting/GetSetting`;
+export const GET_SETTING = `${API}/setting/GetSettings`;
 export const UPDATE_SETTING = `${API}/setting/UpdateSetting`;
+export const GET_SETTING_BY_ID = `${API}/setting/GetSettingByID`;
+
+export const GET_ALL_LANE = `${API}/lane/GetAllLane`;
+export const GET_LANE_BY_ID = `${API}/lane/GetLaneByID`;
+export const UPDATE_LANE = `${API}/lane/UpdateLane`;
+export const CREATE_LANE = `${API}/lane/CreateLane`;
+export const DELETE_LANE = `${API}/lane/DeleteLane`;
+
+export const GET_ALL_CAMERA = `${API}/camera/GetAllCamera`;
+export const GET_CAMERA_BY_ID = `${API}/camera/GetCameraByID`;
+export const UPDATE_CAMERA = `${API}/camera/UpdateCamera`;
+export const CREATE_CAMERA = `${API}/camera/CreateCamera`;
+export const DELETE_CAMERA = `${API}/camera/DeleteCamera`;
 
 export const DETECT_LICENSEPLATE = "http://localhost:5000/DetectLicensePlate";
