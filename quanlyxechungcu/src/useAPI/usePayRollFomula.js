@@ -1,10 +1,10 @@
 import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
 import axios from "axios"; // Import axios
 import {
-  ALL_PARKING_RATE,
-  CREATE_PARKING_RATE,
-  DELETE_PARKING_RATE,
-  UPDATE_PARKING_RATE,
+  CREATE_PAYROLL_FORMULA,
+  DELETE_PAYROLL_FORMULA,
+  GET_ALL_PAYROLL_FORMULA,
+  UPDATE_PAYROLL_FORMULA,
 } from "../config/API";
 
 // Tạo một instance axios với cấu hình mặc định
@@ -28,68 +28,64 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-export const getAllParkingRate = async () => {
+export const GetAllPayRollFomula = async () => {
   try {
-    const response = await axiosInstance.patch(ALL_PARKING_RATE, {
+    const response = await axiosInstance.patch(GET_ALL_PAYROLL_FORMULA, {
       pageNumber: 1,
       pageSize: 20,
     });
 
-    return response.data.data.parkingRates; // Trả về dữ liệu nếu yêu cầu thành công
+    return response.data.data.payRollFomulas; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
     console.error(
-      "Có lỗi xảy ra khi lấy danh sách parkingRates:",
+      "Có lỗi xảy ra khi lấy danh sách PayRollFomula:",
       error.response?.data?.error || error.message
     );
   }
 };
 
-export const updateParkingRate = async (Fee) => {
+export const UpdatePayRollFomula = async (fomula) => {
   try {
-    const response = await axiosInstance.post(UPDATE_PARKING_RATE, {
-      id: Fee._id,
-      vehicleType: Fee.vehicleType,
-      hourly_rate: Fee.hourly_rate,
-      overnight_rate: Fee.overnight_rate,
-      daily_rate: Fee.daily_rate,
-      weekly_rate: Fee.weekly_rate,
-      monthly_rate: Fee.monthly_rate,
-      yearly_rate: Fee.yearly_rate,
-      status: Fee.status,
+    const response = await axiosInstance.post(UPDATE_PAYROLL_FORMULA, {
+      id: fomula._id,
+      role: fomula.role,
+      basicRatePerHour: fomula.basicRatePerHour,
+      overtimeRate: fomula.overtimeRate,
+      deductions: fomula.deductions,
+      allowance: fomula.allowance,
+      status: fomula.status,
     });
 
     return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
     console.error(
-      "Có lỗi xảy ra khi cập nhật parkingRates:",
+      "Có lỗi xảy ra khi cập nhật payRollFomula:",
       error.response?.data?.error || error.message
     );
   }
 };
 
-export const createParkingRate = async (Fee) => {
+export const CreatePayRollFomula = async (fomula) => {
+  console.log("fomula__", fomula);
   try {
-    const response = await axiosInstance.put(CREATE_PARKING_RATE, {
-      vehicleType: Fee.vehicleType,
-      hourly_rate: Fee.hourly_rate,
-      overnight_rate: Fee.overnight_rate,
-      daily_rate: Fee.daily_rate,
-      weekly_rate: Fee.weekly_rate,
-      monthly_rate: Fee.monthly_rate,
-      yearly_rate: Fee.yearly_rate,
-      status: Fee.status,
+    const response = await axiosInstance.put(CREATE_PAYROLL_FORMULA, {
+      role: fomula.role,
+      basicRatePerHour: fomula.basicRatePerHour,
+      overtimeRate: fomula.overtimeRate,
+      deductions: fomula.deductions,
+      allowance: fomula.allowance,
     });
 
     return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
     console.error(
-      "Có lỗi xảy ra khi cập nhật parkingRates:",
+      "Có lỗi xảy ra khi tạo 1 PayrollFomula:",
       error.response?.data?.error || error.message
     );
   }
 };
 
-export const deleteParkingRate = async (id) => {
+export const DeletePayRollFomula = async (id) => {
   const token = Cookies.get("accessToken");
   // Kiểm tra nếu token không tồn tại
   if (!token) {
@@ -98,7 +94,7 @@ export const deleteParkingRate = async (id) => {
   }
 
   try {
-    const response = await axios.delete(DELETE_PARKING_RATE, {
+    const response = await axios.delete(DELETE_PAYROLL_FORMULA, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

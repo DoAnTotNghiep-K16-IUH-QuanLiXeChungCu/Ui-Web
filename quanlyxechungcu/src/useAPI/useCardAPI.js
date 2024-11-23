@@ -145,7 +145,7 @@ export const setUpSerialPortEntry = async (com, baudRate) => {
       }
     );
 
-    console.log("Kết nối thành công qua cổng: ", com);
+    // console.log("Kết nối thành công qua cổng: ", com);
     return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
     console.error(
@@ -170,7 +170,7 @@ export const setUpSerialPortExit = async (com, baudRate) => {
       }
     );
 
-    console.log("Kết nối thành công qua cổng: ", com);
+    // console.log("Kết nối thành công qua cổng: ", com);
     return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
     console.error(
@@ -195,7 +195,7 @@ export const setUpAnotherSerialPortEntry = async (com, baudRate) => {
       }
     );
 
-    console.log("Kết nối thành công qua cổng: ", com);
+    // console.log("Kết nối thành công qua cổng: ", com);
     return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
     console.error(
@@ -220,7 +220,7 @@ export const setUpAnotherSerialPortExit = async (com, baudRate) => {
       }
     );
 
-    console.log("Kết nối thành công qua cổng: ", com);
+    // console.log("Kết nối thành công qua cổng: ", com);
     return response.data; // Trả về dữ liệu phản hồi nếu cần sử dụng
   } catch (error) {
     console.error(

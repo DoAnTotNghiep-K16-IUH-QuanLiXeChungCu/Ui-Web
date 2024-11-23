@@ -24,6 +24,7 @@ const ConnectConfiguration = () => {
   const [lanesUpdate, setLanesUpdate] = useState([]);
   const [settingsUpdate, setSettingsUpdate] = useState([]);
   const [showCameraOption, setShowCameraOption] = useState(false);
+
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
@@ -36,6 +37,7 @@ const ConnectConfiguration = () => {
       try {
         const settings = await getAllSetting();
         setSettings(settings || []);
+        setSelectedSettings(settings[0]);
         setSettingsUpdate(
           settings.map((setting) => ({
             id: setting._id,
@@ -70,7 +72,6 @@ const ConnectConfiguration = () => {
     };
     fetchData();
   }, []);
-
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then((deviceInfos) => {
       const videoDevices = deviceInfos.filter(
@@ -159,7 +160,6 @@ const ConnectConfiguration = () => {
             onChange={handleChangeSetting}
             className="border p-2 rounded col-span-3"
           >
-            <option value="">Tất cả</option>
             {settings.map((setting) => (
               <option key={setting._id} value={setting._id}>
                 {setting.version}
@@ -204,6 +204,20 @@ const ConnectConfiguration = () => {
                 ports={ports}
                 selectedPort={selectedSettings?.[laneType]?.port}
                 onChange={(newPort) => {
+                  const isDuplicate = Object.keys(selectedSettings).some(
+                    (key) =>
+                      key !== laneType &&
+                      selectedSettings[key]?.port === newPort
+                  );
+
+                  if (isDuplicate) {
+                    setShowNotification({
+                      content: `Port ${newPort} đã được sử dụng ở lane khác`,
+                      type: "Error",
+                      show: true,
+                    });
+                    return; // Stop the update
+                  }
                   const updatedSettings = { ...selectedSettings };
                   updatedSettings[laneType].port = newPort;
                   setSelectedSettings(updatedSettings);

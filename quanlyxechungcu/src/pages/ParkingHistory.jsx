@@ -243,7 +243,7 @@ const ParkingHistory = () => {
                           : "Không có"}
                       </td>
                       <td className="border p-2">
-                        {record.entryRecord?.users_shift.fullName}
+                        {record.entryRecord?.users_shift?.fullName}
                       </td>
                     </tr>
                   ))}
