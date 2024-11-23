@@ -23,6 +23,11 @@ import Profile from "../pages/Profile";
 import UserShift from "./../pages/UserShift";
 import SignUp from "../pages/SignUp";
 import CheckingJob from "./../pages/CheckingJob";
+import LicensePlateDetection from "../components/LicensePlateDetection";
+import AttendanceHistory from "../pages/AttendanceHistory";
+import AttendanceHistoryDelete from "../pages/AttendanceHistoryDelete";
+import Accounts from "../pages/Accounts";
+import PayRollFomula from "../pages/PayRollFomula";
 
 const Routers = () => {
   const routers = [
@@ -43,6 +48,7 @@ const Routers = () => {
         { path: "manage/vehicle", element: <Vehicle /> },
         { path: "manage/RFIDCard", element: <RFIDCard /> },
         { path: "manage/parking-fee", element: <ParkingFeeConfiguration /> },
+        { path: "manage/accounts", element: <Accounts /> },
         { path: "report/per-month", element: <ReportPerMonth /> },
         { path: "report/per-day", element: <ReportPerDay /> },
         { path: "about-us", element: <AboutUs /> },
@@ -52,6 +58,9 @@ const Routers = () => {
         { path: "/userShift/checking-job", element: <CheckingJob /> },
         { path: "setting/connect", element: <ConnectConfiguration /> },
         { path: "/parking-check", element: <ParkingManagement /> },
+        { path: "/test", element: <LicensePlateDetection /> },
+        { path: "/logs", element: <AttendanceHistory /> },
+        { path: "/fomula", element: <PayRollFomula /> },
       ],
     },
     {

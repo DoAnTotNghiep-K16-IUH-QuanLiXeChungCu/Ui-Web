@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   addMonthlyTicket,
   filterMonthlyTicket,
@@ -7,11 +7,10 @@ import { formatDate } from "../utils/index";
 import { changeTypeVehicle } from "../utils/index";
 import MonthlyTicketModal from "./MonthlyTicketModal";
 import Notification from "../components/Notification";
-import UserContext from "../context/UserContext";
-import { getData, saveData } from "../context/indexedDB";
 import { getAllVehicle } from "../useAPI/useVehicleAPI";
 import { findCustomerByID } from "../useAPI/useCustomerAPI";
 import Loading from "../components/Loading";
+import { findCardByUUID, setUpSerialPortEntry } from "../useAPI/useCardAPI";
 
 const MonthlyTicketList = () => {
   const [tickets, setTickets] = useState([]);
@@ -21,6 +20,7 @@ const MonthlyTicketList = () => {
   const pageSize = 10;
   const totalPages = Math.ceil(tickets.length / pageSize);
   const [searchTerm, setSearchTerm] = useState(""); // Kích thước trang
+  const [card, setCard] = useState(null);
 
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -31,6 +31,7 @@ const MonthlyTicketList = () => {
     monthlyFee: 0,
     startDate: "",
     endDate: "",
+    rFIDCardID: "",
   });
   const [listChoosenTickets, setListChoosenTickets] = useState([]);
   const [newEndDate, setNewEndDate] = useState("");
@@ -63,6 +64,7 @@ const MonthlyTicketList = () => {
           1,
           10000
         );
+        setUpSerialPortEntry("COM5", 9600);
         setTickets(tickets);
         const c = await getAllVehicle(1, 5000);
         const vehicles = c.vehicles;
@@ -104,6 +106,7 @@ const MonthlyTicketList = () => {
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setNewTickets({ ...newTickets, [name]: value });
+    console.log(newTickets);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -111,8 +114,7 @@ const MonthlyTicketList = () => {
     setShowAddForm(false);
   };
   const addNewMonthlyTicket = async (newTicket, content) => {
-    console.log("newTicket______", newTicket);
-
+    // console.log("newTicket______", newTicket);
     if (newTicket.monthlyFee <= 0) {
       setShowNotification({
         content: "Phí không được <0",
@@ -121,30 +123,64 @@ const MonthlyTicketList = () => {
       });
       return; // Không tiếp tục nếu giá vé không hợp lệ
     }
-
-    const addTicket = await addMonthlyTicket(newTicket);
-    if (addTicket._id) {
-      setTickets((prev) => [...prev, addTicket]);
-      const data = await getData("userData");
-      if (data) {
-        await saveData({
-          id: "userData",
-          ...data,
-          tickets: [...data.tickets, addTicket], // Cập nhật danh sách thẻ mới
-        });
-      }
-      setSelectedTicket(addTicket);
+    if (newTicket.endDate <= newTicket.startDate) {
       setShowNotification({
-        content: content,
-        type: "Notification",
-        show: true,
-      });
-    } else {
-      setShowNotification({
-        content: addTicket,
+        content: "Ngày kích hoạt không thể nhỏ hơn ngày kết thúc",
         type: "Error",
         show: true,
       });
+      return; // Không tiếp tục nếu giá vé không hợp lệ
+    }
+    const check = await findCardByUUID(card);
+    if (!check) {
+      setShowNotification({
+        content: `Không có thẻ ${card} nào trong danh sách.`,
+        type: "Error",
+        show: true,
+      });
+    } else if (check?.userId) {
+      setShowNotification({
+        content: `Thẻ có mã ${card} là thẻ dành cho nhân viên.`,
+        type: "Error",
+        show: true,
+      });
+    } else {
+      handleInputChange({
+        target: {
+          name: "rFIDCardID",
+          value: check._id,
+        },
+      });
+      setShowNotification({
+        content: `Thẻ đã quẹt: ${card}.`,
+        type: "Notification",
+        show: true,
+      });
+      const addTicket = await addMonthlyTicket(newTicket);
+      if (addTicket._id) {
+        setTickets((prev) => [...prev, addTicket]);
+        setNewTickets({
+          vehicleId: "",
+          parking_slotId: "",
+          monthlyFee: 0,
+          startDate: "",
+          endDate: "",
+          rFIDCardID: "",
+        });
+        setCard("");
+        setSelectedTicket(addTicket);
+        setShowNotification({
+          content: content,
+          type: "Notification",
+          show: true,
+        });
+      } else {
+        setShowNotification({
+          content: "Đã có lỗi trong quá trình tạo thẻ tháng",
+          type: "Error",
+          show: true,
+        });
+      }
     }
   };
   const handleExtendSubmit = async (listTicket) => {
@@ -202,6 +238,7 @@ const MonthlyTicketList = () => {
             monthlyFee: ticket.monthlyFee, // Số tiền hàng tháng
             startDate: new Date().toISOString().split("T")[0],
             endDate: newEndDate, // Đặt endDate là ngày gia hạn mới
+            rFIDCardID: ticket.rFIDCardID,
           };
           return transformedTicket;
         }
@@ -322,7 +359,7 @@ const MonthlyTicketList = () => {
             </button>
             <button
               className="bg-yellow-500 text-white px-4 py-2 rounded"
-              onClick={() => setShowExtend(true)}
+              onClick={() => setShowExtend(!showExtend)}
             >
               GIA HẠN
             </button>
@@ -431,6 +468,9 @@ const MonthlyTicketList = () => {
                     #
                   </th>
                   <th className="border p-2 sticky top-0 bg-slate-300 z-10">
+                    Thẻ xe
+                  </th>
+                  <th className="border p-2 sticky top-0 bg-slate-300 z-10">
                     Biển Số
                   </th>
                   <th className="border p-2 sticky top-0 bg-slate-300 z-10">
@@ -477,6 +517,7 @@ const MonthlyTicketList = () => {
                     <td className="border p-2">
                       {index + 1 + (currentPage - 1) * pageSize}
                     </td>
+                    <td className="border p-2">{ticket?.rFIDCard?.uuid}</td>
                     <td className="border p-2">
                       {ticket.vehicle.licensePlate}
                     </td>
@@ -541,6 +582,7 @@ const MonthlyTicketList = () => {
         handleInputChange={handleInputChange}
         handleSubmit={handleSubmit}
         handleCloseModal={handleCloseModal}
+        setCard={setCard}
       />
 
       <Notification

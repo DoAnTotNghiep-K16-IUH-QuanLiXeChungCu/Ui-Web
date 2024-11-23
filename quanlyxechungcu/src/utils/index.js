@@ -26,6 +26,7 @@ export const ChangeNavCase = (str) => {
     else if (str === "CA TRỰC") return "userShift";
     else if (str === "LỊCH LÀM VIỆC") return "schedular";
     else if (str === "CHẤM CÔNG") return "checking-job";
+    else if (str === "TÀI KHOẢN") return "accounts";
   }
   return "";
 };
@@ -175,4 +176,31 @@ export const findEntryRecord = (
         entry.isOut === false
     ) || null
   );
+};
+
+export const formatToVietnameseCurrency = (amount) => {
+  if (typeof amount !== "number") {
+    return 0;
+  }
+  return amount.toLocaleString("vi-VN");
+};
+
+export const calculateAge = (birthDay) => {
+  const birthDate = new Date(birthDay); // Chuyển chuỗi ngày tháng thành đối tượng Date
+  const today = new Date(); // Lấy ngày hiện tại
+
+  let age = today.getFullYear() - birthDate.getFullYear(); // Tính năm chênh lệch
+
+  // Kiểm tra xem sinh nhật năm nay đã qua chưa
+  const isBirthdayPassed =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() >= birthDate.getDate());
+
+  // Nếu sinh nhật chưa qua thì giảm tuổi đi 1
+  if (!isBirthdayPassed) {
+    age--;
+  }
+
+  return age;
 };

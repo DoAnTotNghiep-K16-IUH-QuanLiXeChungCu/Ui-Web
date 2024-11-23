@@ -39,7 +39,7 @@ const Navbar = () => {
   }, [handleClickOutside]);
 
   return (
-    <nav className="bg-[#ec7a00] p-4 h-14">
+    <nav className="bg-[#ec7a00] p-4 h-16">
       <div className="container mx-auto flex justify-center items-center space-x-6">
         {myUserID ? (
           <>
@@ -73,7 +73,14 @@ const Navbar = () => {
             </Link>
             <Dropdown
               label="QUẢN LÝ"
-              items={["KHÁCH HÀNG", "XE", "PHÒNG", "THẺ QUẸT", "PHÍ XE"]}
+              items={[
+                "KHÁCH HÀNG",
+                "XE",
+                "PHÒNG",
+                "THẺ QUẸT",
+                "PHÍ XE",
+                "TÀI KHOẢN",
+              ]}
               isOpen={openDropdown === "quanly"}
               toggleDropdown={() => toggleDropdown("quanly")}
               closeDropdown={closeDropdown}

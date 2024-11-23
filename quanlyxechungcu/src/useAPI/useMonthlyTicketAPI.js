@@ -67,6 +67,7 @@ export const addMonthlyTicket = async (ticket) => {
         monthlyFee: monthlyFee, // Gửi monthlyFee đã chuyển đổi
         startDate: ticket.startDate,
         endDate: ticket.endDate,
+        rFIDCardID: ticket.rFIDCardID,
       }),
     });
 

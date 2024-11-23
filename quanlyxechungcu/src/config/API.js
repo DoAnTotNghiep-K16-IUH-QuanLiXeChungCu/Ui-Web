@@ -4,6 +4,7 @@ export const LOGIN = `${API}/users/login`;
 export const SIGNUP = `${API}/users/sinup`;
 export const UPDATE_USER = `${API}/users/UpdateUser`;
 export const ALL_USER = `${API}/users/GetAllUsers`;
+export const DELETE_USER = `${API}/users/DeleteUsers`;
 
 export const ALL_APARTMENT = `${API}/apartment/GetAllApartments`;
 export const APARTMENT_BY_ID = `${API}/apartment/GetApartmentById`;
@@ -27,6 +28,9 @@ export const AVAILABE_PARKING_SLOT_BY_TYPE_AND_CODE = `${API}/parkingSlot/GetAva
 
 export const ALL_PARKING_RATE = `${API}/parkingRate/GetAllParkingRates`;
 export const UPDATE_PARKING_RATE = `${API}/parkingRate/UpdateParkingRate`;
+export const CREATE_PARKING_RATE = `${API}/parkingRate/CreateParkingRate`;
+export const GET_PARKING_RATE_BY_ID = `${API}/parkingRate/GetParkingRateById`;
+export const DELETE_PARKING_RATE = `${API}/parkingRate/DeleteParkingRate`;
 
 export const ALL_VEHICLE = `${API}/vehicle/GetAllVehicles`;
 export const VEHICLE_BY_ID = `${API}/vehicle/GetVehicleById`;
@@ -103,3 +107,21 @@ export const CREATE_CAMERA = `${API}/camera/CreateCamera`;
 export const DELETE_CAMERA = `${API}/camera/DeleteCamera`;
 
 export const DETECT_LICENSEPLATE = "http://localhost:5000/DetectLicensePlate";
+
+export const GET_ALL_TIMEKEEPING_LOG = `${API}/timeKeepingLog/GetAllTimeKeepingLog`;
+export const GET_ALL_TIMEKEEPING_LOG_DELETE = `${API}/timeKeepingLog/GetAllTimeKeepingLogDelete`;
+
+export const GET_TIMEKEEPING_LOG_BY_ID = `${API}/timeKeepingLog/GetTimeKeepingLogByID`;
+export const CREATE_TIMEKEEPING_LOG = `${API}/timeKeepingLog/CreateTimeKeepingLog`;
+export const UPDATE_TIMEKEEPING_LOG = `${API}/timeKeepingLog/UpdateTimeKeepingLog`;
+export const DELETE_TIMEKEEPING_LOG = `${API}/timeKeepingLog/DeleteTimeKeepingLog`;
+export const GET_TIMEKEEPING_LOG_FROM_DAY_TO_DAY = `${API}/timeKeepingLog/GetTimeKeepingLogFromDayToDay`;
+export const GET_TIMEKEEPING_LOG_TODAY = `${API}/timeKeepingLog/GetTimeKeepingLogToday`;
+export const GET_TIMEKEEPING_LOG_PER_MONTH = `${API}/timeKeepingLog/GetTimeKeepingLogPerMonth`;
+export const GET_TIMEKEEPING_LOG_PER_YEAR = `${API}/timeKeepingLog/GetTimeKeepingLogPerYear`;
+
+export const GET_ALL_PAYROLL_FORMULA = `${API}/payRollFomula/GetAllPayRollFomula`;
+export const GET_PAYROLL_FORMULA_BY_ID = `${API}/payRollFomula/GetPayRollFomulaByID`;
+export const UPDATE_PAYROLL_FORMULA = `${API}/payRollFomula/UpdatePayRollFomula`;
+export const CREATE_PAYROLL_FORMULA = `${API}/payRollFomula/CreatePayRollFomula`;
+export const DELETE_PAYROLL_FORMULA = `${API}/payRollFomula/DeletePayRollFomula`;

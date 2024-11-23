@@ -10,14 +10,14 @@ const CheckEE = ({ type, time, front_pic, back_pic }) => {
         <div>
           <img
             src={front_pic || defaultImage} // Kiểm tra và sử dụng ảnh mặc định
-            alt="Hình ảnh vào"
+            alt="Hình ảnh camera trước"
             className="w-full h-48 object-cover rounded"
           />
         </div>
         <div>
           <img
             src={back_pic || defaultImage} // Kiểm tra và sử dụng ảnh mặc định
-            alt="Hình ảnh ra"
+            alt="Hình ảnh camera sau"
             className="w-full h-48 object-cover rounded"
           />
         </div>

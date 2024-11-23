@@ -260,7 +260,10 @@ const ParkingManagement = () => {
   };
   useEffect(() => {
     if (recordType === "EnEx") {
+      // console.log(selectedSettings.entryLane?.port);
+      // console.log(typeof selectedSettings.entryLane?.port);
       setUpSerialPortEntry(selectedSettings.entryLane?.port, 9600);
+      // setUpSerialPortEntry("COM5", 9600);
       setUpSerialPortExit(selectedSettings.exitLane?.port, 9600);
     } else if (recordType === "EnEn") {
       setUpSerialPortEntry(selectedSettings.entryLane?.port, 9600);

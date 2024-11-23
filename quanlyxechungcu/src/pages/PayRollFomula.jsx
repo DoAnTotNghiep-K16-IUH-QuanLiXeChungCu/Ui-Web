@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
-import {
-  createParkingRate,
-  deleteParkingRate,
-  getAllParkingRate,
-  updateParkingRate,
-} from "../useAPI/useParkingRateAPI";
-import { changeTypeVehicle } from "../utils/index";
-
 import Loading from "../components/Loading";
 import Notification from "../components/Notification";
 import ConfirmationModal from "../components/ConfirmationModal ";
 import ParkingFeeConfigurationModal from "./ParkingFeeConfigurationModal";
-
-const ParkingFeeConfiguration = () => {
-  const [fees, setFees] = useState([]);
-  const [selectedFee, setSelectedFee] = useState(null);
-  const [similarFee, setSimilarFee] = useState(null);
+import {
+  CreatePayRollFomula,
+  DeletePayRollFomula,
+  GetAllPayRollFomula,
+  UpdatePayRollFomula,
+} from "./../useAPI/usePayRollFomula";
+import PayRollFomulaModal from "./PayRollFomulaModal";
+const PayRollFomula = () => {
+  const [payRollFomulas, setPayRollFomulas] = useState([]);
+  const [selectedPayRollFomula, setSelectedPayRollFomula] = useState(null);
+  const [similarPayRollFomula, setSimilarPayRollFomula] = useState(null);
 
   const [openModal, setOpenModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -23,16 +21,7 @@ const ParkingFeeConfiguration = () => {
   const [type, setType] = useState("");
 
   const [loading, setLoading] = useState(true);
-  const [newFee, setNewFee] = useState({
-    vehicleType: "",
-    hourly_rate: "",
-    overnight_rate: "",
-    daily_rate: "",
-    weekly_rate: "",
-    monthly_rate: "",
-    yearly_rate: "",
-    status: "",
-  });
+  const [newPayRollFomula, setNewPayRollFomula] = useState({});
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
@@ -40,8 +29,8 @@ const ParkingFeeConfiguration = () => {
   });
   const fetchFeeData = async () => {
     try {
-      const fees = await getAllParkingRate();
-      setFees(fees || []);
+      const payRollFomula = await GetAllPayRollFomula();
+      setPayRollFomulas(payRollFomula || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -51,24 +40,24 @@ const ParkingFeeConfiguration = () => {
   useEffect(() => {
     fetchFeeData();
   }, []);
-  const handlefeeClick = (fee) => {
-    if (selectedFee && selectedFee._id === fee._id) {
-      setSelectedFee(null);
+  const handlePayRollFomulaClick = (pay) => {
+    if (selectedPayRollFomula && selectedPayRollFomula._id === pay._id) {
+      setSelectedPayRollFomula(null);
     } else {
-      setSelectedFee(fee);
+      setSelectedPayRollFomula(pay);
     }
   };
-  const findSimilarVehicleInUse = (fees, fee) => {
-    return fees.find(
+  const findSimilarRoleInUse = (payRollFomulas, pay) => {
+    return payRollFomulas.find(
       (item) =>
-        item._id !== fee._id && // ID khác
-        item.vehicleType === fee.vehicleType && // Cùng loại xe
+        item._id !== pay._id && // ID khác
+        item.role === pay.role && // Cùng loại xe
         item.status === "in_using" // Trạng thái đang sử dụng
     );
   };
 
-  const handleUpdatefee = async (Fee) => {
-    if (!Fee) {
+  const handleUpdatePayRollFomula = async (Pay) => {
+    if (!Pay) {
       setShowNotification({
         content: `Bạn chưa chọn đối tượng để chỉnh sửa`,
         type: "Error",
@@ -76,134 +65,91 @@ const ParkingFeeConfiguration = () => {
       });
       return;
     } else {
-      const similar = findSimilarVehicleInUse(fees, Fee);
+      const similar = findSimilarRoleInUse(payRollFomulas, Pay);
 
       if (similar) {
-        setSimilarFee(similar);
+        setSimilarPayRollFomula(similar);
       }
-      if (Fee.status === "in_using" && similar) {
+      if (Pay.status === "in_using" && similar) {
         setMessage(
           "Công thức tính tiền dành phương tiện này đã được dùng, nếu bạn sử dụng nó thì công thức trước sẽ không dùng nữa, bạn có chắc sẽ sửa lại thành như vậy chứ"
         );
         setType("update");
         setShowModal(true);
       } else {
-        updateFee(selectedFee);
-        setNewFee("");
+        updateFomula(selectedPayRollFomula);
+        setNewPayRollFomula("");
 
         fetchFeeData();
       }
     }
   };
   const handleEditSimilar = async () => {
-    setSimilarFee({ ...similarFee, status: "not_using" });
-    const simil = { ...similarFee, status: "not_using" };
+    setSimilarPayRollFomula({ ...similarPayRollFomula, status: "not_using" });
+    const simil = { ...similarPayRollFomula, status: "not_using" };
     console.log("simil", simil);
 
-    updateFee(simil);
-    updateFee(selectedFee);
-    setNewFee("");
+    updateFomula(simil);
+    updateFomula(selectedPayRollFomula);
+    setNewPayRollFomula("");
 
     fetchFeeData();
   };
-  const handleAddSimilar = async () => {
-    setSimilarFee({ ...similarFee, status: "not_using" });
-    const simil = { ...similarFee, status: "not_using" };
-    console.log("simil", simil);
-
-    updateFee(simil);
+  const updateFomula = async (Fee) => {
     try {
-      const add = await createParkingRate(newFee);
-      if (add) {
-        setShowNotification({
-          content: `Đã thêm thành công công thức tính tiền xe mới`,
-          type: "Notification",
-          show: true,
-        });
-        setNewFee("");
-        fetchFeeData();
-      } else {
-        setShowNotification({
-          content: `Đã có lỗi khi thêm công thức tính tiền xe mới`,
-          type: "Error",
-          show: true,
-        });
-      }
-    } catch (error) {
-      console.error("Có lỗi khi xóa Fee:", error);
-    }
-  };
-  const updateFee = async (Fee) => {
-    try {
-      await updateParkingRate(Fee);
-      setNewFee("");
+      await UpdatePayRollFomula(Fee);
+      setNewPayRollFomula("");
       fetchFeeData();
     } catch (error) {
       setShowNotification({
-        content: `Đã có lỗi khi sửa bảng tính phí này`,
+        content: `Đã có lỗi khi sửa công thức tính lương này`,
         type: "Error",
         show: true,
       });
     }
   };
-  const handleDeletefee = async (id) => {
+  const handleDeletePayRollFomula = async (id) => {
     console.log("id", id);
     try {
-      const deleteFee = await deleteParkingRate(id);
+      const deleteFee = await DeletePayRollFomula(id);
       if (deleteFee) {
-        setFees((prev) => prev.filter((fee) => fee._id !== id));
-        setSelectedFee(null);
+        setPayRollFomulas((prev) => prev.filter((fee) => fee._id !== id));
+        setSelectedPayRollFomula(null);
         setShowNotification({
-          content: `Đã xóa bảng tính phí này`,
+          content: `Đã xóa công thức tính lương này`,
           type: "Notification",
           show: true,
         });
       } else {
         setShowNotification({
-          content: `Đã có lỗi khi xóa bảng tính phí này`,
+          content: `Đã có lỗi khi xóa công thức tính lương này`,
           type: "Error",
           show: true,
         });
       }
     } catch (error) {
-      console.error("Có lỗi khi xóa Fee:", error);
+      console.error("Có lỗi khi xóa PayRollFomula:", error);
     }
   };
-  const handleAddfee = async () => {
-    console.log("newFee", newFee);
-
-    const similar = fees.find(
-      (item) =>
-        item.vehicleType === newFee.vehicleType && // Cùng loại xe
-        item.status === "in_using" // Trạng thái đang sử dụng
-    );
-    console.log("similar____", similar);
-
-    if (!newFee) {
+  const handleAddPayRollFomula = async () => {
+    console.log("newPayRollFomula", newPayRollFomula);
+    if (!newPayRollFomula) {
       console.error("Bạn chưa điền thông tin cho công thức tính tiền xe mới");
-      return;
-    } else if (similar && newFee.status === "in_using") {
-      setSimilarFee(similar);
-      setMessage(
-        "Công thức tính tiền dành phương tiện này đã được dùng, nếu bạn muống tạo mới và sử dụng nó thì công thức trước sẽ không dùng nữa, bạn có chắc sẽ sửa lại thành như vậy chứ"
-      );
-      setShowModal(true);
-      setType("add");
       return;
     }
     try {
-      const add = await createParkingRate(newFee);
+      const add = await CreatePayRollFomula(newPayRollFomula);
       if (add) {
         setShowNotification({
-          content: `Đã thêm thành công công thức tính tiền xe mới`,
+          content: `Đã thêm thành công công thức tính tiền mới dành cho nhân viên`,
           type: "Notification",
           show: true,
         });
-        setNewFee("");
+        setNewPayRollFomula("");
         fetchFeeData();
       } else {
         setShowNotification({
-          content: `Đã có lỗi khi thêm công thức tính tiền xe mới`,
+          content: `Đã có lỗi khi thêm công thức tính tiền mới`,
           type: "Error",
           show: true,
         });
@@ -236,21 +182,28 @@ const ParkingFeeConfiguration = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {fees.map((fee) => (
+                  {payRollFomulas.map((fomula) => (
                     <tr
-                      key={fee._id}
+                      key={fomula._id}
                       className={`text-center cursor-pointer ${
-                        selectedFee && selectedFee._id === fee._id
+                        selectedPayRollFomula &&
+                        selectedPayRollFomula._id === fomula._id
                           ? "bg-gray-200" // Đổi màu nền khi thẻ được chọn
                           : ""
                       }`}
-                      onClick={() => handlefeeClick(fee)} // Thêm hàm nhấn vào thẻ
+                      onClick={() => handlePayRollFomulaClick(fomula)} // Thêm hàm nhấn vào thẻ
                     >
                       <td className="border p-2">
-                        {changeTypeVehicle(fee.vehicleType)}
+                        {fomula.role === "User"
+                          ? "Nhân viên"
+                          : fomula.role === "Manager"
+                          ? "Quản lý"
+                          : "Admin"}
                       </td>
                       <td className="border p-2">
-                        {fee.status === "in_using" ? "Đang dùng" : "Không dùng"}
+                        {fomula.status === "in_using"
+                          ? "Đang dùng"
+                          : "Không dùng"}
                       </td>
                     </tr>
                   ))}
@@ -262,68 +215,44 @@ const ParkingFeeConfiguration = () => {
           <div className="col-span-9 bg-white border rounded p-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block font-medium">Loại xe:</label>
-                <select
-                  className="w-full mt-1 p-2 border rounded"
-                  value={selectedFee?.vehicleType}
-                >
-                  <option value="car">Ô tô</option>
-                  <option value="motor">Xe máy</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-medium">Giá gửi ngày:</label>
+                <label className="block font-medium">
+                  Lương cơ bản theo giờ:
+                </label>
                 <input
                   type="number"
                   className="w-full mt-1 p-2 border rounded"
                   placeholder="Nhập số giờ"
-                  value={selectedFee?.hourly_rate} // Giá trị của input là mã số thẻ mới
+                  value={selectedPayRollFomula?.basicRatePerHour} // Giá trị của input là mã số thẻ mới
+                />
+              </div>
+
+              <div>
+                <label className="block font-medium">
+                  Lương làm ngoài giờ:
+                </label>
+                <input
+                  type="number"
+                  className="w-full mt-1 p-2 border rounded"
+                  placeholder="Nhập số giờ"
+                  value={selectedPayRollFomula?.overtimeRate} // Giá trị của input là mã số thẻ mới
                 />
               </div>
               <div>
-                <label className="block font-medium">Giá gửi đêm:</label>
+                <label className="block font-medium">Phạt đi trễ:</label>
                 <input
                   type="number"
                   className="w-full mt-1 p-2 border rounded"
                   placeholder="Nhập giá"
-                  value={selectedFee?.overnight_rate}
+                  value={selectedPayRollFomula?.deductions}
                 />
               </div>
               <div>
-                <label className="block font-medium">Giá gửi 1 ngày:</label>
+                <label className="block font-medium">Trợ cấp:</label>
                 <input
                   type="number"
                   className="w-full mt-1 p-2 border rounded"
                   placeholder="Nhập giá"
-                  value={selectedFee?.daily_rate}
-                />
-              </div>
-              <div>
-                <label className="block font-medium">Giá gửi theo tuần:</label>
-                <input
-                  type="number"
-                  className="w-full mt-1 p-2 border rounded"
-                  placeholder="Nhập giá"
-                  value={selectedFee?.weekly_rate}
-                />
-              </div>
-              <div>
-                <label className="block font-medium">Giá gửi theo tháng:</label>
-                <input
-                  type="number"
-                  className="w-full mt-1 p-2 border rounded"
-                  placeholder="Nhập giá"
-                  value={selectedFee?.monthly_rate}
-                />
-              </div>
-              <div>
-                <label className="block font-medium">Giá gửi theo năm:</label>
-                <input
-                  type="number"
-                  className="w-full mt-1 p-2 border rounded"
-                  placeholder="Nhập giá"
-                  value={selectedFee?.yearly_rate}
+                  value={selectedPayRollFomula?.allowance}
                 />
               </div>
               <div>
@@ -338,9 +267,9 @@ const ParkingFeeConfiguration = () => {
                       id="status-in-using"
                       className="mt-1"
                       name="status"
-                      checked={selectedFee?.status === "in_using"} // Kiểm tra trạng thái
+                      checked={selectedPayRollFomula?.status === "in_using"} // Kiểm tra trạng thái
                       onChange={() =>
-                        setSelectedFee((prev) => ({
+                        setSelectedPayRollFomula((prev) => ({
                           ...prev,
                           status: "in_using", // Cập nhật trạng thái
                         }))
@@ -354,9 +283,9 @@ const ParkingFeeConfiguration = () => {
                       id="status-not-using"
                       className="mt-1"
                       name="status"
-                      checked={selectedFee?.status === "not_using"} // Kiểm tra trạng thái
+                      checked={selectedPayRollFomula?.status === "not_using"} // Kiểm tra trạng thái
                       onChange={() =>
-                        setSelectedFee((prev) => ({
+                        setSelectedPayRollFomula((prev) => ({
                           ...prev,
                           status: "not_using", // Cập nhật trạng thái
                         }))
@@ -376,15 +305,17 @@ const ParkingFeeConfiguration = () => {
               </button>
               <button
                 className="bg-red-500 text-white px-4 py-2 rounded"
-                onClick={() => handleDeletefee(selectedFee._id)}
+                onClick={() =>
+                  handleDeletePayRollFomula(selectedPayRollFomula._id)
+                }
               >
                 XÓA
               </button>
               <button
                 className="bg-yellow-500 text-white px-4 py-2 rounded"
-                onClick={() => handleUpdatefee(selectedFee)}
+                onClick={() => handleUpdatePayRollFomula(selectedPayRollFomula)}
               >
-                Sửa
+                SỬA
               </button>
             </div>
           </div>
@@ -398,19 +329,19 @@ const ParkingFeeConfiguration = () => {
         isOpen={showModal}
         message={message}
         onConfirm={handleEditSimilar}
-        onConfirmAdd={handleAddSimilar}
+        onConfirmAdd={handleEditSimilar}
         type={type}
         onCancel={() => setShowModal(false)} // Đóng modal khi hủy
       />
-      <ParkingFeeConfigurationModal
+      <PayRollFomulaModal
         openModal={openModal}
-        newFee={newFee}
-        setNewFee={setNewFee}
-        handleAddfee={handleAddfee}
+        newPayRollFomula={newPayRollFomula}
+        setNewPayRollFomula={setNewPayRollFomula}
+        handleAddPayRollFomula={handleAddPayRollFomula}
         setOpenModal={setOpenModal}
       />
     </div>
   );
 };
 
-export default ParkingFeeConfiguration;
+export default PayRollFomula;

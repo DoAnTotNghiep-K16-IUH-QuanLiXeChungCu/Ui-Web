@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 const CameraSelect = ({ devices, selectedCamera, onChange, openCamera }) => {
   const [videoStream, setVideoStream] = useState(null);
   const videoRef = useRef(null);
-  // console.log("devices:", devices);
 
   useEffect(() => {
     if (openCamera && selectedCamera) {
