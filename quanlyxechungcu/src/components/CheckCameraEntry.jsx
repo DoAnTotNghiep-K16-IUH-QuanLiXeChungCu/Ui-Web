@@ -2,10 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Notification from "./Notification";
 import Camera from "./Camera";
 import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
-import { getAllShift } from "../useAPI/useShiftAPI";
-import { findCurrentShift } from "../utils";
-import { format } from "date-fns";
-import { getUserShiftsByUserIdAndShiftIdAndDateTime } from "../useAPI/useUserShiftAPI";
 import {
   DETECT_LICENSEPLATE,
   READ_ANOTHER_RFID_CARD_ENTRY,
@@ -17,6 +13,8 @@ import axios from "axios";
 import { createEntryRecord } from "../useAPI/useRecordAPI";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrochip, faPen } from "@fortawesome/free-solid-svg-icons";
+import { detectLicensePlate } from "../useAPI/useDetectLicensePalteAPI";
+import { GetUserByRFIDCard } from "../useAPI/useUserAPI";
 
 const CheckCameraEntry = ({
   isStart,
@@ -37,6 +35,10 @@ const CheckCameraEntry = ({
     camera1: null,
     camera2: null,
   });
+  const [imageUrl, setImageUrl] = useState({
+    front: null,
+    back: null,
+  });
   const [entryRfidData, setEntryRfidData] = useState("");
   const [prevRfidData, setPrevRfidData] = useState("");
   const previousRfidDataRef = useRef("");
@@ -46,64 +48,56 @@ const CheckCameraEntry = ({
     show: false,
   });
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [userShiftHere, setUserShiftHere] = useState("");
-  const [shifts, setShifts] = useState([]);
   const [vehicleType, setVehicleType] = useState("");
   const [edit, setEdit] = useState(false);
-
+  const myUserID = Cookies.get("profileID");
   const handleLicensePlateChange = (e) => {
     setEntryLicensePlate(e.target.value);
   };
-  useEffect(() => {
-    const fetchShiftsAndUserShift = async () => {
-      const myUserID = Cookies.get("profileID");
-      const shifts = await getAllShift();
-      setShifts(shifts);
-      const myShift = findCurrentShift(shifts);
-      const dayStr = format(new Date(), "yyyy-MM-dd");
-      const UShiftHere = await getUserShiftsByUserIdAndShiftIdAndDateTime(
-        myUserID,
-        myShift._id,
-        dayStr
-      );
-      if (UShiftHere) {
-        setUserShiftHere(UShiftHere);
-      }
-    };
-    fetchShiftsAndUserShift();
-  }, []);
   const handleDetectLicensePlate = async (photo1, photo2) => {
     if (!photo1 && !photo2) {
       console.error("No image selected!");
       return;
     }
 
-    const formData1 = new FormData();
-    const blob1 = await fetch(photo1).then((res) => res.blob());
-    formData1.append("file", blob1);
-
     try {
-      const response1 = await axios.post(DETECT_LICENSEPLATE, formData1);
-      const licensePlates1 = response1.data.license_plates || [];
-      if (licensePlates1.length === 0 && photo2) {
-        const formData2 = new FormData();
-        const blob2 = await fetch(photo2).then((res) => res.blob());
-        formData2.append("file", blob2);
-        const response2 = await axios.post(DETECT_LICENSEPLATE, formData2);
-        const licensePlates2 = response2.data.license_plates || [];
+      // Tải lên ảnh lên MinIO
+      const formData = new FormData();
+      const blobFront = await (await fetch(photo1)).blob();
+      const blobBack = await (await fetch(photo2)).blob();
+      const frontFileName = "Entry_camera1_photo.png";
+      const backFileName = "Entry_camera2_photo.png";
+      formData.append("files", blobFront, frontFileName);
+      formData.append("files", blobBack, backFileName);
 
-        const data = licensePlates2.join(",");
-        // console.log("data_______", data);
-        setEntryLicensePlate(data);
-      } else {
-        const data = licensePlates1.join(",");
-        // console.log("data_______", data);
-        setEntryLicensePlate(data); // Sử dụng biển số từ photo1 nếu có
+      const uploadResponse = await axios.post(UPLOAD_MEDIA, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const imageUrls = uploadResponse.data.data.urls;
+      const imageUrlFront = imageUrls[0];
+      const imageUrlBack = imageUrls[1];
+      const licensePlates1 = await detectLicensePlate(imageUrlFront);
+      console.log("licensePlates1", licensePlates1);
+
+      let data = licensePlates1.join(",");
+      if (licensePlates1.length === 0 && photo2) {
+        const licensePlates2 = await detectLicensePlate(imageUrlBack);
+        console.log("licensePlates2", licensePlates2);
+
+        data = licensePlates2.join(",");
       }
+      setEntryLicensePlate(data);
+      setImageUrl({
+        front: imageUrlFront,
+        back: imageUrlBack,
+      });
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("Error handling license plate detection:", error);
     }
   };
+
   const useTakePhotos = (videoRefs, canvasRefs) => {
     const takePhotos = useCallback(() => {
       const width = 640;
@@ -177,46 +171,45 @@ const CheckCameraEntry = ({
       }
       console.log("Mã số thẻ: ", newRfidData);
     };
-
     return () => {
       eventSource.close();
-      // window.eventSource = null;
     };
-  }, [isStart, , type]);
+  }, [isStart, type]);
 
   useEffect(() => {
     const handleRFIDCheck = async () => {
       if (isStart === false) {
         return;
       }
-      //   console.log("entryRfidData", entryRfidData);
       if (entryRfidData === "" || isInitialLoad) {
         setIsInitialLoad(false); // Sau lần đầu tiên, không xử lý nữa
         return;
       }
       try {
         console.log("entryRfidData", entryRfidData);
-
         const check = await findCardByUUID(entryRfidData);
-        // console.log("check", check);
-
+        const userFinded = await GetUserByRFIDCard(entryRfidData);
         if (check === null || check === undefined) {
           setShowNotification({
             content: `Không có thẻ ${entryRfidData} nào trong danh sách.`,
             type: "Error",
             show: true,
           });
-          // previousRfidDataRef.current = "";
+          setPrevRfidData("");
+          setEntryRfidData("");
+          return;
+        } else if (userFinded) {
+          setShowNotification({
+            content: `Thẻ ${entryRfidData} dành cho nhân viên, không thẻ quẹt xe`,
+            type: "Error",
+            show: true,
+          });
           setPrevRfidData("");
           setEntryRfidData("");
           return;
         } else {
-          // console.log("được:");
-          await uploadImages(check._id); // Gọi hàm uploadImages
+          await uploadImages(check._id);
         }
-        // Cập nhật giá trị rfidData cuối cùng đã xử lý
-        //   previousRfidDataRef.current = rfidData;
-        // setPrevRfidData(rfidData);
       } catch (error) {
         console.error("Lỗi khi xử lý RFID:", error);
       }
@@ -224,21 +217,8 @@ const CheckCameraEntry = ({
     handleRFIDCheck(); // Gọi hàm xử lý RFID
   }, [entryRfidData, isStart, prevRfidData]);
 
-  // Kiểm tra thẻ RFID và hiển thị thông báo
-
   const uploadImages = async (rfidID) => {
-    if (userShiftHere === null) {
-      setShowNotification({
-        content: `Hôm nay không phải ca trực của bạn`,
-        type: "Error",
-        show: true,
-      });
-      setPrevRfidData("");
-      //   previousRfidDataRef.current = "";
-      return;
-    }
     if (!photos.camera1 || !photos.camera2) {
-      // Kiểm tra xem ảnh đã được chụp hay chưa
       setShowNotification({
         content: "Vui lòng chụp ảnh trước khi tiếp tục.",
         type: "Error",
@@ -246,11 +226,9 @@ const CheckCameraEntry = ({
       });
       setPrevRfidData("");
       setEntryRfidData("");
-      //   previousRfidDataRef.current = "";
       return;
     }
     if (vehicleType === "") {
-      // Kiểm tra xem ảnh đã được chụp hay chưa
       setShowNotification({
         content: "Vui lòng chọn loại phương tiện trước khi tiếp tục.",
         type: "Error",
@@ -258,39 +236,16 @@ const CheckCameraEntry = ({
       });
       setPrevRfidData("");
       setEntryRfidData("");
-      //   previousRfidDataRef.current = "";
       return;
     }
     try {
-      const formData = new FormData();
-      const blobFront = await (await fetch(photos.camera1)).blob();
-      const blobBack = await (await fetch(photos.camera2)).blob();
-
-      const frontFileName = "Entry_camera1-photo.png";
-      const backFileName = "Entry_camera2-photo.png";
-
-      formData.append("files", blobFront, frontFileName);
-      formData.append("files", blobBack, backFileName);
-
-      const uploadResponse = await axios.post(UPLOAD_MEDIA, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      const imageUrls = uploadResponse.data.data.urls;
-      const imageUrlFront = imageUrls[0];
-      const imageUrlBack = imageUrls[1];
-
-      console.log("Image uploaded successfully from camera1:", imageUrlFront);
-      console.log("Image uploaded successfully from camera2:", imageUrlBack);
-
       const newEnTry = {
-        picture_front: imageUrlFront,
-        picture_back: imageUrlBack,
+        picture_front: imageUrl.front,
+        picture_back: imageUrl.back,
         licensePlate: entryLicensePlate,
         isResident: true,
         vehicleType: vehicleType,
-        users_shiftId: userShiftHere._id,
+        usersID: myUserID,
         rfidId: rfidID,
       };
       console.log("newEntryRecord", newEnTry);
@@ -364,48 +319,75 @@ const CheckCameraEntry = ({
         </div>
       </div>
       {/* Car Info */}
-      <div className="grid grid-cols-4 gap-1 mt-1">
-        <div className="col-span-3">
-          <div className="grid grid-cols-2">
-            <h3 className="p-2 rounded w-full text-lg font-bold">
-              {" "}
-              Biển số xe
-            </h3>
-            <div className="flex">
-              <input
-                type="text"
-                value={entryLicensePlate}
-                className={`border rounded mb-1 w-full p-2 border-gray-300 text-center ${
-                  edit ? "bg-white" : "bg-gray-200"
-                }`}
-                onChange={handleLicensePlateChange}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setEdit(!edit)}
-                className="ml-2 p-2"
-              >
-                <FontAwesomeIcon icon={edit ? faMicrochip : faPen} />
-              </button>
-            </div>
-            <h3 className="p-2 rounded w-full font-semibold">Loại xe:</h3>
-            <div className="flex">
-              <select
-                name="type"
-                className="border p-2 rounded w-full"
-                value={vehicleType}
-                onChange={(e) => setVehicleType(e.target.value)}
-              >
-                <option value="">Chọn loại phương tiện</option>
-                <option value="car">Ô tô</option>
-                <option value="motor">Xe máy</option>
-              </select>
-            </div>
+      <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded shadow-md">
+        {/* Biển số xe */}
+        <div className="col-span-2 flex items-center">
+          <label className="w-1/3 text-lg font-semibold">Biển số xe:</label>
+          <div className="flex w-2/3 items-center">
+            <input
+              type="text"
+              value={entryLicensePlate}
+              className={`border rounded w-full p-2 text-center $bg-white`}
+              onChange={handleLicensePlateChange}
+              required
+            />
           </div>
         </div>
-        <div className="col-span-1 flex justify-center items-center"></div>
+
+        {/* Loại phương tiện */}
+        <div className="col-span-2 flex items-center">
+          <label className="w-1/3 text-lg font-semibold">Loại xe:</label>
+          <select
+            name="type"
+            className="border rounded w-2/3 p-2 bg-white"
+            value={vehicleType}
+            onChange={(e) => setVehicleType(e.target.value)}
+          >
+            <option value="">---------</option>
+            <option value="car">Ô tô</option>
+            <option value="motor">Xe máy</option>
+          </select>
+        </div>
+
+        {/* Loại khách hàng */}
+        <div className="col-span-2 flex items-center">
+          <label className="w-1/3 text-lg font-semibold">Khách hàng:</label>
+          <select
+            name="customerType"
+            className="border rounded w-2/3 p-2 bg-white"
+            // value={customerType}
+            // onChange={(e) => setCustomerType(e.target.value)}
+          >
+            <option value="">---------</option>
+            <option value="visitor">Vãng lai</option>
+            <option value="resident">Trong khu dân cư</option>
+          </select>
+        </div>
+        {/* Ngày vào */}
+        <div className="col-span-2 flex items-center">
+          <label className="w-1/3 text-lg font-semibold">Ngày vào:</label>
+          <input
+            type="date"
+            // value={entryDate}
+            className="border rounded w-2/3 p-2 text-center bg-white"
+            // onChange={(e) => setEntryDate(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* Giờ vào */}
+        <div className="col-span-2 flex items-center">
+          <label className="w-1/3 text-lg font-semibold">Giờ vào:</label>
+          <input
+            type="time"
+            // value={entryTime}
+            className="border rounded w-2/3 p-2 text-center bg-white"
+            // onChange={(e) => setEntryTime(e.target.value)}
+            required
+          />
+        </div>
       </div>
+
       <div className="flex justify-between items-center mt-1">
         <span className="font-semibold text-red-700 text-center">
           {/* BIỂN SỐ KHÔNG GIỐNG NHAU */}

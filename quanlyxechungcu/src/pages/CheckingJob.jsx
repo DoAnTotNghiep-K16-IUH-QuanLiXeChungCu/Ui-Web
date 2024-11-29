@@ -3,6 +3,13 @@ import { findCardByUUID, setUpSerialPortEntry } from "../useAPI/useCardAPI";
 import { READ_RFID_CARD_ENTRY } from "../config/API";
 import Notification from "../components/Notification";
 import { addTimeKeepingLog } from "../useAPI/useTimeKeepingLogAPI";
+import { format } from "date-fns";
+import {
+  createTimeKeeping,
+  updateTimeKeeping,
+} from "../useAPI/useTimeKeepingAPI.js";
+import { calculateAge } from "../utils/index.js";
+
 const CheckingJob = () => {
   setUpSerialPortEntry("COM5", 9600);
   const cardData = useRef("");
@@ -10,7 +17,6 @@ const CheckingJob = () => {
   const [isStart, setIsStart] = useState(false);
   const [type, setType] = useState("in");
   const logDataRef = useRef(null);
-
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
@@ -87,6 +93,10 @@ const CheckingJob = () => {
         type: "Notification",
         show: true,
       });
+      createOrUpdateTimeKeeping(
+        logDataRef.current.userID,
+        logDataRef.current.scanTime
+      );
       cardData.current = "";
       logDataRef.current = "";
       setCard("");
@@ -99,6 +109,32 @@ const CheckingJob = () => {
       // console.log("Mã số thẻ: ", log);
     }
   };
+  const createOrUpdateTimeKeeping = async (userID, scanTime) => {
+    const workDate = format(scanTime, "yyyy-MM-dd");
+    const timeKeeping = {
+      userId: userID,
+      workDate: workDate,
+      checkIn: scanTime,
+      checkOut: scanTime,
+    };
+    if (type === "in") {
+      const add = await createTimeKeeping(timeKeeping);
+      if (add) {
+        console.log("Đã ghi nhận tạo 1 TimeLogging");
+      } else {
+        console.log("Đã có lỗi khi tạo 1 TimeLogging");
+      }
+      return;
+    } else if (type === "out") {
+      const update = await updateTimeKeeping(timeKeeping);
+      if (update) {
+        console.log("Đã cập nhật TimeLogging");
+      } else {
+        console.log("Đã có lỗi khi cạp nhật 1 TimeLogging");
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-r from-blue-100 via-white to-blue-100">
       <div className="w-full max-w-3xl p-8 bg-white shadow-xl rounded-lg">
@@ -150,7 +186,7 @@ const CheckingJob = () => {
             <div className="flex justify-between">
               <span className="font-medium text-gray-600">Tuổi:</span>
               <span className="font-semibold text-gray-800">
-                {card?.userId?.age}
+                {calculateAge(card?.userId?.birthDay)}
               </span>
             </div>
             <div className="flex justify-between">

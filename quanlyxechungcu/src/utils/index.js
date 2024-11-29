@@ -27,6 +27,8 @@ export const ChangeNavCase = (str) => {
     else if (str === "LỊCH LÀM VIỆC") return "schedular";
     else if (str === "CHẤM CÔNG") return "checking-job";
     else if (str === "TÀI KHOẢN") return "accounts";
+    else if (str === "GIỜ LÀM VIỆC") return "shifts";
+    else if (str === "LƯƠNG NHÂN VIÊN") return "payrolls";
   }
   return "";
 };

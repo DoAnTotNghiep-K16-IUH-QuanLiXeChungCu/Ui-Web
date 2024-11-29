@@ -12,8 +12,6 @@ import {
   FILTER_RECORD,
   MONEY_BY_DAY,
 } from "../config/API";
-import { log } from "@tensorflow/tfjs";
-
 export const getALLEntryRecord = async () => {
   const token = Cookies.get("accessToken");
   if (!token) {
@@ -274,7 +272,7 @@ export const createEntryRecord = async (entryRecord) => {
         licensePlate: entryRecord.licensePlate,
         isResident: entryRecord.isResident,
         vehicleType: entryRecord.vehicleType,
-        users_shiftId: entryRecord.users_shiftId,
+        usersID: entryRecord.usersID,
         rfidId: entryRecord.rfidId,
       },
       {
@@ -333,13 +331,6 @@ export const getEntryRecordByisOutAndUuidAndLicensePlate = async (
   uuid,
   licensePlate
 ) => {
-  console.log("isOut", isOut);
-  console.log("type___isOut", typeof isOut);
-  console.log("uuid", uuid);
-  console.log("type___uuid", typeof uuid);
-  console.log("licensePlate", licensePlate);
-  console.log("type___licensePlate", typeof licensePlate);
-
   const token = Cookies.get("accessToken");
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");

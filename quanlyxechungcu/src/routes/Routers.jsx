@@ -28,6 +28,9 @@ import AttendanceHistory from "../pages/AttendanceHistory";
 import AttendanceHistoryDelete from "../pages/AttendanceHistoryDelete";
 import Accounts from "../pages/Accounts";
 import PayRollFomula from "../pages/PayRollFomula";
+import Shift from "../pages/Shift";
+import PayRoll from "../pages/PayRoll";
+import PayRollPerUser from "../pages/PayRollPerUser";
 
 const Routers = () => {
   const routers = [
@@ -49,8 +52,10 @@ const Routers = () => {
         { path: "manage/RFIDCard", element: <RFIDCard /> },
         { path: "manage/parking-fee", element: <ParkingFeeConfiguration /> },
         { path: "manage/accounts", element: <Accounts /> },
+        { path: "manage/shifts", element: <Shift /> },
         { path: "report/per-month", element: <ReportPerMonth /> },
         { path: "report/per-day", element: <ReportPerDay /> },
+        { path: "report/payrolls", element: <PayRoll /> },
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
         { path: "/account/profile", element: <Profile /> },
@@ -61,6 +66,7 @@ const Routers = () => {
         { path: "/test", element: <LicensePlateDetection /> },
         { path: "/logs", element: <AttendanceHistory /> },
         { path: "/fomula", element: <PayRollFomula /> },
+        { path: "/payrollUser", element: <PayRollPerUser /> },
       ],
     },
     {

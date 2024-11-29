@@ -13,6 +13,16 @@ module.exports = {
         );`,
         "secondary-gradient": `linear-gradient(86.88deg, #20e3b2, #2cccff)`,
       },
+      fontFamily: {
+        sans: [
+          "Roboto",
+          "Inter",
+          "Open Sans",
+          "system-ui",
+          "Arial",
+          "Gill Sans",
+        ],
+      },
     },
   },
   plugins: [],
