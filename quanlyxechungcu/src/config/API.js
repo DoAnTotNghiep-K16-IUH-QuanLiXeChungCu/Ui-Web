@@ -5,6 +5,7 @@ export const SIGNUP = `${API}/users/sinup`;
 export const UPDATE_USER = `${API}/users/UpdateUser`;
 export const ALL_USER = `${API}/users/GetAllUsers`;
 export const DELETE_USER = `${API}/users/DeleteUsers`;
+export const GET_USER_BY_UUID = `${API}/users/GetUserByRFIDCard`;
 
 export const ALL_APARTMENT = `${API}/apartment/GetAllApartments`;
 export const APARTMENT_BY_ID = `${API}/apartment/GetApartmentById`;
@@ -125,3 +126,19 @@ export const GET_PAYROLL_FORMULA_BY_ID = `${API}/payRollFomula/GetPayRollFomulaB
 export const UPDATE_PAYROLL_FORMULA = `${API}/payRollFomula/UpdatePayRollFomula`;
 export const CREATE_PAYROLL_FORMULA = `${API}/payRollFomula/CreatePayRollFomula`;
 export const DELETE_PAYROLL_FORMULA = `${API}/payRollFomula/DeletePayRollFomula`;
+
+export const GET_ALL_PAYROLL = `${API}/payRoll/GetAllPayRolls`;
+export const GET_PAYROLL_BY_ID = `${API}/payRoll/GetPayRollByID`;
+export const UPDATE_PAYROLL = `${API}/payRoll/UpdatePayRoll`;
+export const CREATE_PAYROLL = `${API}/payRoll/CreatePayRoll`;
+export const DELETE_PAYROLL = `${API}/payRoll/DeletePayRoll`;
+export const GET_PAYROLL_BY_PERIOD = `${API}/payRoll/GetPayRollByPeriod`;
+export const GET_PAYROLL_BY_YEAR_AND_USER = `${API}/payRoll/GetPayRollByYearAndUserID`;
+
+export const GET_ALL_TIMEKEEPING = `${API}/timeKeeping/GetAllPayRollFomula`;
+export const CREATE_TIMEKEEPING = `${API}/timeKeeping/CreateTimeKeeping`;
+export const UPDATE_TIMEKEEPING = `${API}/timeKeeping/UpdateTimeKeeping`;
+export const DELETE_TIMEKEEPING = `${API}/timeKeeping/DeleteTimeKeeping`;
+export const GET_TIMEKEEPING_BY_USERID_AND_DATE_ARRANGE = `${API}/timeKeeping/GetTimeKeepingByUserIdAndDateRange`;
+export const FILTER_TIMEKEEPING = `${API}/timeKeeping/FilterTimeKeeping`;
+export const GET_TIMEKEEPING_BY_USERID_AND_SHIFTID = `${API}/timeKeeping/GetTimeKeepingByUserIdAndShiftIdAndDateTime`;

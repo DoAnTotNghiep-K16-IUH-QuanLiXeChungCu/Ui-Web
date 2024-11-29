@@ -65,7 +65,7 @@ const UserShift = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
+        setLoading(false);
       }
     };
 

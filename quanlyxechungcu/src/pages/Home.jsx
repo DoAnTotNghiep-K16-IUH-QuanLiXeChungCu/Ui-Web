@@ -14,7 +14,7 @@ import p3step4 from "../assets/3step4.jpg";
 
 const Home = () => {
   return (
-    <div>
+    <div className="min-h-screen bg-white">
       <div className="flex justify-center items-center h-auto mt-5">
         <img
           src={image}

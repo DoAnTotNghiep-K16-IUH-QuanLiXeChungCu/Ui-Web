@@ -2,12 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { findCardByUUID, setUpSerialPortEntry } from "../useAPI/useCardAPI";
 import { READ_RFID_CARD_ENTRY } from "../config/API";
 import Notification from "../components/Notification";
-import { addTimeKeepingLog } from "../useAPI/useTimeKeepingLogAPI";
-import Cookies from "js-cookie";
+import { GetUserByRFIDCard } from "../useAPI/useUserAPI";
 const SwipeCard = () => {
   setUpSerialPortEntry("COM5", 9600);
   const [cardData, setCardData] = useState("");
-
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
@@ -21,11 +19,18 @@ const SwipeCard = () => {
         // Cập nhật cardData mà không làm ảnh hưởng đến render
         setCardData(newRfidData);
         const check = await findCardByUUID(newRfidData);
-        //   console.log("check: ", check);
+        const userFinded = await GetUserByRFIDCard(newRfidData);
+        console.log("check", check);
         if (!check) {
           setShowNotification({
             content: `Không có thẻ ${newRfidData} nào trong danh sách.`,
             type: "Error",
+            show: true,
+          });
+        } else if (userFinded) {
+          setShowNotification({
+            content: `Thẻ ${newRfidData} là thẻ dành cho nhân viên`,
+            type: "Warning",
             show: true,
           });
         } else {

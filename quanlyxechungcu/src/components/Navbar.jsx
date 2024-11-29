@@ -80,6 +80,7 @@ const Navbar = () => {
                 "THẺ QUẸT",
                 "PHÍ XE",
                 "TÀI KHOẢN",
+                "GIỜ LÀM VIỆC",
               ]}
               isOpen={openDropdown === "quanly"}
               toggleDropdown={() => toggleDropdown("quanly")}
@@ -94,7 +95,7 @@ const Navbar = () => {
             />
             <Dropdown
               label="BÁO CÁO"
-              items={["THEO THÁNG", "THEO NGÀY"]}
+              items={["THEO THÁNG", "THEO NGÀY", "LƯƠNG NHÂN VIÊN"]}
               isOpen={openDropdown === "baocao"}
               toggleDropdown={() => toggleDropdown("baocao")}
               closeDropdown={closeDropdown}

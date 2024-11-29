@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import VehicleModal from "./VehicleModal";
 import Notification from "../components/Notification";
 import { deleteUser, getAllUser, updateUser } from "./../useAPI/useUserAPI";
 import Loading from "../components/Loading";
@@ -173,6 +172,15 @@ const Accounts = () => {
     ) {
       setShowNotification({
         content: "Số điện thoại phải từ 10 đến 11 số",
+        type: "Error",
+        show: true,
+      });
+    } else if (
+      dataAccount.rfidCard === null ||
+      dataAccount.rfidCard === undefined
+    ) {
+      setShowNotification({
+        content: "Thẻ của bạn không có trong hệ thống",
         type: "Error",
         show: true,
       });
