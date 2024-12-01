@@ -13,6 +13,8 @@ import {
   ArcElement,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 // Đăng ký các thành phần cần thiết
 ChartJS.register(
@@ -138,6 +140,27 @@ const ReportPerDay = () => {
         anchor: 'center',
       },
     },
+  };
+
+  const handlePrint = () => {
+    const doc = new jsPDF();
+    doc.text(`Báo cáo doanh thu bãi xe tháng ${selectedDate.getMonth() + 1} năm ${selectedDate.getFullYear()}`, 14, 10);
+    doc.autoTable({
+      head: [
+        ["Loại xe", "Nhóm", "Vào trong kỳ", "Ra trong kỳ", "Chưa ra", "Doanh thu", "% Thay đổi Doanh thu"],
+      ],
+      body: data.map(item => [
+        item.vehicleType,
+        item.group,
+        item.entered,
+        item.exited,
+        item.notExited,
+        `${item.revenue.toLocaleString()} đ`,
+        `${calculatePercentageChange(item.revenue, previousMonthData[item.vehicleType])} %`,
+      ]),
+      startY: 20,
+    });
+    doc.save('bao_cao_doanh_thu.pdf');
   };
 
   return (
