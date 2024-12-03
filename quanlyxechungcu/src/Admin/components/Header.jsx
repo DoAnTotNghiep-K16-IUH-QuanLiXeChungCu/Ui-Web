@@ -26,7 +26,7 @@ const Header = () => {
   };
   const handleNavigateToProfile = () => {
     setDropdownOpen(false);
-    navigate("/account/profile"); // Điều hướng về trang đăng nhập
+    navigate("/admin/account/profile"); // Điều hướng về trang đăng nhập
   };
   return (
     <div className="bg-white flex justify-between items-center h-11 pl-5">

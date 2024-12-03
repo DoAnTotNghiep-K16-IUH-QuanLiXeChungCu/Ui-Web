@@ -154,7 +154,11 @@ const ReportPerDay = () => {
   return (
     <div className="p-6 bg-gray-50">
       <div className="flex justify-between items-center mb-6">
+<<<<<<< HEAD
       <h2 className="text-4xl font-bold text-blue-800 text-center flex-1">
+=======
+      <h2 className="text-4xl font-bold text-[#FF0000] text-center flex-1">
+>>>>>>> 858f605e7ee99bbb96964091b93ca2ea50b2f400
         Báo cáo doanh thu bãi xe ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
       </h2>
       </div>
