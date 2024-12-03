@@ -59,6 +59,7 @@ export const FILTER_RECORD = `${API}/entryRecord/FilterEntryRecords`;
 export const CREATE_ENTRY_RECORD = `${API}/entryRecord/CreateEntryRecord`;
 export const ENTRY_RECORD_TO_EXIT_RECORD = `${API}/entryRecord/GetEntryRecordByisOutAndLicensePlate`;
 export const CREATE_EXIT_RECORD = `${API}/exitRecord/CreateExitRecord`;
+export const GET_NUMBER_VEHICLE_IN_MONTH = `${API}/entryRecord/GetNumBerVehicleInMonth`;
 
 export const ALL_CARD = `${API}/RFIDCard/GetAllRFIDCards`;
 export const ADD_CARD = `${API}/RFIDCard/CreateRFIDCard`;

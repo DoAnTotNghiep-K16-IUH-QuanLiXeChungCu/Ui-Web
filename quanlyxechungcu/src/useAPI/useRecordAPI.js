@@ -11,6 +11,7 @@ import {
   ENTRY_RECORD_TO_EXIT_RECORD,
   FILTER_RECORD,
   MONEY_BY_DAY,
+  GET_NUMBER_VEHICLE_IN_MONTH
 } from "../config/API";
 export const getALLEntryRecord = async () => {
   const token = Cookies.get("accessToken");
@@ -359,5 +360,42 @@ export const getEntryRecordByisOutAndUuidAndLicensePlate = async (
       error.response?.data?.error || error.message
     );
     return null;
+  }
+};
+
+export const getNumberVehicleInMonth = async (month, year) => {
+  const token = Cookies.get("accessToken");
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+
+  if (!month || !year) {
+    console.error("Tháng và năm là bắt buộc.");
+    return;
+  }
+
+  try {
+    const response = await axios.patch(
+      GET_NUMBER_VEHICLE_IN_MONTH,
+      {
+        month,
+        year,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Trả về kết quả nếu yêu cầu thành công
+    return response.data.data; 
+  } catch (error) {
+    console.error(
+      "Có lỗi xảy ra khi lấy dữ liệu thống kê số lượng phương tiện trong tháng:",
+      error.response?.data?.error || error.message
+    );
   }
 };
