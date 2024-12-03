@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { getNumberVehicleInMonth } from "../../useAPI/useRecordAPI";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
-  ArcElement,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import "jspdf-autotable";
 
 // Đăng ký các thành phần cần thiết
 ChartJS.register(
@@ -29,110 +29,114 @@ ChartJS.register(
 
 const ReportPerDay = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-
-  const data = [
-    {
-      vehicleType: "Ô tô của cư dân",
-      group: "Vé lượt",
-      entered: 30,
-      exited: 29,
-      revenue: 800000,
-    },
-    {
-      vehicleType: "Xe máy của cư dân",
-      group: "Vé lượt",
-      entered: 410,
-      exited: 408,
-      revenue: 1732000,
-    },
-    {
-      vehicleType: "Ô tô vãng lai",
-      group: "Vé lượt",
-      entered: 147,
-      exited: 148,
-      revenue: 0,
-    },
-    {
-      vehicleType: "Xe máy vãng lai",
-      group: "Vé lượt",
-      entered: 11,
-      exited: 10,
-      revenue: 0,
-    },
-  ];
-
-  const total = {
-    monthlyTickets: {
-      entered: 22,
-      exited: 21,
-    },
-    hourlyTickets: {
-      entered: 587,
-      exited: 585,
-    },
-    overall: {
-      entered: 609,
-      exited: 606,
-    },
-  };
-
-  // Previous month's data for percentage calculation
-  const previousMonthData = {
-    "Ô tô của cư dân": 750000,
-    "Xe máy của cư dân": 1600000,
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState({
+    monthlyTickets: { entered: 0, exited: 0 },
+    hourlyTickets: { entered: 0, exited: 0 },
+    overall: { entered: 0, exited: 0 },
+  });
+  const [previousMonthData, setPreviousMonthData] = useState({
+    "Ô tô của cư dân": 0,
+    "Xe máy của cư dân": 0,
     "Ô tô vãng lai": 0,
     "Xe máy vãng lai": 0,
-  };
+  });
 
-  // Calculate percentage change
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const apiData = await getNumberVehicleInMonth(selectedDate.getMonth() + 1, selectedDate.getFullYear());
+        console.log("API data: ", apiData);
+
+        if (apiData) {
+          const formatData = (type, group, entered, exited, revenue) => ({
+            vehicleType: type,
+            group,
+            entered: entered || 0,
+            exited: exited || 0,
+            revenue: revenue || 0,
+          });
+
+          setData([
+            formatData("Ô tô của cư dân", "Vé lượt", apiData.resident?.carIn, apiData.resident?.carOut, apiData.resident?.carRevenue),
+            formatData("Xe máy của cư dân", "Vé lượt", apiData.resident?.motorIn, apiData.resident?.motorOut, apiData.resident?.motorRevenue),
+            formatData("Ô tô vãng lai", "Vé lượt", apiData.nonResident?.carIn, apiData.nonResident?.carOut, apiData.nonResident?.carRevenue),
+            formatData("Xe máy vãng lai", "Vé lượt", apiData.nonResident?.motorIn, apiData.nonResident?.motorOut, apiData.nonResident?.motorRevenue),
+          ]);
+
+          setTotal({
+            monthlyTickets: {
+              entered: apiData.total?.totalIn || 0,
+              exited: apiData.total?.totalOut || 0,
+            },
+            hourlyTickets: { entered: 0, exited: 0 },
+            overall: {
+              entered: apiData.total?.totalIn || 0,
+              exited: apiData.total?.totalOut || 0,
+            },
+          });
+
+          setPreviousMonthData({
+            "Ô tô của cư dân": apiData.previousMonth?.resident?.carRevenue || 0,
+            "Xe máy của cư dân": apiData.previousMonth?.resident?.motorRevenue || 0,
+            "Ô tô vãng lai": apiData.previousMonth?.nonResident?.carRevenue || 0,
+            "Xe máy vãng lai": apiData.previousMonth?.nonResident?.motorRevenue || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
+    };
+
+    fetchData();
+  }, [selectedDate]);
+
   const calculatePercentageChange = (currentRevenue, previousRevenue) => {
     if (previousRevenue === 0) return currentRevenue > 0 ? 100 : 0;
     const change = ((currentRevenue - previousRevenue) / previousRevenue) * 100;
-    return change.toFixed(2); // Limit to 2 decimal places
+    return change.toFixed(2);
   };
 
-  const vehicleTypeData = {
+  const getVehicleTypeData = () => ({
     labels: ['Ô tô của cư dân', 'Xe máy của cư dân', 'Ô tô vãng lai', 'Xe máy vãng lai'],
     datasets: [
       {
         label: 'Số lượng xe vào trong kỳ',
-        data: [30, 410, 147, 11],
+        data: data.map(item => item.entered),
         backgroundColor: 'rgba(255, 99, 132, 0.3)',
         borderColor: '#FF6F61',
         borderWidth: 1,
       },
       {
         label: 'Số lượng xe đã ra',
-        data: [29, 408, 148, 10],
+        data: data.map(item => item.exited),
         backgroundColor: 'rgba(54, 162, 235, 0.3)',
         borderColor: '#36A2EB',
         borderWidth: 1,
       },
     ],
-  };
+  });
 
-  const revenueData = {
+  const getRevenueData = () => ({
     labels: ['Ô tô của cư dân', 'Xe máy của cư dân', 'Ô tô vãng lai', 'Xe máy vãng lai'],
     datasets: [
       {
         label: 'Doanh thu',
-        data: [800000, 1732000, 0, 0],
+        data: data.map(item => item.revenue),
         backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FFEB33'],
         borderWidth: 1,
       },
     ],
     plugins: {
       datalabels: {
-        formatter: (value) => `${value.toLocaleString()} đ`,
+        formatter: value => `${value.toLocaleString()} đ`,
         color: '#fff',
-        font: {
-          weight: 'bold',
-        },
+        font: { weight: 'bold' },
         align: 'center',
         anchor: 'center',
       },
     },
-  };
+  });
 
   return (
     <div className="p-6 bg-gray-50">
@@ -140,12 +144,11 @@ const ReportPerDay = () => {
         <h2 className="text-4xl font-bold text-[#FF0000] text-center flex-1">
           Báo cáo doanh thu bãi xe tháng {selectedDate.getMonth() + 1} năm {selectedDate.getFullYear()}
         </h2>
-
         <div className="ml-4">
           <label className="block font-semibold text-sm text-gray-600">Chọn tháng/năm</label>
           <DatePicker
             selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
+            onChange={date => setSelectedDate(date)}
             dateFormat="MM/yyyy"
             showMonthYearPicker
             className="mt-2 p-2 border border-blue-500 rounded"
@@ -154,36 +157,26 @@ const ReportPerDay = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row lg:space-x-6">
-        <div className="lg:w-1/2 p-4 flex flex-col justify-between bg-white shadow-md rounded-lg">
-          <h3 className="font-semibold text-center text-2xl text-gray-700 mb-5">
-            Số lượng xe vào/ra theo loại
-          </h3>
-          <Bar data={vehicleTypeData} />
+        <div className="lg:w-1/2 p-4 bg-white shadow-md rounded-lg">
+          <h3 className="font-semibold text-center text-2xl text-gray-700 mb-5">Số lượng xe vào/ra theo loại</h3>
+          <Bar data={getVehicleTypeData()} />
         </div>
-
-        <div className="lg:w-1/2 p-4 flex flex-col justify-between bg-white shadow-md rounded-lg">
-          <h3 className="font-semibold text-center text-2xl text-gray-700 mb-5">
-            Doanh thu theo loại xe
-          </h3>
+        <div className="lg:w-1/2 p-4 bg-white shadow-md rounded-lg">
+          <h3 className="font-semibold text-center text-2xl text-gray-700 mb-5">Doanh thu theo loại xe</h3>
           <div className="flex justify-center" style={{ height: '340px' }}>
-            <Pie data={revenueData} />
+            <Pie data={getRevenueData()} />
           </div>
         </div>
       </div>
 
       <div className="mt-6">
-        <h3 className="font-semibold text-center text-2xl text-[#FF0000] mb-4">
-          Bảng dữ liệu chi tiết tháng {selectedDate.getMonth() + 1} năm {selectedDate.getFullYear()}
-        </h3>
+        <h3 className="font-semibold text-center text-2xl text-[#FF0000] mb-4">Bảng dữ liệu chi tiết</h3>
         <table className="min-w-full border-collapse border border-gray-400 mb-5 bg-white shadow-md rounded-lg">
           <thead className="bg-[#F1F1F1]">
             <tr>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Loại xe</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Nhóm</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Vào trong kỳ</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Ra trong kỳ</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Doanh thu</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">% Thay đổi Doanh thu</th>
+              {['Loại xe', 'Nhóm', 'Vào trong kỳ', 'Ra trong kỳ', 'Doanh thu', '% Thay đổi Doanh thu'].map((header, idx) => (
+                <th key={idx} className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">{header}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -193,9 +186,7 @@ const ReportPerDay = () => {
                 <td className="border border-gray-400 p-2 text-sm text-gray-700 font-semibold">{item.group}</td>
                 <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.entered}</td>
                 <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.exited}</td>
-                <td className="border border-gray-400 p-2 text-sm text-gray-700">
-                  {item.revenue.toLocaleString()} đ
-                </td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.revenue.toLocaleString()} đ</td>
                 <td className="border border-gray-400 p-2 text-sm text-gray-700">
                   {calculatePercentageChange(item.revenue, previousMonthData[item.vehicleType])} %
                 </td>
@@ -205,27 +196,15 @@ const ReportPerDay = () => {
         </table>
 
         <div className="mt-5 text-sm text-gray-700">
-          <div className="flex justify-start">
-            <div className="font-bold text-blue-600">Tổng Vé tháng:</div>
-            <div className="ml-4">
-              Vào trong kỳ: <span className="font-bold">{total.monthlyTickets.entered}</span>, Ra trong kỳ:{" "}
-              <span className="font-bold">{total.monthlyTickets.exited}</span>
+          {['Tổng Vé tháng'].map((label, idx) => (
+            <div className="flex justify-start mt-2" key={idx}>
+              <div className="font-bold text-blue-600">{label}:</div>
+              <div className="ml-4">
+                Vào trong kỳ: <span className="font-bold">{total.monthlyTickets.entered}</span>, Ra trong kỳ:{" "}
+                <span className="font-bold">{total.monthlyTickets.exited}</span>
+              </div>
             </div>
-          </div>
-          <div className="flex justify-start mt-2">
-            <div className="font-bold text-blue-600">Tổng Vé lượt:</div>
-            <div className="ml-6">
-              Vào trong kỳ: <span className="font-bold">{total.hourlyTickets.entered}</span>, Ra trong kỳ:{" "}
-              <span className="font-bold">{total.hourlyTickets.exited}</span>
-            </div>
-          </div>
-          <div className="flex justify-start mt-2">
-            <div className="font-bold text-blue-600">Tổng cộng:</div>
-            <div className="ml-10">
-              Vào trong kỳ: <span className="font-bold">{total.overall.entered}</span>, Ra trong kỳ:{" "}
-              <span className="font-bold">{total.overall.exited}</span>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

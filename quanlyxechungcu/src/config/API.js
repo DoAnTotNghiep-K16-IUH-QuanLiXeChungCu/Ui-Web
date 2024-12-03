@@ -51,6 +51,7 @@ export const MONTHLY_STATISTIC = `${API}/residentHistoryMoney/GetMonthlyStatisti
 export const YEAR_STATISTIC = `${API}/residentHistoryMoney/GetYearlyStatistics`;
 export const MONTHLY_TICKET_BY_RFIDCARD = `${API}/residentHistoryMoney/GetResidentHistoryMoneysLatesbyRFIDCard`;
 export const MONTHLY_TICKET_BY_LICENSEPLATE = `${API}/residentHistoryMoney/GetResidentHistoryMoneysLicensePlate`;
+export const GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH_ISRESIDENT = `${API}/residentHistoryMoney/GetTotalFeesForCurrentAndPreviousMonth`;
 
 export const ALL_ENTRY_RECORD = `${API}/entryRecord/GetAllEntryRecords`;
 export const ALL_EXIT_RECORD = `${API}/exitRecord/GetAllExitRecords`;
@@ -147,6 +148,7 @@ export const FILTER_TIMEKEEPING = `${API}/timeKeeping/FilterTimeKeeping`;
 export const GET_TIMEKEEPING_BY_USERID_AND_SHIFTID = `${API}/timeKeeping/GetTimeKeepingByUserIdAndShiftIdAndDateTime`;
 
 export const ESTIMATE_PARKING_TRANSACTION = `${API}/parkingTransaction/EstimateParkingTransaction`;
+export const GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH = `${API}/parkingTransaction/GetTotalFeesForCurrentAndPreviousMonth`;
 // export const UPDATE_TIMEKEEPING = `${API}/timeKeeping/UpdateTimeKeeping`;
 // export const DELETE_TIMEKEEPING = `${API}/timeKeeping/DeleteTimeKeeping`;
 // export const GET_TIMEKEEPING_BY_USERID_AND_DATE_ARRANGE = `${API}/timeKeeping/GetTimeKeepingByUserIdAndDateRange`;
