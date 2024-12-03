@@ -25,6 +25,7 @@ const Login = () => {
         }),
       });
       const data = await response.json();
+      const role = data.data.role;
       if (response.ok) {
         // Xử lý nếu đăng nhập thành công
         Cookies.set("accessToken", data.data.accessToken, {
@@ -124,16 +125,6 @@ const Login = () => {
             </button>
           </div>
         </form>
-
-        {/* Forgot Password */}
-        <div className="mt-4 text-center">
-          <Link
-            to="/auth/signup"
-            className="text-blue-500 hover:text-blue-700 text-sm"
-          >
-            Đăng kí
-          </Link>
-        </div>
         <div className="mt-4 text-center">
           <Link
             to="/auth/forgot-password"

@@ -260,7 +260,7 @@ export const createEntryRecord = async (entryRecord) => {
   const token = Cookies.get("accessToken");
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
-    return;
+    return null; // Trả về null khi không có token
   }
 
   try {
@@ -283,12 +283,13 @@ export const createEntryRecord = async (entryRecord) => {
       }
     );
 
-    return response.data.entryRecord; // Trả về dữ liệu phản hồi nếu cần sử dụng
+    return response.data.entryRecord; // Trả về dữ liệu phản hồi nếu thành công
   } catch (error) {
     console.error(
       "Lỗi khi thêm EntryRecord:",
       error.response?.data?.error || error.message
     );
+    return error.response?.data?.error || "Không thể thêm EntryRecord"; // Trả về lỗi một cách an toàn
   }
 };
 
@@ -328,7 +329,6 @@ export const createExitRecord = async (exitRecord) => {
 };
 export const getEntryRecordByisOutAndUuidAndLicensePlate = async (
   isOut,
-  uuid,
   licensePlate
 ) => {
   const token = Cookies.get("accessToken");
@@ -342,7 +342,6 @@ export const getEntryRecordByisOutAndUuidAndLicensePlate = async (
       ENTRY_RECORD_TO_EXIT_RECORD,
       {
         isOut,
-        uuid,
         licensePlate, // Truyền ID vào body dưới dạng JSON
       },
       {
