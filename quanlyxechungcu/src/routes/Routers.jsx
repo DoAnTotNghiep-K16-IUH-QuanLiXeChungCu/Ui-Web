@@ -1,47 +1,44 @@
 import React from "react";
 import { Navigate, useRoutes } from "react-router-dom";
-import Home from "../pages/Home";
-import NotFound from "../pages/NotFound";
-import Login from "../pages/Login";
-import ForgotPassword from "../pages/ForgotPassword";
-import DashboardLayout from "../layouts/DashboardLayout";
-import AuthLayout from "../layouts/AuthLayout";
-import ParkingManagement from "../pages/ParkingManage";
-import ParkingFeeConfiguration from "../pages/ParkingFeeConfiguration";
-import MonthlyTicketList from "../pages/MonthlyTicketList";
-import Customer from "../pages/Customer";
-import Vehicle from "../pages/Vehicle";
-import ConnectConfiguration from "../pages/ConnectConfiguration";
-import ParkingHistory from "../pages/ParkingHistory";
-import AboutUs from "../pages/AboutUs";
-import RFIDCard from "../pages/RFIDCard";
-import Apartment from "../pages/Apartment";
-import ParkingSlot from "../pages/ParkingSlot";
-import ReportPerMonth from "../pages/ReportPerMonth";
-import ReportPerDay from "../pages/ReportPerDay";
-import Profile from "../pages/Profile";
-import UserShift from "./../pages/UserShift";
-import SignUp from "../pages/SignUp";
-import CheckingJob from "./../pages/CheckingJob";
-import LicensePlateDetection from "../components/LicensePlateDetection";
-import AttendanceHistory from "../pages/AttendanceHistory";
-import AttendanceHistoryDelete from "../pages/AttendanceHistoryDelete";
-import Accounts from "../pages/Accounts";
-import PayRollFomula from "../pages/PayRollFomula";
-import Shift from "../pages/Shift";
-import PayRoll from "../pages/PayRoll";
-import PayRollPerUser from "../pages/PayRollPerUser";
+import NotFound from "./../Employee/pages/NotFound";
+import Login from "../Employee/pages/Login";
+import AuthLayout from "./../Employee/layouts/AuthLayout";
+import ParkingManagement from "./../Employee/pages/ParkingManage";
+import ConnectConfiguration from "./../Employee/pages/ConnectConfiguration";
+import CheckingJob from "./../Employee/pages/CheckingJob";
+import UserShiftEmployee from "./../Employee/pages/UserShiftEmployee";
+import Profile from "./../Employee/pages/Profile";
+import MonthlyTicketList from "./../Employee/pages/MonthlyTicketList";
+import AboutUs from "./../Employee/pages/AboutUs";
+import Vehicle from "./../Employee/pages/Vehicle";
+import Customer from "./../Employee/pages/Customer";
+import ParkingHistory from "./../Employee/pages/ParkingHistory";
+import ParkingSlot from "./../Employee/pages/ParkingSlot";
+import Home from "./../Employee/pages/Home";
+import EmployeeLayout from "./../Employee/layouts/EmployeeLayout";
+import PayRollPerUser from "../Admin/pages/PayRollPerUser";
+import PayRollFomulaModal from "../Admin/pages/PayRollFomulaModal";
+import AttendanceHistory from "../Admin/pages/AttendanceHistory";
+import UserShift from "../Admin/pages/UserShift";
+import ReportPerDay from "../Admin/pages/ReportPerDay";
+import ReportPerMonth from "../Admin/pages/ReportPerMonth";
+import Shift from "../Admin/pages/Shift";
+import Accounts from "../Admin/pages/Accounts";
+import ParkingFeeConfiguration from "../Admin/pages/ParkingFeeConfiguration";
+import RFIDCard from "../Admin/pages/RFIDCard";
+import Apartment from "../Admin/pages/Apartment";
+import AdminLayout from "./../Admin/layouts/AdminLayout";
+import PayRoll from "./../Admin/pages/PayRoll";
 
 const Routers = () => {
   const routers = [
-    // { index: true, element: <Home /> },
     {
       path: "/",
-      element: <Navigate to="/home"></Navigate>,
+      element: <Navigate to="/auth/login"></Navigate>,
     },
     {
-      path: "/",
-      element: <DashboardLayout />,
+      path: "/admin",
+      element: <AdminLayout />,
       children: [
         { path: "home", element: <Home /> },
         { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
@@ -56,27 +53,42 @@ const Routers = () => {
         { path: "report/per-month", element: <ReportPerMonth /> },
         { path: "report/per-day", element: <ReportPerDay /> },
         { path: "report/payrolls", element: <PayRoll /> },
+        { path: "monthly-ticket", element: <MonthlyTicketList /> },
+        { path: "account/profile", element: <Profile /> },
+        { path: "userShift/schedular", element: <UserShift /> },
+        { path: "userShift/checking-job", element: <CheckingJob /> },
+        { path: "setting/connect", element: <ConnectConfiguration /> },
+        { path: "parking-check", element: <ParkingManagement /> },
+        { path: "userShift/logs", element: <AttendanceHistory /> },
+        { path: "fomula", element: <PayRollFomulaModal /> },
+        { path: "parking-check", element: <ParkingManagement /> },
+        { path: "monthly-ticket", element: <MonthlyTicketList /> },
+        { path: "about-us", element: <AboutUs /> },
+        { path: "payrollUser", element: <PayRollPerUser /> },
+      ],
+    },
+    {
+      path: "/",
+      element: <EmployeeLayout />,
+      children: [
+        { path: "home", element: <Home /> },
+        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
+        { path: "parking-manage/history", element: <ParkingHistory /> },
+        { path: "manage/customer", element: <Customer /> },
+        { path: "manage/vehicle", element: <Vehicle /> },
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
-        { path: "/account/profile", element: <Profile /> },
-        { path: "/userShift/schedular", element: <UserShift /> },
-        { path: "/userShift/checking-job", element: <CheckingJob /> },
+        { path: "account/profile", element: <Profile /> },
+        { path: "userShift/schedular", element: <UserShiftEmployee /> },
+        { path: "userShift/checking-job", element: <CheckingJob /> },
         { path: "setting/connect", element: <ConnectConfiguration /> },
-        { path: "/parking-check", element: <ParkingManagement /> },
-        { path: "/test", element: <LicensePlateDetection /> },
-        { path: "/logs", element: <AttendanceHistory /> },
-        { path: "/fomula", element: <PayRollFomula /> },
-        { path: "/payrollUser", element: <PayRollPerUser /> },
+        { path: "parking-check", element: <ParkingManagement /> },
       ],
     },
     {
       path: "/auth",
       element: <AuthLayout />,
-      children: [
-        { path: "login", element: <Login /> },
-        { path: "forgot-password", element: <ForgotPassword /> },
-        { path: "signup", element: <SignUp /> },
-      ],
+      children: [{ path: "login", element: <Login /> }],
     },
     { path: "*", element: <NotFound /> },
   ];

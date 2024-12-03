@@ -3,6 +3,7 @@ import {
   ALL_MONTHLY_TICKET,
   CREATE_MONTHLY_TICKET,
   FILTER_MONTHLY_TICKET,
+  MONTHLY_TICKET_BY_LICENSEPLATE,
   UPDATE_MONTHLY_TICKET,
 } from "../config/API";
 
@@ -201,6 +202,39 @@ export const filterMonthlyTicket = async (
 
     if (response.ok) {
       return data.data.residentHistoryMoneys; // Trả về dữ liệu nếu yêu cầu thành công
+    } else {
+      console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
+      return data.error;
+    }
+  } catch (error) {
+    console.error("Error during creating monthly tickets:", error);
+  }
+};
+
+export const GetResidentHistoryMoneysLicensePlate = async (licensePlate) => {
+  const token = Cookies.get("accessToken");
+
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+
+  try {
+    const response = await fetch(MONTHLY_TICKET_BY_LICENSEPLATE, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        licensePlate: licensePlate,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return data.data; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
       console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
       return data.error;

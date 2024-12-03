@@ -29,6 +29,7 @@ export const ChangeNavCase = (str) => {
     else if (str === "TÀI KHOẢN") return "accounts";
     else if (str === "GIỜ LÀM VIỆC") return "shifts";
     else if (str === "LƯƠNG NHÂN VIÊN") return "payrolls";
+    else if (str === "LỊCH SỬ QUÉT THẺ") return "logs";
   }
   return "";
 };
@@ -37,7 +38,7 @@ export const changeLabel = (str) => {
     if (str === "entryLane") return "Cổng vào 1";
     else if (str === "exitLane") return "Cổng ra 1";
     else if (str === "secondaryEntryLane") return "Cổng vào 2";
-    else if (str === "secondaryExitLane") return "Cổng vào 2";
+    else if (str === "secondaryExitLane") return "Cổng ra 2";
   }
   return "";
 };
