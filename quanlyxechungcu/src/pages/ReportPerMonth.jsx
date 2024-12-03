@@ -13,7 +13,6 @@ import {
   ArcElement,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 // Đăng ký các thành phần cần thiết
@@ -142,27 +141,6 @@ const ReportPerDay = () => {
     },
   };
 
-  const handlePrint = () => {
-    const doc = new jsPDF();
-    doc.text(`Báo cáo doanh thu bãi xe tháng ${selectedDate.getMonth() + 1} năm ${selectedDate.getFullYear()}`, 14, 10);
-    doc.autoTable({
-      head: [
-        ["Loại xe", "Nhóm", "Vào trong kỳ", "Ra trong kỳ", "Chưa ra", "Doanh thu", "% Thay đổi Doanh thu"],
-      ],
-      body: data.map(item => [
-        item.vehicleType,
-        item.group,
-        item.entered,
-        item.exited,
-        item.notExited,
-        `${item.revenue.toLocaleString()} đ`,
-        `${calculatePercentageChange(item.revenue, previousMonthData[item.vehicleType])} %`,
-      ]),
-      startY: 20,
-    });
-    doc.save('bao_cao_doanh_thu.pdf');
-  };
-
   return (
     <div className="p-6 bg-gray-50">
       <div className="flex justify-between items-center mb-6">
@@ -254,7 +232,7 @@ const ReportPerDay = () => {
           </div>
           <div className="flex justify-start mt-2">
             <div className="font-bold text-blue-600">Tổng cộng:</div>
-            <div className="ml-12">
+            <div className="ml-10">
               Vào trong kỳ: <span className="font-bold">{total.overall.entered}</span>, Ra trong kỳ:{" "}
               <span className="font-bold">{total.overall.exited}</span>, Chưa ra:{" "}
               <span className="font-bold">{total.overall.notExited}</span>

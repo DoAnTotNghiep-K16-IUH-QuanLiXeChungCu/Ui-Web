@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bar, Pie } from "react-chartjs-2";
-import DatePicker from "react-datepicker"; // Import DatePicker
-import "react-datepicker/dist/react-datepicker.css"; // Import CSS cho DatePicker
+import "react-datepicker/dist/react-datepicker.css";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,6 +11,7 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
 // Đăng ký các thành phần cần thiết
 ChartJS.register(
@@ -21,11 +21,24 @@ ChartJS.register(
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ChartDataLabels
 );
 
 const ReportPerDay = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Trạng thái cho ngày được chọn
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  useEffect(() => {
+    // Giả sử bạn có một API lấy ngày hiện tại từ server
+    const fetchServerDate = async () => {
+      const response = await fetch("/api/getServerDate");
+      const data = await response.json();
+      const serverDate = new Date(data.date); // Dữ liệu ngày từ server
+      setSelectedDate(serverDate); // Cập nhật ngày từ server
+    };
+
+    fetchServerDate();
+  }, []);
 
   const data = [
     {
@@ -80,28 +93,41 @@ const ReportPerDay = () => {
     },
   };
 
-  // Dữ liệu cho biểu đồ Bar: Số lượng xe vào/ra theo loại
+  // Previous month's data for percentage calculation
+  const previousMonthData = {
+    "Ô tô của cư dân": 750000,
+    "Xe máy của cư dân": 1600000,
+    "Ô tô vãng lai": 0,
+    "Xe máy vãng lai": 0,
+  };
+
+  // Calculate percentage change
+  const calculatePercentageChange = (currentRevenue, previousRevenue) => {
+    if (previousRevenue === 0) return currentRevenue > 0 ? 100 : 0;
+    const change = ((currentRevenue - previousRevenue) / previousRevenue) * 100;
+    return change.toFixed(2); // Limit to 2 decimal places
+  };
+
   const vehicleTypeData = {
     labels: ['Ô tô của cư dân', 'Xe máy của cư dân', 'Ô tô vãng lai', 'Xe máy vãng lai'],
     datasets: [
       {
         label: 'Số lượng xe vào trong kỳ',
         data: [30, 410, 147, 11],
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.3)',
+        borderColor: '#FF6F61',
         borderWidth: 1,
       },
       {
         label: 'Số lượng xe đã ra',
         data: [29, 408, 148, 10],
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(54, 162, 235, 0.3)',
+        borderColor: '#36A2EB',
         borderWidth: 1,
       },
     ],
   };
 
-  // Dữ liệu cho biểu đồ Pie: Doanh thu theo loại xe
   const revenueData = {
     labels: ['Ô tô của cư dân', 'Xe máy của cư dân', 'Ô tô vãng lai', 'Xe máy vãng lai'],
     datasets: [
@@ -112,101 +138,104 @@ const ReportPerDay = () => {
         borderWidth: 1,
       },
     ],
+    plugins: {
+      datalabels: {
+        formatter: (value) => `${value.toLocaleString()} đ`,
+        color: '#fff',
+        font: {
+          weight: 'bold',
+        },
+        align: 'center',
+        anchor: 'center',
+      },
+    },
   };
 
   return (
-    <div className="p-6">
-      {/* Tiêu đề và phần chọn ngày nằm cùng một dòng */}
-      <div className="flex items-center gap-4 mb-4">
-        <h2 className="text-2xl font-bold text-orange-600">
-          Báo cáo doanh thu bãi xe ngày {selectedDate.toLocaleDateString()}
-        </h2>
-        <div>
-          <label className="block font-semibold text-sm text-gray-600">Chọn ngày</label>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            dateFormat="dd/MM/yyyy"
-            className="mt-2 p-2 border border-gray-400 rounded"
-          />
-        </div>
+    <div className="p-6 bg-gray-50">
+      <div className="flex justify-between items-center mb-6">
+      <h2 className="text-4xl font-bold text-blue-800 text-center flex-1">
+        Báo cáo doanh thu bãi xe ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
+      </h2>
       </div>
-
-      {/* Cột chứa biểu đồ và bảng tổng kết */}
       <div className="flex flex-col lg:flex-row lg:space-x-6">
-        {/* Cột bên trái: Biểu đồ Số lượng xe vào/ra */}
-        <div className="lg:w-1/2 p-4 flex flex-col justify-between">
-          <h3 className="font-semibold text-center text-lg text-gray-700 mb-5">
+        <div className="lg:w-1/2 p-4 flex flex-col justify-between bg-white shadow-md rounded-lg">
+          <h3 className="font-semibold text-center text-2xl text-gray-700 mb-5">
             Số lượng xe vào/ra theo loại
           </h3>
           <Bar data={vehicleTypeData} />
         </div>
 
-        {/* Cột bên phải: Biểu đồ Doanh thu theo loại xe */}
-        <div className="lg:w-1/2 p-4 flex flex-col justify-between">
-          <h3 className="font-semibold text-center text-lg text-gray-700 mb-5">
+        <div className="lg:w-1/2 p-4 flex flex-col justify-between bg-white shadow-md rounded-lg">
+          <h3 className="font-semibold text-center text-2xl text-gray-700 mb-5">
             Doanh thu theo loại xe
           </h3>
-          <div className="flex justify-center" style={{ height: '300px' }}>
+          <div className="flex justify-center" style={{ height: '340px' }}>
             <Pie data={revenueData} />
           </div>
         </div>
       </div>
 
-      {/* Bảng tổng kết */}
       <div className="mt-6">
-        <table className="min-w-full border-collapse border border-gray-400 mb-5">
-          <thead>
-            <tr className="bg-gray-200">
+      <h3 className="font-semibold text-center text-2xl text-[#FF0000] mb-4">
+      Doanh thu theo loại xe vào ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
+      </h3>
+        <table className="min-w-full border-collapse border border-gray-400 mb-5 bg-white shadow-md rounded-lg">
+          <thead className="bg-[#F1F1F1]">
+            <tr>
               <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Loại xe</th>
               <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Nhóm</th>
               <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Vào trong kỳ</th>
               <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Ra trong kỳ</th>
               <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Chưa ra</th>
               <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Doanh thu</th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">% Thay đổi Doanh thu</th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
-              <tr key={index} className={index % 2 === 0 ? "bg-gray-100" : ""}>
-                <td className="border border-gray-400 p-2 text-sm">{item.vehicleType}</td>
-                <td className="border border-gray-400 p-2 text-sm">{item.group}</td>
-                <td className="border border-gray-400 p-2 text-sm">{item.entered}</td>
-                <td className="border border-gray-400 p-2 text-sm">{item.exited}</td>
-                <td className="border border-gray-400 p-2 text-sm">{item.notExited}</td>
-                <td className="border border-gray-400 p-2 text-sm text-red-600">
+              <tr key={index} className={index % 2 === 0 ? "bg-[#F9F9F9]" : ""}>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700 font-semibold">{item.vehicleType}</td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700 font-semibold">{item.group}</td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.entered}</td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.exited}</td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.notExited}</td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">
                   {item.revenue.toLocaleString()} đ
+                </td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">
+                  {calculatePercentageChange(item.revenue, previousMonthData[item.vehicleType])}%
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
 
-        {/* Tổng kết */}
-        <div className="mt-5 text-sm text-gray-700">
-          <div className="flex justify-start">
-            <div className="font-bold">Tổng Vé tháng:</div>
-            <div className="ml-4">
-              Vào trong kỳ: <span className="font-bold">{total.monthlyTickets.entered}</span>, Ra trong kỳ:{" "}
-              <span className="font-bold">{total.monthlyTickets.exited}</span>, Chưa ra:{" "}
-              <span className="font-bold">{total.monthlyTickets.notExited}</span>
-            </div>
+      {/* Tổng số liệu */}
+      <div className="mt-5 text-sm text-gray-700">
+        <div className="flex justify-start">
+          <div className="font-bold text-blue-600">Tổng Vé tháng:</div>
+          <div className="ml-4">
+            Vào trong kỳ: <span className="font-bold">{total.monthlyTickets.entered}</span>, Ra trong kỳ:{" "}
+            <span className="font-bold">{total.monthlyTickets.exited}</span>, Chưa ra:{" "}
+            <span className="font-bold">{total.monthlyTickets.notExited}</span>
           </div>
-          <div className="flex justify-start mt-2">
-            <div className="font-bold">Tổng Vé lượt:</div>
-            <div className="ml-6">
-              Vào trong kỳ: <span className="font-bold">{total.hourlyTickets.entered}</span>, Ra trong kỳ:{" "}
-              <span className="font-bold">{total.hourlyTickets.exited}</span>, Chưa ra:{" "}
-              <span className="font-bold">{total.hourlyTickets.notExited}</span>
-            </div>
+        </div>
+        <div className="flex justify-start mt-2">
+          <div className="font-bold text-blue-600">Tổng Vé lượt:</div>
+          <div className="ml-6">
+            Vào trong kỳ: <span className="font-bold">{total.hourlyTickets.entered}</span>, Ra trong kỳ:{" "}
+            <span className="font-bold">{total.hourlyTickets.exited}</span>, Chưa ra:{" "}
+            <span className="font-bold">{total.hourlyTickets.notExited}</span>
           </div>
-          <div className="flex justify-start mt-2">
-            <div className="font-bold">Tổng cộng:</div>
-            <div className="ml-12">
-              Vào trong kỳ: <span className="font-bold">{total.overall.entered}</span>, Ra trong kỳ:{" "}
-              <span className="font-bold">{total.overall.exited}</span>, Chưa ra:{" "}
-              <span className="font-bold">{total.overall.notExited}</span>
-            </div>
+        </div>
+        <div className="flex justify-start mt-2">
+          <div className="font-bold text-blue-600">Tổng cộng:</div>
+          <div className="ml-10">
+            Vào trong kỳ: <span className="font-bold">{total.overall.entered}</span>, Ra trong kỳ:{" "}
+            <span className="font-bold">{total.overall.exited}</span>, Chưa ra:{" "}
+            <span className="font-bold">{total.overall.notExited}</span>
           </div>
         </div>
       </div>
