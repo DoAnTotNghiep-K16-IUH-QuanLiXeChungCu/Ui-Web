@@ -43,20 +43,20 @@ const Navbar = () => {
       <div className="container mx-auto flex justify-center items-center space-x-6">
         {myUserID ? (
           <>
-            <Link
+            {/* <Link
               to="/admin/about-us"
               className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
             >
               <FontAwesomeIcon icon={faCircleInfo} />
               VỀ CHÚNG TÔI
-            </Link>
-            <Link
+            </Link> */}
+            {/* <Link
               to="/admin/parking-check"
               className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
             >
               <FontAwesomeIcon icon={faCheckToSlot} />
               QUẸT XE
-            </Link>
+            </Link> */}
             <Dropdown
               label="BÃI ĐỖ"
               items={["LỊCH SỬ", "DANH SÁCH BÃI ĐỖ"]}
@@ -81,6 +81,7 @@ const Navbar = () => {
                 "PHÍ XE",
                 "TÀI KHOẢN",
                 "GIỜ LÀM VIỆC",
+                "TÍNH LƯƠNG",
               ]}
               isOpen={openDropdown === "quanly"}
               toggleDropdown={() => toggleDropdown("quanly")}
@@ -88,25 +89,26 @@ const Navbar = () => {
             />
             <Dropdown
               label="CA TRỰC"
-              items={["LỊCH LÀM VIỆC", "CHẤM CÔNG", "LỊCH SỬ QUÉT THẺ"]}
+              items={["LỊCH LÀM VIỆC", "LỊCH SỬ QUÉT THẺ"]}
+              // "CHẤM CÔNG",
               isOpen={openDropdown === "catruc"}
               toggleDropdown={() => toggleDropdown("catruc")}
               closeDropdown={closeDropdown}
             />
             <Dropdown
-              label="BÁO CÁO"
+              label="THỐNG KÊ"
               items={["THEO THÁNG", "THEO NGÀY", "LƯƠNG NHÂN VIÊN"]}
               isOpen={openDropdown === "baocao"}
               toggleDropdown={() => toggleDropdown("baocao")}
               closeDropdown={closeDropdown}
             />
-            <Dropdown
+            {/* <Dropdown
               label="CÀI ĐẶT"
               items={["KẾT NỐI"]}
               isOpen={openDropdown === "caidat"}
               toggleDropdown={() => toggleDropdown("caidat")}
               closeDropdown={closeDropdown}
-            />
+            /> */}
           </>
         ) : (
           <Link

@@ -17,7 +17,6 @@ import ParkingSlot from "./../Employee/pages/ParkingSlot";
 import Home from "./../Employee/pages/Home";
 import EmployeeLayout from "./../Employee/layouts/EmployeeLayout";
 import PayRollPerUser from "../Admin/pages/PayRollPerUser";
-import PayRollFomulaModal from "../Admin/pages/PayRollFomulaModal";
 import AttendanceHistory from "../Admin/pages/AttendanceHistory";
 import UserShift from "../Admin/pages/UserShift";
 import ReportPerDay from "../Admin/pages/ReportPerDay";
@@ -29,6 +28,7 @@ import RFIDCard from "../Admin/pages/RFIDCard";
 import Apartment from "../Admin/pages/Apartment";
 import AdminLayout from "./../Admin/layouts/AdminLayout";
 import PayRoll from "./../Admin/pages/PayRoll";
+import PayRollFomula from "./../Admin/pages/PayRollFomula";
 
 const Routers = () => {
   const routers = [
@@ -50,6 +50,7 @@ const Routers = () => {
         { path: "manage/parking-fee", element: <ParkingFeeConfiguration /> },
         { path: "manage/accounts", element: <Accounts /> },
         { path: "manage/shifts", element: <Shift /> },
+        { path: "manage/fomula", element: <PayRollFomula /> },
         { path: "report/per-month", element: <ReportPerMonth /> },
         { path: "report/per-day", element: <ReportPerDay /> },
         { path: "report/payrolls", element: <PayRoll /> },
@@ -60,7 +61,6 @@ const Routers = () => {
         { path: "setting/connect", element: <ConnectConfiguration /> },
         { path: "parking-check", element: <ParkingManagement /> },
         { path: "userShift/logs", element: <AttendanceHistory /> },
-        { path: "fomula", element: <PayRollFomulaModal /> },
         { path: "parking-check", element: <ParkingManagement /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
         { path: "about-us", element: <AboutUs /> },
