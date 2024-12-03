@@ -3,6 +3,8 @@ import { Bar, Pie } from "react-chartjs-2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getNumberVehicleInMonth } from "../../useAPI/useRecordAPI";
+import { getTotalFeesForCurrentAndPreviousMonthResident } from "../../useAPI/useMonthlyTicketAPI";
+import { getTotalFeesForCurrentAndPreviousMonth } from "../../useAPI/useParkingTransactionAPI"; 
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -45,6 +47,7 @@ const ReportPerDay = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Lấy dữ liệu về số lượng xe vào/ra từ API
         const apiData = await getNumberVehicleInMonth(selectedDate.getMonth() + 1, selectedDate.getFullYear());
         console.log("API data: ", apiData);
 
@@ -75,14 +78,28 @@ const ReportPerDay = () => {
               exited: apiData.total?.totalOut || 0,
             },
           });
-
-          setPreviousMonthData({
-            "Ô tô của cư dân": apiData.previousMonth?.resident?.carRevenue || 0,
-            "Xe máy của cư dân": apiData.previousMonth?.resident?.motorRevenue || 0,
-            "Ô tô vãng lai": apiData.previousMonth?.nonResident?.carRevenue || 0,
-            "Xe máy vãng lai": apiData.previousMonth?.nonResident?.motorRevenue || 0,
-          });
         }
+
+        // Gọi API lấy doanh thu cho cư dân
+        const feesResidentData = await getTotalFeesForCurrentAndPreviousMonthResident(selectedDate.getMonth() + 1, selectedDate.getFullYear());
+        if (feesResidentData) {
+          setPreviousMonthData((prevData) => ({
+            ...prevData,
+            "Ô tô của cư dân": feesResidentData.currentMonth?.find(item => item.type === "car")?.totalFee || 0,
+            "Xe máy của cư dân": feesResidentData.currentMonth?.find(item => item.type === "motor")?.totalFee || 0,
+          }));
+        }
+
+        // Gọi API lấy doanh thu cho vãng lai
+        const feesData = await getTotalFeesForCurrentAndPreviousMonth(selectedDate.getMonth() + 1, selectedDate.getFullYear());
+        if (feesData) {
+          setPreviousMonthData((prevData) => ({
+            ...prevData,
+            "Ô tô vãng lai": feesData.currentMonth?.find(item => item.type === "car")?.totalFee || 0,
+            "Xe máy vãng lai": feesData.currentMonth?.find(item => item.type === "motor")?.totalFee || 0,
+          }));
+        }
+
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
