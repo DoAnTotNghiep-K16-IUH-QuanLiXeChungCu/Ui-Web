@@ -73,7 +73,7 @@ const NavbarEmployee = () => {
             </Link>
             <Dropdown
               label="QUẢN LÝ"
-              items={["KHÁCH HÀNG", "XE"]}
+              items={["KHÁCH HÀNG", "XE", "PHÒNG"]}
               isOpen={openDropdown === "quanly"}
               toggleDropdown={() => toggleDropdown("quanly")}
               closeDropdown={closeDropdown}

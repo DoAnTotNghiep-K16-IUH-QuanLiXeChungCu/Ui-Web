@@ -165,7 +165,9 @@ const PayRollFomula = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-semibold">DANH SÁCH PHÍ ĐỖ XE</h1>
+          <h1 className="text-xl font-semibold">
+            DANH SÁCH CÔNG THỨC TÍNH LƯƠNG NHÂN VIÊN
+          </h1>
         </div>
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-3 bg-gray-50 border rounded p-4">

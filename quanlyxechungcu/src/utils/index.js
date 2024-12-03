@@ -14,7 +14,7 @@ export const ChangeNavCase = (str) => {
     else if (str === "CÀI ĐẶT") return "setting";
     else if (str === "BÃI ĐỖ") return "parking-manage";
     else if (str === "LỊCH SỬ") return "history";
-    else if (str === "BÁO CÁO") return "report";
+    else if (str === "THỐNG KÊ") return "report";
     else if (str === "THEO THÁNG") return "per-month";
     else if (str === "THEO NGÀY") return "per-day";
     else if (str === "DANH SÁCH BÃI ĐỖ") return "parking-slot";
@@ -30,6 +30,7 @@ export const ChangeNavCase = (str) => {
     else if (str === "GIỜ LÀM VIỆC") return "shifts";
     else if (str === "LƯƠNG NHÂN VIÊN") return "payrolls";
     else if (str === "LỊCH SỬ QUÉT THẺ") return "logs";
+    else if (str === "TÍNH LƯƠNG") return "fomula";
   }
   return "";
 };
