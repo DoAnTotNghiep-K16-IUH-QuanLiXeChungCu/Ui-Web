@@ -5,7 +5,8 @@ import {
   FILTER_MONTHLY_TICKET,
   MONTHLY_TICKET_BY_LICENSEPLATE,
   UPDATE_MONTHLY_TICKET,
-  GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH_ISRESIDENT
+  GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH_ISRESIDENT,
+  GET_TOTAl_FEES_FOR_TODAY_RESIDENT
 } from "../config/API";
 
 export const getAllMonthlyTicket = async (pageNumber) => {
@@ -275,6 +276,37 @@ export const getTotalFeesForCurrentAndPreviousMonthResident = async (month, year
 
     if (response.ok) {
       return data.data; // Trả về dữ liệu nếu yêu cầu thành công
+    } else {
+      console.error("Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:", data.error);
+      return data.error;
+    }
+  } catch (error) {
+    console.error("Error during fetching total fees for current and previous month:", error);
+  }
+};
+
+
+export const getTotalFeesForTodayResident  = async (month, year) => {
+  const token = Cookies.get("accessToken");
+
+  if (!token) {
+    console.error("Token không tồn tại. Vui lòng đăng nhập.");
+    return;
+  }
+
+  try {
+    const response = await fetch(GET_TOTAl_FEES_FOR_TODAY_RESIDENT, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return data.data;
     } else {
       console.error("Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:", data.error);
       return data.error;
