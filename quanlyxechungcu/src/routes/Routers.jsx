@@ -41,7 +41,8 @@ const Routers = () => {
       element: <AdminLayout />,
       children: [
         { path: "home", element: <Home /> },
-        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
+        { path: "manage/parking-slot", element: <ParkingSlot /> },
+
         { path: "parking-manage/history", element: <ParkingHistory /> },
         { path: "manage/customer", element: <Customer /> },
         { path: "manage/apartment", element: <Apartment /> },
@@ -72,10 +73,11 @@ const Routers = () => {
       element: <EmployeeLayout />,
       children: [
         { path: "home", element: <Home /> },
-        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
         { path: "parking-manage/history", element: <ParkingHistory /> },
         { path: "manage/customer", element: <Customer /> },
         { path: "manage/vehicle", element: <Vehicle /> },
+        { path: "manage/parking-slot", element: <ParkingSlot /> },
+
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
         { path: "account/profile", element: <Profile /> },

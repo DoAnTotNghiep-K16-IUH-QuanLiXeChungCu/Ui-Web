@@ -109,44 +109,54 @@ const ReportPerDay = () => {
   };
 
   const vehicleTypeData = {
-    labels: ['Ô tô của cư dân', 'Xe máy của cư dân', 'Ô tô vãng lai', 'Xe máy vãng lai'],
+    labels: [
+      "Ô tô của cư dân",
+      "Xe máy của cư dân",
+      "Ô tô vãng lai",
+      "Xe máy vãng lai",
+    ],
     datasets: [
       {
-        label: 'Số lượng xe vào trong kỳ',
+        label: "Số lượng xe vào trong kỳ",
         data: [30, 410, 147, 11],
-        backgroundColor: 'rgba(255, 99, 132, 0.3)',
-        borderColor: '#FF6F61',
+        backgroundColor: "rgba(255, 99, 132, 0.3)",
+        borderColor: "#FF6F61",
         borderWidth: 1,
       },
       {
-        label: 'Số lượng xe đã ra',
+        label: "Số lượng xe đã ra",
         data: [29, 408, 148, 10],
-        backgroundColor: 'rgba(54, 162, 235, 0.3)',
-        borderColor: '#36A2EB',
+        backgroundColor: "rgba(54, 162, 235, 0.3)",
+        borderColor: "#36A2EB",
         borderWidth: 1,
       },
     ],
   };
 
   const revenueData = {
-    labels: ['Ô tô của cư dân', 'Xe máy của cư dân', 'Ô tô vãng lai', 'Xe máy vãng lai'],
+    labels: [
+      "Ô tô của cư dân",
+      "Xe máy của cư dân",
+      "Ô tô vãng lai",
+      "Xe máy vãng lai",
+    ],
     datasets: [
       {
-        label: 'Doanh thu',
+        label: "Doanh thu",
         data: [800000, 1732000, 0, 0],
-        backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FFEB33'],
+        backgroundColor: ["#FF5733", "#33FF57", "#3357FF", "#FFEB33"],
         borderWidth: 1,
       },
     ],
     plugins: {
       datalabels: {
         formatter: (value) => `${value.toLocaleString()} đ`,
-        color: '#fff',
+        color: "#fff",
         font: {
-          weight: 'bold',
+          weight: "bold",
         },
-        align: 'center',
-        anchor: 'center',
+        align: "center",
+        anchor: "center",
       },
     },
   };
@@ -154,13 +164,10 @@ const ReportPerDay = () => {
   return (
     <div className="p-6 bg-gray-50">
       <div className="flex justify-between items-center mb-6">
-<<<<<<< HEAD
-      <h2 className="text-4xl font-bold text-blue-800 text-center flex-1">
-=======
-      <h2 className="text-4xl font-bold text-[#FF0000] text-center flex-1">
->>>>>>> 858f605e7ee99bbb96964091b93ca2ea50b2f400
-        Báo cáo doanh thu bãi xe ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
-      </h2>
+        <h2 className="text-4xl font-bold text-blue-800 text-center flex-1">
+          Báo cáo doanh thu bãi xe ngày {new Date().getDate()} tháng{" "}
+          {new Date().getMonth() + 1} năm {new Date().getFullYear()}
+        </h2>
       </div>
       <div className="flex flex-col lg:flex-row lg:space-x-6">
         <div className="lg:w-1/2 p-4 flex flex-col justify-between bg-white shadow-md rounded-lg">
@@ -174,41 +181,70 @@ const ReportPerDay = () => {
           <h3 className="font-semibold text-center text-2xl text-gray-700 mb-5">
             Doanh thu theo loại xe
           </h3>
-          <div className="flex justify-center" style={{ height: '340px' }}>
+          <div className="flex justify-center" style={{ height: "340px" }}>
             <Pie data={revenueData} />
           </div>
         </div>
       </div>
 
       <div className="mt-6">
-      <h3 className="font-semibold text-center text-2xl text-[#FF0000] mb-4">
-      Doanh thu theo loại xe vào ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
-      </h3>
+        <h3 className="font-semibold text-center text-2xl text-[#FF0000] mb-4">
+          Doanh thu theo loại xe vào ngày {new Date().getDate()} tháng{" "}
+          {new Date().getMonth() + 1} năm {new Date().getFullYear()}
+        </h3>
         <table className="min-w-full border-collapse border border-gray-400 mb-5 bg-white shadow-md rounded-lg">
           <thead className="bg-[#F1F1F1]">
             <tr>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Loại xe</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Nhóm</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Vào trong kỳ</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Ra trong kỳ</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Chưa ra</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">Doanh thu</th>
-              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">% Thay đổi Doanh thu</th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">
+                Loại xe
+              </th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">
+                Nhóm
+              </th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">
+                Vào trong kỳ
+              </th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">
+                Ra trong kỳ
+              </th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">
+                Chưa ra
+              </th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">
+                Doanh thu
+              </th>
+              <th className="border border-gray-400 p-2 text-sm font-semibold text-gray-700">
+                % Thay đổi Doanh thu
+              </th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
               <tr key={index} className={index % 2 === 0 ? "bg-[#F9F9F9]" : ""}>
-                <td className="border border-gray-400 p-2 text-sm text-gray-700 font-semibold">{item.vehicleType}</td>
-                <td className="border border-gray-400 p-2 text-sm text-gray-700 font-semibold">{item.group}</td>
-                <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.entered}</td>
-                <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.exited}</td>
-                <td className="border border-gray-400 p-2 text-sm text-gray-700">{item.notExited}</td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700 font-semibold">
+                  {item.vehicleType}
+                </td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700 font-semibold">
+                  {item.group}
+                </td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">
+                  {item.entered}
+                </td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">
+                  {item.exited}
+                </td>
+                <td className="border border-gray-400 p-2 text-sm text-gray-700">
+                  {item.notExited}
+                </td>
                 <td className="border border-gray-400 p-2 text-sm text-gray-700">
                   {item.revenue.toLocaleString()} đ
                 </td>
                 <td className="border border-gray-400 p-2 text-sm text-gray-700">
-                  {calculatePercentageChange(item.revenue, previousMonthData[item.vehicleType])}%
+                  {calculatePercentageChange(
+                    item.revenue,
+                    previousMonthData[item.vehicleType]
+                  )}
+                  %
                 </td>
               </tr>
             ))}
@@ -221,25 +257,32 @@ const ReportPerDay = () => {
         <div className="flex justify-start">
           <div className="font-bold text-blue-600">Tổng Vé tháng:</div>
           <div className="ml-4">
-            Vào trong kỳ: <span className="font-bold">{total.monthlyTickets.entered}</span>, Ra trong kỳ:{" "}
-            <span className="font-bold">{total.monthlyTickets.exited}</span>, Chưa ra:{" "}
+            Vào trong kỳ:{" "}
+            <span className="font-bold">{total.monthlyTickets.entered}</span>,
+            Ra trong kỳ:{" "}
+            <span className="font-bold">{total.monthlyTickets.exited}</span>,
+            Chưa ra:{" "}
             <span className="font-bold">{total.monthlyTickets.notExited}</span>
           </div>
         </div>
         <div className="flex justify-start mt-2">
           <div className="font-bold text-blue-600">Tổng Vé lượt:</div>
           <div className="ml-6">
-            Vào trong kỳ: <span className="font-bold">{total.hourlyTickets.entered}</span>, Ra trong kỳ:{" "}
-            <span className="font-bold">{total.hourlyTickets.exited}</span>, Chưa ra:{" "}
+            Vào trong kỳ:{" "}
+            <span className="font-bold">{total.hourlyTickets.entered}</span>, Ra
+            trong kỳ:{" "}
+            <span className="font-bold">{total.hourlyTickets.exited}</span>,
+            Chưa ra:{" "}
             <span className="font-bold">{total.hourlyTickets.notExited}</span>
           </div>
         </div>
         <div className="flex justify-start mt-2">
           <div className="font-bold text-blue-600">Tổng cộng:</div>
           <div className="ml-10">
-            Vào trong kỳ: <span className="font-bold">{total.overall.entered}</span>, Ra trong kỳ:{" "}
-            <span className="font-bold">{total.overall.exited}</span>, Chưa ra:{" "}
-            <span className="font-bold">{total.overall.notExited}</span>
+            Vào trong kỳ:{" "}
+            <span className="font-bold">{total.overall.entered}</span>, Ra trong
+            kỳ: <span className="font-bold">{total.overall.exited}</span>, Chưa
+            ra: <span className="font-bold">{total.overall.notExited}</span>
           </div>
         </div>
       </div>

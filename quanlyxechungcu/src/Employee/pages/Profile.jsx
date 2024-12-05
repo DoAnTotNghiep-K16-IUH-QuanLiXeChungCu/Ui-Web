@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { UPDATE_USER } from "../../config/API";
 import Notification from "../components/Notification";
 import UserContext from "../../context/UserContext";
+import { calculateAge } from "../../utils";
 const Profile = () => {
   const { profile, setProfile } = useContext(UserContext);
   const [showNotification, setShowNotification] = useState({
@@ -14,7 +15,7 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     id: profile._id,
     username: profile.username,
-    age: profile.age,
+    birthDay: profile.birthDay,
     address: profile.address,
     phoneNumber: profile.phoneNumber,
     role: profile.role,
@@ -138,7 +139,7 @@ const Profile = () => {
               type="number"
               name="age"
               className={`p-2 rounded w-2/3 ${isEditing ? "border" : ""}`}
-              value={formData.age}
+              value={calculateAge(formData.birthDay)}
               onChange={handleInputChange}
               readOnly={!isEditing}
             />

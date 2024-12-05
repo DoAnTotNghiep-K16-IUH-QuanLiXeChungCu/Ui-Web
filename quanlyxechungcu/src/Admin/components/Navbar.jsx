@@ -6,6 +6,7 @@ import {
   faIdCard,
   faCircleInfo,
   faCheckToSlot,
+  faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import Cookies from "js-cookie";
 
@@ -57,20 +58,13 @@ const Navbar = () => {
               <FontAwesomeIcon icon={faCheckToSlot} />
               QUẸT XE
             </Link> */}
-            <Dropdown
-              label="BÃI ĐỖ"
-              items={["LỊCH SỬ", "DANH SÁCH BÃI ĐỖ"]}
-              isOpen={openDropdown === "baido"}
-              toggleDropdown={() => toggleDropdown("baido")}
-              closeDropdown={closeDropdown}
-            />
-            <Link
-              to="/admin/monthly-ticket"
-              className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
+            {/* <Link
+              to="/parking-check"
+              className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
             >
-              <FontAwesomeIcon icon={faIdCard} />
-              <span>VÉ THÁNG</span>
-            </Link>
+              <FontAwesomeIcon icon={faCheckToSlot} />
+              GIỮ XE
+            </Link> */}
             <Dropdown
               label="QUẢN LÝ"
               items={[
@@ -82,11 +76,27 @@ const Navbar = () => {
                 "TÀI KHOẢN",
                 "GIỜ LÀM VIỆC",
                 "TÍNH LƯƠNG",
+                "DANH SÁCH BÃI ĐỖ",
               ]}
               isOpen={openDropdown === "quanly"}
               toggleDropdown={() => toggleDropdown("quanly")}
               closeDropdown={closeDropdown}
             />
+            <Link
+              to="/admin/parking-manage/history"
+              className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
+            >
+              <FontAwesomeIcon icon={faClockRotateLeft} />
+              LỊCH SỬ GIỮ XE
+            </Link>
+            <Link
+              to="/admin/monthly-ticket"
+              className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
+            >
+              <FontAwesomeIcon icon={faIdCard} />
+              <span>VÉ THÁNG</span>
+            </Link>
+
             <Dropdown
               label="CA TRỰC"
               items={["LỊCH LÀM VIỆC", "LỊCH SỬ QUÉT THẺ"]}
