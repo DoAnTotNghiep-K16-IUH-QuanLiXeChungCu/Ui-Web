@@ -51,6 +51,8 @@ export const MONTHLY_STATISTIC = `${API}/residentHistoryMoney/GetMonthlyStatisti
 export const YEAR_STATISTIC = `${API}/residentHistoryMoney/GetYearlyStatistics`;
 export const MONTHLY_TICKET_BY_RFIDCARD = `${API}/residentHistoryMoney/GetResidentHistoryMoneysLatesbyRFIDCard`;
 export const MONTHLY_TICKET_BY_LICENSEPLATE = `${API}/residentHistoryMoney/GetResidentHistoryMoneysLicensePlate`;
+export const GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH_ISRESIDENT = `${API}/residentHistoryMoney/GetTotalFeesForCurrentAndPreviousMonth`;
+export const GET_TOTAl_FEES_FOR_TODAY_RESIDENT = `${API}/residentHistoryMoney/GetTotalFeesForToday`;
 
 export const ALL_ENTRY_RECORD = `${API}/entryRecord/GetAllEntryRecords`;
 export const ALL_EXIT_RECORD = `${API}/exitRecord/GetAllExitRecords`;
@@ -59,6 +61,8 @@ export const FILTER_RECORD = `${API}/entryRecord/FilterEntryRecords`;
 export const CREATE_ENTRY_RECORD = `${API}/entryRecord/CreateEntryRecord`;
 export const ENTRY_RECORD_TO_EXIT_RECORD = `${API}/entryRecord/GetEntryRecordByisOutAndLicensePlate`;
 export const CREATE_EXIT_RECORD = `${API}/exitRecord/CreateExitRecord`;
+export const GET_NUMBER_VEHICLE_IN_MONTH = `${API}/entryRecord/GetNumBerVehicleInMonth`;
+export const GET_VEHICLE_STATS_FOR_TODAY = `${API}/entryRecord/GetVehicleStatsForToday`;
 
 export const ALL_CARD = `${API}/RFIDCard/GetAllRFIDCards`;
 export const ADD_CARD = `${API}/RFIDCard/CreateRFIDCard`;
@@ -146,6 +150,8 @@ export const FILTER_TIMEKEEPING = `${API}/timeKeeping/FilterTimeKeeping`;
 export const GET_TIMEKEEPING_BY_USERID_AND_SHIFTID = `${API}/timeKeeping/GetTimeKeepingByUserIdAndShiftIdAndDateTime`;
 
 export const ESTIMATE_PARKING_TRANSACTION = `${API}/parkingTransaction/EstimateParkingTransaction`;
+export const GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH = `${API}/parkingTransaction/GetTotalFeesForCurrentAndPreviousMonth`;
+export const GET_TOTAl_FEES_FOR_TODAY = `${API}/parkingTransaction/GetTotalFeesForToday`;
 // export const UPDATE_TIMEKEEPING = `${API}/timeKeeping/UpdateTimeKeeping`;
 // export const DELETE_TIMEKEEPING = `${API}/timeKeeping/DeleteTimeKeeping`;
 // export const GET_TIMEKEEPING_BY_USERID_AND_DATE_ARRANGE = `${API}/timeKeeping/GetTimeKeepingByUserIdAndDateRange`;
