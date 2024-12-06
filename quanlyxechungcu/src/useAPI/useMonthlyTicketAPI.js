@@ -6,7 +6,7 @@ import {
   MONTHLY_TICKET_BY_LICENSEPLATE,
   UPDATE_MONTHLY_TICKET,
   GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH_ISRESIDENT,
-  GET_TOTAl_FEES_FOR_TODAY_RESIDENT
+  GET_TOTAl_FEES_FOR_TODAY_RESIDENT,
 } from "../config/API";
 
 export const getAllMonthlyTicket = async (pageNumber) => {
@@ -238,14 +238,17 @@ export const GetResidentHistoryMoneysLicensePlate = async (licensePlate) => {
       return data.data; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
       console.error("Có lỗi xảy ra khi tạo vé tháng: ", data.error);
-      return data.error;
+      return null;
     }
   } catch (error) {
     console.error("Error during creating monthly tickets:", error);
   }
 };
 
-export const getTotalFeesForCurrentAndPreviousMonthResident = async (month, year) => {
+export const getTotalFeesForCurrentAndPreviousMonthResident = async (
+  month,
+  year
+) => {
   const token = Cookies.get("accessToken");
 
   if (!token) {
@@ -260,33 +263,41 @@ export const getTotalFeesForCurrentAndPreviousMonthResident = async (month, year
   }
 
   try {
-    const response = await fetch(GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH_ISRESIDENT, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        month: month,
-        year: year,
-      }),
-    });
+    const response = await fetch(
+      GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH_ISRESIDENT,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          month: month,
+          year: year,
+        }),
+      }
+    );
 
     const data = await response.json();
 
     if (response.ok) {
       return data.data; // Trả về dữ liệu nếu yêu cầu thành công
     } else {
-      console.error("Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:", data.error);
+      console.error(
+        "Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:",
+        data.error
+      );
       return data.error;
     }
   } catch (error) {
-    console.error("Error during fetching total fees for current and previous month:", error);
+    console.error(
+      "Error during fetching total fees for current and previous month:",
+      error
+    );
   }
 };
 
-
-export const getTotalFeesForTodayResident  = async (month, year) => {
+export const getTotalFeesForTodayResident = async (month, year) => {
   const token = Cookies.get("accessToken");
 
   if (!token) {
@@ -308,10 +319,16 @@ export const getTotalFeesForTodayResident  = async (month, year) => {
     if (response.ok) {
       return data.data;
     } else {
-      console.error("Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:", data.error);
+      console.error(
+        "Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:",
+        data.error
+      );
       return data.error;
     }
   } catch (error) {
-    console.error("Error during fetching total fees for current and previous month:", error);
+    console.error(
+      "Error during fetching total fees for current and previous month:",
+      error
+    );
   }
 };

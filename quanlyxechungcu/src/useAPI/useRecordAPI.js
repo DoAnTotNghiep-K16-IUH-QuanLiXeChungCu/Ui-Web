@@ -12,7 +12,7 @@ import {
   FILTER_RECORD,
   MONEY_BY_DAY,
   GET_NUMBER_VEHICLE_IN_MONTH,
-  GET_VEHICLE_STATS_FOR_TODAY
+  GET_VEHICLE_STATS_FOR_TODAY,
 } from "../config/API";
 export const getALLEntryRecord = async () => {
   const token = Cookies.get("accessToken");
@@ -392,7 +392,7 @@ export const getNumberVehicleInMonth = async (month, year) => {
     );
 
     // Trả về kết quả nếu yêu cầu thành công
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
     console.error(
       "Có lỗi xảy ra khi lấy dữ liệu thống kê số lượng phương tiện trong tháng:",
@@ -410,14 +410,18 @@ export const getVehicleStatsForToday = async () => {
   }
 
   try {
-    const response = await axios.patch(GET_VEHICLE_STATS_FOR_TODAY, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-console.log("response", response);
-    return response.data.data; 
+    const response = await axios.patch(
+      GET_VEHICLE_STATS_FOR_TODAY,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    // console.log("response", response);
+    return response.data.data;
   } catch (error) {
     console.error(
       "Có lỗi xảy ra khi lấy dữ liệu thống kê số lượng phương tiện trong tháng:",

@@ -21,6 +21,7 @@ const CheckCameraExit = ({
   type,
   setDataCheckCard,
   selectedSettings,
+  setDataFee,
 }) => {
   const [exitLicensePlate, setExitLicensePlate] = useState("");
   const videoRefs = {
@@ -91,8 +92,8 @@ const CheckCameraExit = ({
       const formData = new FormData();
       const blobFront = await (await fetch(photo1)).blob();
       const blobBack = await (await fetch(photo2)).blob();
-      const frontFileName = "Entry_camera1_photo.png";
-      const backFileName = "Entry_camera2_photo.png";
+      const frontFileName = "Exit_camera1_photo.png";
+      const backFileName = "Exit_camera2_photo.png";
       formData.append("files", blobFront, frontFileName);
       formData.append("files", blobBack, backFileName);
 
@@ -126,11 +127,11 @@ const CheckCameraExit = ({
 
       if (entryRecordData === null) {
         setShowNotification({
-          content: `Không tìm thấy phương tiện có biển số là ${exitLicensePlate} trong bãi`,
+          content: `Không tìm thấy phương tiện có biển số là ${data} trong bãi`,
           type: "Error",
           show: true,
         });
-        setExitLicensePlate("");
+        // setExitLicensePlate("");
         setVehicleType("");
         return;
       }
@@ -328,20 +329,16 @@ const CheckCameraExit = ({
         picture_back: imageUrl.back,
         licensePlate: exitLicensePlate,
         isResident: entryRecordData.isResident,
-        vehicleType: vehicleType,
+        vehicleType: entryRecordData.vehicleType,
       };
-      console.log("newExitRecord", newExit);
+      // console.log("newExitRecord", newExit);
 
       const addNewExit = await createExitRecord(newExit);
       console.log("addNewExit", addNewExit);
       if (addNewExit) {
         setDataCheckCard((prev) => prev + 1);
-
-        setShowNotification({
-          content: `Tạo dữ liệu ra thành công.`,
-          type: "Notification",
-          show: true,
-        });
+        const audio = new Audio("/sounds/moi_ban_ra.mp3");
+        audio.play();
         setPhotos({
           camera1: null,
           camera2: null,
@@ -357,6 +354,8 @@ const CheckCameraExit = ({
         setExitLicensePlate("");
         setVehicleType("");
         setEntryRecordData();
+        setEstimateMoney(estimateMoney);
+        setDataFee(2);
       } else {
         setPrevRfidData("");
         setExitRfidData("");

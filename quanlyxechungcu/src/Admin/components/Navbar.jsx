@@ -1,24 +1,30 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Dropdown from "./Dropdown";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faIdCard,
-  faCircleInfo,
-  faCheckToSlot,
+  faClock,
+  faMoneyBillWave,
+  faUsers,
+  faCalculator,
+  faCalendarAlt,
+  faClipboardCheck,
+  faMoneyCheckAlt,
+  faChartBar,
+  faChartPie,
+  faRightFromBracket,
+  faCircleUser,
 } from "@fortawesome/free-solid-svg-icons";
 import Cookies from "js-cookie";
 
 const Navbar = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const myUserID = Cookies.get("profileID");
-
+  const navigate = useNavigate();
+  const fullname = Cookies.get("fullname");
   const toggleDropdown = (dropdown) => {
-    if (openDropdown === dropdown) {
-      setOpenDropdown(null);
-    } else {
-      setOpenDropdown(dropdown);
-    }
+    setOpenDropdown(openDropdown === dropdown ? null : dropdown);
   };
 
   const closeDropdown = () => {
@@ -38,82 +44,127 @@ const Navbar = () => {
     };
   }, [handleClickOutside]);
 
+  const handleLogout = () => {
+    Cookies.remove("accessToken"); // Xóa token khỏi cookie
+    Cookies.remove("role");
+    Cookies.remove("fullname"); // Xóa role khỏi cookie nếu có
+    Cookies.remove("profileID"); // Xóa role khỏi cookie nếu có
+    navigate("/auth/login"); // Điều hướng về trang đăng nhập
+  };
+
   return (
-    <nav className="bg-indigo-600 p-4 h-16">
-      <div className="container mx-auto flex justify-center items-center space-x-6">
+    <nav className="p-4">
+      {/* User Section */}
+      <div className="relative flex items-center space-x-4 text-left mb-6">
+        <button
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-700 hover:bg-blue-600 transition-colors duration-300 focus:outline-none"
+          aria-label="User Profile"
+        >
+          <FontAwesomeIcon
+            icon={faCircleUser}
+            className="text-white text-4xl"
+          />
+        </button>
+        <div className="leading-tight">
+          <p className="text-white text-lg font-semibold">{fullname}</p>
+          <p className="text-gray-300 text-sm">Quản lý</p>
+        </div>
+      </div>
+      {/* Navigation Links */}
+      <div className="mb-6">
+        <span className="text-sm">Chức năng</span>
+      </div>
+      <div className="container mx-auto flex flex-col items-start ml-6">
         {myUserID ? (
           <>
-            {/* <Link
-              to="/admin/about-us"
-              className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
-            >
-              <FontAwesomeIcon icon={faCircleInfo} />
-              VỀ CHÚNG TÔI
-            </Link> */}
-            {/* <Link
-              to="/admin/parking-check"
-              className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
-            >
-              <FontAwesomeIcon icon={faCheckToSlot} />
-              QUẸT XE
-            </Link> */}
-            <Dropdown
-              label="BÃI ĐỖ"
-              items={["LỊCH SỬ", "DANH SÁCH BÃI ĐỖ"]}
-              isOpen={openDropdown === "baido"}
-              toggleDropdown={() => toggleDropdown("baido")}
-              closeDropdown={closeDropdown}
-            />
-            <Link
-              to="/admin/monthly-ticket"
-              className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
-            >
-              <FontAwesomeIcon icon={faIdCard} />
-              <span>VÉ THÁNG</span>
-            </Link>
-            <Dropdown
-              label="QUẢN LÝ"
-              items={[
-                "KHÁCH HÀNG",
-                "XE",
-                "PHÒNG",
-                "THẺ QUẸT",
-                "PHÍ XE",
-                "TÀI KHOẢN",
-                "GIỜ LÀM VIỆC",
-                "TÍNH LƯƠNG",
-              ]}
-              isOpen={openDropdown === "quanly"}
-              toggleDropdown={() => toggleDropdown("quanly")}
-              closeDropdown={closeDropdown}
-            />
-            <Dropdown
-              label="CA TRỰC"
-              items={["LỊCH LÀM VIỆC", "LỊCH SỬ QUÉT THẺ"]}
-              // "CHẤM CÔNG",
-              isOpen={openDropdown === "catruc"}
-              toggleDropdown={() => toggleDropdown("catruc")}
-              closeDropdown={closeDropdown}
-            />
-            <Dropdown
-              label="THỐNG KÊ"
-              items={["THEO THÁNG", "THEO NGÀY", "LƯƠNG NHÂN VIÊN"]}
-              isOpen={openDropdown === "baocao"}
-              toggleDropdown={() => toggleDropdown("baocao")}
-              closeDropdown={closeDropdown}
-            />
-            {/* <Dropdown
-              label="CÀI ĐẶT"
-              items={["KẾT NỐI"]}
-              isOpen={openDropdown === "caidat"}
-              toggleDropdown={() => toggleDropdown("caidat")}
-              closeDropdown={closeDropdown}
-            /> */}
+            <div className="space-y-6">
+              <Link
+                to="/admin/manage/RFIDCard"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faIdCard} />
+                <span>Quản lý thẻ quẹt</span>
+              </Link>
+              <Link
+                to="/admin/manage/parking-fee"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faMoneyBillWave} />
+                <span>Quản lý phí xe</span>
+              </Link>
+              <Link
+                to="/admin/manage/accounts"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faUsers} />
+                <span>Quản lý tài khoản</span>
+              </Link>
+              <Link
+                to="/admin/manage/shifts"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faClock} />
+                <span>Quản lý giờ làm việc</span>
+              </Link>
+              <Link
+                to="/manage/fomula"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faCalculator} />
+                <span>Quản lý tính lương</span>
+              </Link>
+              <Link
+                to="/admin/userShift/schedular"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faCalendarAlt} />
+                <span>Quản lí lịch làm việc</span>
+              </Link>
+              <Link
+                to="/admin/userShift/logs"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faClipboardCheck} />
+                <span>Quản lý chấm công</span>
+              </Link>
+              <Link
+                to="/admin/report/payrolls"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faMoneyCheckAlt} />
+                <span>Quản lý lương nhân viên</span>
+              </Link>
+              <Link
+                to="/admin/report/per-day"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faChartBar} />
+                <span>Thống kê theo ngày</span>
+              </Link>
+              <Link
+                to="/admin/report/per-month"
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faChartPie} />
+                <span>Thống kê theo tháng</span>
+              </Link>
+            </div>
+            <div className="mt-20">
+              {" "}
+              {/* Tạo khoảng cách lớn với nhóm nút chức năng */}
+              <button
+                onClick={handleLogout}
+                className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
+              >
+                <FontAwesomeIcon icon={faRightFromBracket} />
+                <span>Đăng xuất</span>
+              </button>
+            </div>
           </>
         ) : (
           <Link
             to="/auth/login"
-            className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 pl-5"
+            className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300"
           >
             Đăng nhập để truy cập các chức năng
           </Link>

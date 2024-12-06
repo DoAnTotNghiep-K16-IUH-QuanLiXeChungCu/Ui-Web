@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import { Outlet } from "react-router-dom";
-import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Notification from "../components/Notification";
 
@@ -23,7 +22,6 @@ const AdminLayout = () => {
 
     window.addEventListener("offline", handleOffline);
 
-    // Cleanup event listener when the component unmounts
     return () => {
       window.removeEventListener("offline", handleOffline);
     };
@@ -31,16 +29,24 @@ const AdminLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
-      <Navbar />
-      <div className="flex-grow">
-        <Outlet />
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <div className="fixed left-0 w-80 h-full bg-[#191970] text-white hidden lg:block">
+          <Navbar />
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 lg:ml-80 overflow-y-auto">
+          <Outlet />
+        </div>
       </div>
-      <Notification
-        showNotification={showNotification}
-        setShowNotification={setShowNotification}
-      />
-      <Footer />
+
+      {/* Notification */}
+      {showNotification.show && (
+        <div className="absolute top-4 right-4 bg-yellow-300 text-black p-4 rounded shadow-md">
+          {showNotification.content}
+        </div>
+      )}
     </div>
   );
 };

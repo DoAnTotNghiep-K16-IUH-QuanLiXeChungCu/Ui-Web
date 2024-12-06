@@ -25,10 +25,10 @@ import Shift from "../Admin/pages/Shift";
 import Accounts from "../Admin/pages/Accounts";
 import ParkingFeeConfiguration from "../Admin/pages/ParkingFeeConfiguration";
 import RFIDCard from "../Admin/pages/RFIDCard";
-import Apartment from "../Admin/pages/Apartment";
 import AdminLayout from "./../Admin/layouts/AdminLayout";
 import PayRoll from "./../Admin/pages/PayRoll";
 import PayRollFomula from "./../Admin/pages/PayRollFomula";
+import Apartment from "./../Employee/pages/Apartment";
 
 const Routers = () => {
   const routers = [
@@ -41,15 +41,18 @@ const Routers = () => {
       element: <AdminLayout />,
       children: [
         { path: "home", element: <Home /> },
-        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
+        { path: "manage/parking-slot", element: <ParkingSlot /> },
+
         { path: "parking-manage/history", element: <ParkingHistory /> },
-        { path: "manage/customer", element: <Customer /> },
-        { path: "manage/apartment", element: <Apartment /> },
-        { path: "manage/vehicle", element: <Vehicle /> },
+        // { path: "manage/customer", element: <Customer /> },
+        // { path: "manage/apartment", element: <Apartment /> },
+        // { path: "manage/vehicle", element: <Vehicle /> },
         { path: "manage/RFIDCard", element: <RFIDCard /> },
         { path: "manage/parking-fee", element: <ParkingFeeConfiguration /> },
         { path: "manage/accounts", element: <Accounts /> },
         { path: "manage/shifts", element: <Shift /> },
+        { path: "manage/parking-slot", element: <ParkingSlot /> },
+
         { path: "manage/fomula", element: <PayRollFomula /> },
         { path: "report/per-month", element: <ReportPerMonth /> },
         { path: "report/per-day", element: <ReportPerDay /> },
@@ -72,10 +75,12 @@ const Routers = () => {
       element: <EmployeeLayout />,
       children: [
         { path: "home", element: <Home /> },
-        { path: "parking-manage/parking-slot", element: <ParkingSlot /> },
         { path: "parking-manage/history", element: <ParkingHistory /> },
         { path: "manage/customer", element: <Customer /> },
         { path: "manage/vehicle", element: <Vehicle /> },
+        { path: "manage/parking-slot", element: <ParkingSlot /> },
+        { path: "manage/apartment", element: <Apartment /> },
+
         { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
         { path: "account/profile", element: <Profile /> },

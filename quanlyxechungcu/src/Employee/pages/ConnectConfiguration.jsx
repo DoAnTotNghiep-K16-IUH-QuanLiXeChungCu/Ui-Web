@@ -23,7 +23,6 @@ const ConnectConfiguration = () => {
   const [lanesUpdate, setLanesUpdate] = useState([]);
   const [settingsUpdate, setSettingsUpdate] = useState([]);
   const [showCameraOption, setShowCameraOption] = useState(false);
-
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
@@ -203,20 +202,25 @@ const ConnectConfiguration = () => {
                 ports={ports}
                 selectedPort={selectedSettings?.[laneType]?.port}
                 onChange={(newPort) => {
-                  const isDuplicate = Object.keys(selectedSettings).some(
+                  const duplicateLane = Object.keys(selectedSettings).find(
                     (key) =>
                       key !== laneType &&
                       selectedSettings[key]?.port === newPort
                   );
 
-                  if (isDuplicate) {
+                  console.log("duplicateLane", duplicateLane);
+
+                  if (duplicateLane) {
                     setShowNotification({
-                      content: `Port ${newPort} đã được sử dụng ở lane khác`,
+                      content: `Port ${newPort} đã được sử dụng ở lane: ${changeLabel(
+                        duplicateLane
+                      )}`,
                       type: "Error",
                       show: true,
                     });
                     return; // Stop the update
                   }
+
                   const updatedSettings = { ...selectedSettings };
                   updatedSettings[laneType].port = newPort;
                   setSelectedSettings(updatedSettings);
@@ -229,6 +233,7 @@ const ConnectConfiguration = () => {
                   );
                 }}
               />
+
               <CameraSelect
                 selectedCamera={selectedSettings?.[laneType]?.camera1?.deviceID}
                 devices={devices}

@@ -6,6 +6,7 @@ import {
   faIdCard,
   faCircleInfo,
   faCheckToSlot,
+  faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import Cookies from "js-cookie";
 
@@ -55,15 +56,15 @@ const NavbarEmployee = () => {
               className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
             >
               <FontAwesomeIcon icon={faCheckToSlot} />
-              QUẸT XE
+              GIỮ XE
             </Link>
-            <Dropdown
-              label="BÃI ĐỖ"
-              items={["LỊCH SỬ", "DANH SÁCH BÃI ĐỖ"]}
-              isOpen={openDropdown === "baido"}
-              toggleDropdown={() => toggleDropdown("baido")}
-              closeDropdown={closeDropdown}
-            />
+            <Link
+              to="/parking-manage/history"
+              className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
+            >
+              <FontAwesomeIcon icon={faClockRotateLeft} />
+              LỊCH SỬ GIỮ XE
+            </Link>
             <Link
               to="/monthly-ticket"
               className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
@@ -73,7 +74,7 @@ const NavbarEmployee = () => {
             </Link>
             <Dropdown
               label="QUẢN LÝ"
-              items={["KHÁCH HÀNG", "XE", "PHÒNG"]}
+              items={["KHÁCH HÀNG", "XE", "PHÒNG", "DANH SÁCH BÃI ĐỖ"]}
               isOpen={openDropdown === "quanly"}
               toggleDropdown={() => toggleDropdown("quanly")}
               closeDropdown={closeDropdown}

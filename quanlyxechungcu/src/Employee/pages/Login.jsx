@@ -49,6 +49,8 @@ const Login = () => {
         });
         const { role, accessToken, ...filteredProfile } = data.data;
         const profile = filteredProfile;
+        // console.log("profile", profile);
+
         setProfile(profile);
         if (data.data.role === "Admin") navigate("/admin/home");
         else if (data.data.role === "User") navigate("/home");

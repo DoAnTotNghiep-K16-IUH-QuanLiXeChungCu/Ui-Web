@@ -66,7 +66,7 @@ export const UpdatePayRollFomula = async (fomula) => {
 };
 
 export const CreatePayRollFomula = async (fomula) => {
-  console.log("fomula__", fomula);
+  // console.log("fomula__", fomula);
   try {
     const response = await axiosInstance.put(CREATE_PAYROLL_FORMULA, {
       role: fomula.role,

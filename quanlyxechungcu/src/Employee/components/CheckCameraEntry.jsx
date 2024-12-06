@@ -130,9 +130,16 @@ const CheckCameraEntry = ({
         const [time, date] = currentDateTime.split(" ");
 
         if (time && date) {
-          const formattedDate = date.split("/").reverse().join("-");
+          const formattedDate = date
+            .split("/")
+            .reverse()
+            .map((part) => part.padStart(2, "0")) // Đảm bảo mỗi phần có ít nhất 2 chữ số
+            .join("-");
 
           const formattedTime = time.split(":").slice(0, 2).join(":");
+          console.log("Formatted Date:", formattedDate);
+          console.log("Formatted Time:", formattedTime);
+
           setCurrent({
             date: formattedDate,
             time: formattedTime,
@@ -304,11 +311,8 @@ const CheckCameraEntry = ({
       console.log("addNewEntry", addNewEntry);
       if (addNewEntry) {
         setDataCheckCard((prev) => prev + 1);
-        setShowNotification({
-          content: `Tạo dữ liệu vào thành công.`,
-          type: "Notification",
-          show: true,
-        });
+        const audio = new Audio("/sounds/moi_ban_vao.mp3");
+        audio.play();
         setPhotos({
           camera1: null,
           camera2: null,

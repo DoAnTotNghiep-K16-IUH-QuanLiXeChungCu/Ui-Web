@@ -124,26 +124,26 @@ const CheckCameraExit = ({
         null;
       console.log("entryRecordData", entryRecordData);
 
-      if (entryRecordData === null) {
-        setShowNotification({
-          content: `Không tìm thấy phương tiện có biển số là ${exitLicensePlate} trong bãi`,
-          type: "Error",
-          show: true,
-        });
-        setExitLicensePlate("");
-        setVehicleType("");
-        return;
-      }
-      if (entryRecordData.licensePlate !== data) {
-        setShowNotification({
-          content: `Biển số xe ra và biển số xe vào không giống nhau. Biển số vào là ${entryRecordData.licensePlate} biển số ra là ${exitLicensePlate}`,
-          type: "Error",
-          show: true,
-        });
-        setExitLicensePlate("");
-        setVehicleType("");
-        return;
-      }
+      // if (entryRecordData === null) {
+      //   setShowNotification({
+      //     content: `Không tìm thấy phương tiện có biển số là ${exitLicensePlate} trong bãi`,
+      //     type: "Error",
+      //     show: true,
+      //   });
+      //   setExitLicensePlate("");
+      //   setVehicleType("");
+      //   return;
+      // }
+      // if (entryRecordData.licensePlate !== data) {
+      //   setShowNotification({
+      //     content: `Biển số xe ra và biển số xe vào không giống nhau. Biển số vào là ${entryRecordData.licensePlate} biển số ra là ${exitLicensePlate}`,
+      //     type: "Error",
+      //     show: true,
+      //   });
+      //   setExitLicensePlate("");
+      //   setVehicleType("");
+      //   return;
+      // }
       setEntryRecordData(entryRecordData);
       const estimateMoney = await EstimateParkingTransaction(
         data,

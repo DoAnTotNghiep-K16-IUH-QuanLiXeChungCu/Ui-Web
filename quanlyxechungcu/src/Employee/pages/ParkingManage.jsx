@@ -15,6 +15,7 @@ import {
   setUpSerialPortExit,
 } from "../../useAPI/useCardAPI";
 import Notification from "../components/Notification";
+import { getTotalFeesForToday } from "../../useAPI/useParkingTransactionAPI";
 
 const ParkingManagement = () => {
   const [moneyPerDay, setMoneyPerDay] = useState(0);
@@ -22,27 +23,30 @@ const ParkingManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [recordType, setRecordType] = useState("EnEx");
   const [dataCheckCard, setDataCheckCard] = useState(0);
+  const [dataFee, setDataFee] = useState(0);
+
   const [settings, setSettings] = useState([]);
   const [selectedSettings, setSelectedSettings] = useState("");
-  const [selectedPorts, setSelectedPorts] = useState({
-    entry: "",
-    exit: "",
-    anotherEntry: "",
-    anotherExit: "",
-  });
+
   const [showNotification, setShowNotification] = useState({
     content: "",
     type: "",
     show: false,
   });
   const fetchData = async () => {
-    const money = await getMoneyByDay(new Date("2024-01-01"));
-    if (money) setMoneyPerDay(money.totalMoney);
     const settings = await getAllSetting();
     setSettings(settings || []);
     setSelectedSettings(settings[0]);
   };
+  const fetchDataFee = async () => {
+    const fees = await getTotalFeesForToday();
+    // console.log("fees", fees.today[0].totalFee + fees.today[1].totalFee);
 
+    if (fees) setMoneyPerDay(fees.today[0].totalFee + fees.today[1].totalFee);
+  };
+  useEffect(() => {
+    fetchDataFee();
+  }, [dataFee]);
   useEffect(() => {
     fetchData();
   }, []);
@@ -50,7 +54,7 @@ const ParkingManagement = () => {
   const toggleStart = () => setIsStart((prev) => !prev);
   const toggleModal = () => {
     setShowModal((prev) => !prev);
-    console.log("showModal", showModal);
+    // console.log("showModal", showModal);
   };
   const handleChangeSetting = (e) => {
     const selectedSettingId = e.target.value;
@@ -129,18 +133,15 @@ const ParkingManagement = () => {
           <CheckCameraEntry
             isStart={isStart}
             setDataCheckCard={setDataCheckCard}
-            selectedPorts={selectedPorts}
-            setSelectedPorts={setSelectedPorts}
             type="main"
             selectedSettings={selectedSettings.entryLane}
           />
           <CheckCameraExit
             isStart={isStart}
             setDataCheckCard={setDataCheckCard}
-            selectedPorts={selectedPorts}
-            setSelectedPorts={setSelectedPorts}
             type="main"
             selectedSettings={selectedSettings.exitLane}
+            setDataFee={setDataFee}
           />
         </div>
       )}
@@ -149,16 +150,12 @@ const ParkingManagement = () => {
           <CheckCameraEntry
             isStart={isStart}
             setDataCheckCard={setDataCheckCard}
-            selectedPorts={selectedPorts}
-            setSelectedPorts={setSelectedPorts}
             type="main"
             selectedSettings={selectedSettings.entryLane}
           />
           <CheckCameraEntry
             isStart={isStart}
             setDataCheckCard={setDataCheckCard}
-            selectedPorts={selectedPorts}
-            setSelectedPorts={setSelectedPorts}
             type="another"
             selectedSettings={selectedSettings.secondaryEntryLane}
           />
@@ -169,18 +166,16 @@ const ParkingManagement = () => {
           <CheckCameraExit
             isStart={isStart}
             setDataCheckCard={setDataCheckCard}
-            selectedPorts={selectedPorts}
-            setSelectedPorts={setSelectedPorts}
             type="main"
             selectedSettings={selectedSettings.exitLane}
+            setDataFee={setDataFee}
           />
           <CheckCameraExit
             isStart={isStart}
             setDataCheckCard={setDataCheckCard}
-            selectedPorts={selectedPorts}
-            setSelectedPorts={setSelectedPorts}
             type="another"
             selectedSettings={selectedSettings.secondaryExitLane}
+            setDataFee={setDataFee}
           />
         </div>
       )}
