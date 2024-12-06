@@ -114,8 +114,8 @@ const RFIDCard = () => {
     return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
   }
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto bg-white rounded-lg p-6">
         <h1 className="text-xl font-semibold">Danh sách thẻ</h1>
         <div className="flex justify-between items-center mb-4">
           <input

@@ -10,58 +10,26 @@ const Header = () => {
   const navigate = useNavigate();
   const accessToken = Cookies.get("accessToken");
   const fullname = Cookies.get("fullname");
-  const handleLogout = () => {
-    Cookies.remove("accessToken"); // Xóa token khỏi cookie
-    Cookies.remove("role");
-    Cookies.remove("fullname"); // Xóa role khỏi cookie nếu có
-    Cookies.remove("profileID"); // Xóa role khỏi cookie nếu có
-    // Xóa role khỏi cookie nếu có
-    navigate("/auth/login"); // Điều hướng về trang đăng nhập
-  };
-  // Parse JSON
-
-  // Toggle dropdown
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-  const handleNavigateToProfile = () => {
-    setDropdownOpen(false);
-    navigate("/admin/account/profile"); // Điều hướng về trang đăng nhập
-  };
   return (
-    <div className="bg-white flex justify-between items-center h-11 pl-5">
+    <div className="bg-[#191970] flex justify-start items-center h-16 pl-5">
       {/* Logo */}
-      <Link to={"/admin/home"}>
-        <img className="h-20 w-20 ml-10" src={logo} alt="logo"></img>
-      </Link>
-
       <div className="relative space-x-4 pr-5">
         {accessToken ? (
-          // Nếu có token, hiển thị dropdown
-          <div className="relative inline-block text-left">
+          <div className="relative flex items-center space-x-4 text-left">
             <button
-              onClick={toggleDropdown}
-              className="text-black hover:text-blue-600 mr-5 focus:outline-none"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700 hover:bg-blue-600 transition-colors duration-300 focus:outline-none"
+              aria-label="User Profile"
             >
-              <FontAwesomeIcon icon={faCircleUser} className="text-2xl mr-2" />
-              {fullname}
+              <FontAwesomeIcon
+                icon={faCircleUser}
+                className="text-white text-2xl"
+                size="30"
+              />
             </button>
-            {dropdownOpen && (
-              <div className="z-10 absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
-                <button
-                  onClick={handleNavigateToProfile}
-                  className="block px-4 py-2 text-black hover:bg-gray-100"
-                >
-                  Thông tin cá nhân
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-black hover:bg-gray-100"
-                >
-                  Đăng xuất
-                </button>
-              </div>
-            )}
+            <div className="leading-tight">
+              <p className="text-white text-base font-semibold">{fullname}</p>
+              <p className="text-gray-300 text-sm">Quản lý</p>
+            </div>
           </div>
         ) : (
           // Nếu không có token, hiển thị nút Đăng nhập

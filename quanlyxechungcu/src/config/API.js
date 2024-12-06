@@ -152,6 +152,7 @@ export const GET_TIMEKEEPING_BY_USERID_AND_SHIFTID = `${API}/timeKeeping/GetTime
 export const ESTIMATE_PARKING_TRANSACTION = `${API}/parkingTransaction/EstimateParkingTransaction`;
 export const GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH = `${API}/parkingTransaction/GetTotalFeesForCurrentAndPreviousMonth`;
 export const GET_TOTAl_FEES_FOR_TODAY = `${API}/parkingTransaction/GetTotalFeesForToday`;
+
 // export const UPDATE_TIMEKEEPING = `${API}/timeKeeping/UpdateTimeKeeping`;
 // export const DELETE_TIMEKEEPING = `${API}/timeKeeping/DeleteTimeKeeping`;
 // export const GET_TIMEKEEPING_BY_USERID_AND_DATE_ARRANGE = `${API}/timeKeeping/GetTimeKeepingByUserIdAndDateRange`;

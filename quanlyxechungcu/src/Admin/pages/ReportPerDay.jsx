@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import "react-datepicker/dist/react-datepicker.css";
-import { getVehicleStatsForToday } from "../../useAPI/useRecordAPI";
+import {
+  countVehicleEntry,
+  countVehicleExit,
+  countVehicleNonExit,
+  getVehicleStatsForToday,
+} from "../../useAPI/useRecordAPI";
 import { getTotalFeesForTodayResident } from "../../useAPI/useMonthlyTicketAPI";
 import { getTotalFeesForToday } from "../../useAPI/useParkingTransactionAPI";
 import {
@@ -15,6 +20,7 @@ import {
   ArcElement,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { format } from "date-fns";
 
 // Đăng ký các thành phần cần thiết cho chart.js
 ChartJS.register(
@@ -27,18 +33,67 @@ ChartJS.register(
   Legend,
   ChartDataLabels
 );
-
 const ReportPerDay = () => {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState({
     monthlyTickets: { entered: 0, exited: 0 },
   });
+  const [vehicleEntry, setVehicleEntry] = useState([]);
+  const [vehicleExit, setVehicleExit] = useState([]);
+  const [vehicleNonExit, setVehicleNonExit] = useState([]);
+  const fetchVehicleData = async () => {
+    const countV = await countVehicleEntry(format(new Date(), "yyyy-MM-dd"));
+    if (countV) {
+      setVehicleEntry(countV);
+    }
+    const countVE = await countVehicleExit(format(new Date(), "yyyy-MM-dd"));
+    if (countVE) {
+      setVehicleExit(countVE);
+    }
+    const countVNE = await countVehicleNonExit(
+      format(new Date(), "yyyy-MM-dd")
+    );
+    if (countVNE) {
+      setVehicleNonExit(countVNE);
+    }
+  };
+  useEffect(() => {
+    fetchVehicleData();
+  }, []);
+  const getSortedVehicleData = (vehicleData) => {
+    const sortedData = {
+      car: 0, // Số lượng ô tô
+      motor: 0, // Số lượng xe máy
+    };
+    if (vehicleData.length > 0) {
+      vehicleData.forEach((vehicle) => {
+        if (vehicle.vehicleType === "car") {
+          sortedData.car = vehicle.amount;
+        } else if (vehicle.vehicleType === "motor") {
+          sortedData.motor = vehicle.amount;
+        }
+      });
+    } else {
+      if (vehicleData.vehicleType === "car") {
+        sortedData.car = vehicleData.amount;
+      } else if (vehicleData.vehicleType === "motor") {
+        sortedData.motor = vehicleData.amount;
+      }
+    }
+
+    return sortedData;
+  };
+
+  const dataVehicleEntry = getSortedVehicleData(vehicleEntry);
+  const dataVehicleExit = getSortedVehicleData(vehicleExit);
+  const dataVehicleNonExit = getSortedVehicleData(vehicleNonExit);
 
   // Hàm xử lý lấy và cập nhật dữ liệu
   const fetchData = async () => {
     try {
       // Lấy dữ liệu về số lượng xe vào/ra từ API
       const apiData = await getVehicleStatsForToday();
+      console.log("getVehicleStatsForToday", apiData);
 
       if (apiData) {
         const formatData = (
@@ -89,22 +144,23 @@ const ReportPerDay = () => {
 
       // Lấy dữ liệu doanh thu cho cư dân từ API
       const feesResidentData = await getTotalFeesForTodayResident();
+      console.log("feesResidentData", feesResidentData.today);
 
       if (
         feesResidentData &&
-        feesResidentData.data &&
-        Array.isArray(feesResidentData.data.today)
+        feesResidentData?.today &&
+        Array.isArray(feesResidentData?.today)
       ) {
         setData((prevData) =>
           prevData.map((item) => {
             if (item.vehicleType === "Ô tô của cư dân") {
-              const carData = feesResidentData.data.today.find(
+              const carData = feesResidentData.today.find(
                 (i) => i.type === "car"
               );
               return { ...item, revenue: carData?.totalFee || 0 };
             }
             if (item.vehicleType === "Xe máy của cư dân") {
-              const motorData = feesResidentData.data.today.find(
+              const motorData = feesResidentData.today.find(
                 (i) => i.type === "motor"
               );
               return { ...item, revenue: motorData?.totalFee || 0 };
@@ -118,18 +174,17 @@ const ReportPerDay = () => {
 
       // Lấy dữ liệu doanh thu cho vãng lai từ API
       const feesData = await getTotalFeesForToday();
+      console.log("feesData", feesData.today);
 
-      if (feesData && feesData.data && Array.isArray(feesData.data.today)) {
+      if (feesData && feesData?.today && Array.isArray(feesData?.today)) {
         setData((prevData) =>
           prevData.map((item) => {
             if (item.vehicleType === "Ô tô vãng lai") {
-              const carData = feesData.data.today.find((i) => i.type === "car");
+              const carData = feesData.today.find((i) => i.type === "car");
               return { ...item, revenue: carData?.totalFee || 0 };
             }
             if (item.vehicleType === "Xe máy vãng lai") {
-              const motorData = feesData.data.today.find(
-                (i) => i.type === "motor"
-              );
+              const motorData = feesData.today.find((i) => i.type === "motor");
               return { ...item, revenue: motorData?.totalFee || 0 };
             }
             return item;
@@ -138,6 +193,7 @@ const ReportPerDay = () => {
       } else {
         console.error("Dữ liệu không hợp lệ từ API feesData");
       }
+      // console.log("apiData", apiData);
 
       // Set the total counts for vehicles entering and exiting
       const totalEntered =
@@ -216,6 +272,7 @@ const ReportPerDay = () => {
       },
     };
   };
+  // console.log("data", data);
 
   return (
     <div className="p-6 bg-gray-50">
@@ -299,10 +356,37 @@ const ReportPerDay = () => {
         </h3>
         <div className="flex justify-between text-sm text-gray-700">
           <div>
-            <strong>Số xe vào:</strong> {total.monthlyTickets.entered}
+            <strong>Số xe vào:</strong>
+            <div className="flex space-x-4 justify-center">
+              <p>
+                Ô tô: <span>{dataVehicleEntry.car}</span>
+              </p>
+              <p>
+                Xe máy: <span>{dataVehicleEntry.motor}</span>
+              </p>
+            </div>
           </div>
           <div>
-            <strong>Số xe ra:</strong> {total.monthlyTickets.exited}
+            <strong>Số xe ra:</strong>
+            <div className="flex space-x-4 justify-center">
+              <p>
+                Ô tô: <span>{dataVehicleExit.car}</span>
+              </p>
+              <p>
+                Xe máy: <span>{dataVehicleExit.motor}</span>
+              </p>
+            </div>
+          </div>
+          <div>
+            <strong>Số xe chưa ra:</strong>
+            <div className="flex space-x-4 justify-center">
+              <p>
+                Ô tô: <span>{dataVehicleNonExit.car}</span>
+              </p>
+              <p>
+                Xe máy: <span>{dataVehicleNonExit.motor}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>

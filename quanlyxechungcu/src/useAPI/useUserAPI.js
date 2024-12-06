@@ -64,10 +64,10 @@ export const GetUserByRFIDCard = async (uuid) => {
 
     return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
-    console.error(
-      "Có lỗi xảy ra khi lấy dữ liệu User:",
-      error.response?.data?.error || error.message
-    );
+    // console.error(
+    //   "Có lỗi xảy ra khi lấy dữ liệu User:",
+    //   error.response?.data?.error || error.message
+    // );
     return null; // Hoặc có thể trả về giá trị nào khác nếu cần
   }
 };

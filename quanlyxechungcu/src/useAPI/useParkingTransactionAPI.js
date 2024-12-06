@@ -1,6 +1,10 @@
 import Cookies from "js-cookie"; // Import js-cookie nếu chưa có
 import axios from "axios"; // Import axios
-import { ESTIMATE_PARKING_TRANSACTION,GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH ,GET_TOTAl_FEES_FOR_TODAY} from "../config/API";
+import {
+  ESTIMATE_PARKING_TRANSACTION,
+  GET_TOTAL_FEES_FOR_CURRENT_AND_PREVIOUS_MONTH,
+  GET_TOTAl_FEES_FOR_TODAY,
+} from "../config/API";
 
 export const EstimateParkingTransaction = async (
   licensePlate,
@@ -13,10 +17,10 @@ export const EstimateParkingTransaction = async (
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
     return;
   }
-  console.log("licensePlate", licensePlate);
-  console.log("vehicleType", vehicleType);
-  console.log("entryTime", entryTime);
-  console.log("exitTime", exitTime);
+  // console.log("licensePlate", licensePlate);
+  // console.log("vehicleType", vehicleType);
+  // console.log("entryTime", entryTime);
+  // console.log("exitTime", exitTime);
 
   try {
     const response = await axios.patch(
@@ -73,7 +77,7 @@ export const getTotalFeesForCurrentAndPreviousMonth = async (month, year) => {
     );
 
     // Trả về dữ liệu nếu yêu cầu thành công
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
     console.error(
       "Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:",
@@ -82,7 +86,7 @@ export const getTotalFeesForCurrentAndPreviousMonth = async (month, year) => {
   }
 };
 
-export const getTotalFeesForToday = async (month, year) => {
+export const getTotalFeesForToday = async () => {
   const token = Cookies.get("accessToken");
   if (!token) {
     console.error("Token không tồn tại. Vui lòng đăng nhập.");
@@ -101,7 +105,7 @@ export const getTotalFeesForToday = async (month, year) => {
       }
     );
 
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
     console.error(
       "Có lỗi xảy ra khi lấy tổng phí cho tháng hiện tại và tháng trước:",
