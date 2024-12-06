@@ -107,7 +107,7 @@ const Navbar = () => {
                 <span>Quản lý giờ làm việc</span>
               </Link>
               <Link
-                to="/manage/fomula"
+                to="/admin/manage/fomula"
                 className="text-white hover:text-yellow-600 focus:outline-none transition-colors duration-300 flex items-center space-x-2"
               >
                 <FontAwesomeIcon icon={faCalculator} />
