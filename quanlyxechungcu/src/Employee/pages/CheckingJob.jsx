@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { findCardByUUID, setUpSerialPortEntry } from "../../useAPI/useCardAPI";
-import { READ_RFID_CARD_ENTRY } from "../../config/API";
+import { READ_RFID_CARD_ENTRY, READ_RFID_CARD_EXIT } from "../../config/API";
 import Notification from "../components/Notification";
 import { addTimeKeepingLog } from "../../useAPI/useTimeKeepingLogAPI";
 import { format } from "date-fns";
@@ -9,6 +9,7 @@ import {
   updateTimeKeeping,
 } from "../../useAPI/useTimeKeepingAPI.js";
 import { calculateAge } from "../../utils/index.js";
+import { GetUserByRFIDCard } from "../../useAPI/useUserAPI.js";
 
 const CheckingJob = () => {
   setUpSerialPortEntry("COM5", 9600);
@@ -23,7 +24,7 @@ const CheckingJob = () => {
     show: false,
   });
   useEffect(() => {
-    const eventSource = new EventSource(READ_RFID_CARD_ENTRY);
+    const eventSource = new EventSource(READ_RFID_CARD_EXIT);
     eventSource.onmessage = async (event) => {
       if (isStart === false) {
         cardData.current = "";
@@ -34,10 +35,11 @@ const CheckingJob = () => {
           const newRfidData = event.data;
           // Cập nhật cardData mà không làm ảnh hưởng đến render
           cardData.current = newRfidData;
-          console.log("newRfidData: ", newRfidData);
-
+          // console.log("newRfidData: ", newRfidData);
           const check = await findCardByUUID(cardData.current);
-          console.log("check: ", check);
+          const userFinded = await GetUserByRFIDCard(cardData.current);
+          console.log("userFinded", userFinded);
+
           if (!check) {
             setShowNotification({
               content: `Không có thẻ ${newRfidData} nào trong danh sách.`,
@@ -45,7 +47,7 @@ const CheckingJob = () => {
               show: true,
             });
             setCard("");
-          } else if (!check?.userId) {
+          } else if (!userFinded) {
             setShowNotification({
               content: `Thẻ có mã ${newRfidData} không phải dành cho nhân viên.`,
               type: "Error",
@@ -58,18 +60,17 @@ const CheckingJob = () => {
               .replace("T", " ")
               .slice(0, 19);
             logDataRef.current = {
-              rfidId: check._id,
-              userID: check.userId._id,
+              rfidId: userFinded.rfidCard._id,
+              userID: userFinded._id,
               scanTime: scanTime,
               status: type,
             };
 
             const cardData = {
-              ...check,
+              ...userFinded,
               scanTime,
             };
             // console.log("cardData", cardData);
-
             setCard(cardData);
           }
         } catch (error) {
@@ -124,6 +125,8 @@ const CheckingJob = () => {
       } else {
         console.log("Đã có lỗi khi tạo 1 TimeLogging");
       }
+      cardData.current = "";
+      logDataRef.current = "";
       return;
     } else if (type === "out") {
       const update = await updateTimeKeeping(timeKeeping);
@@ -132,6 +135,9 @@ const CheckingJob = () => {
       } else {
         console.log("Đã có lỗi khi cạp nhật 1 TimeLogging");
       }
+      cardData.current = "";
+      logDataRef.current = "";
+      return;
     }
   };
 
@@ -180,13 +186,13 @@ const CheckingJob = () => {
             <div className="flex justify-between">
               <span className="font-medium text-gray-600">Tên nhân viên:</span>
               <span className="font-semibold text-gray-800">
-                {card?.userId?.fullname}
+                {card?.fullname}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-gray-600">Tuổi:</span>
               <span className="font-semibold text-gray-800">
-                {calculateAge(card?.userId?.birthDay)}
+                {calculateAge(card?.birthDay) || ""}
               </span>
             </div>
             <div className="flex justify-between">

@@ -56,15 +56,16 @@ const Navbar = () => {
     <nav className="p-4">
       {/* User Section */}
       <div className="relative flex items-center space-x-4 text-left mb-6">
-        <button
+        <Link
           className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-700 hover:bg-blue-600 transition-colors duration-300 focus:outline-none"
           aria-label="User Profile"
+          to="/admin/account/profile"
         >
           <FontAwesomeIcon
             icon={faCircleUser}
             className="text-white text-4xl"
           />
-        </button>
+        </Link>
         <div className="leading-tight">
           <p className="text-white text-lg font-semibold">{fullname}</p>
           <p className="text-gray-300 text-sm">Quản lý</p>

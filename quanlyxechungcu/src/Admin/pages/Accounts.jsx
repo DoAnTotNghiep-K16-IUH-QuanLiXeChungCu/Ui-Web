@@ -283,7 +283,7 @@ const Accounts = () => {
                 </button>
               </div>
             </div>
-            <div className="flex justify-end items-center mb-4 ml-4">
+            {/* <div className="flex justify-end items-center mb-4 ml-4">
               <div className="flex space-x-2">
                 <button
                   className="bg-lime-500 text-white px-4 py-2 rounded"
@@ -294,7 +294,7 @@ const Accounts = () => {
                   GÁN QUYỀN
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="grid grid-cols-7">

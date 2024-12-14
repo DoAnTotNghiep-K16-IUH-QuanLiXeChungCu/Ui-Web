@@ -6,6 +6,7 @@ export const UPDATE_USER = `${API}/users/UpdateUser`;
 export const ALL_USER = `${API}/users/GetAllUsers`;
 export const DELETE_USER = `${API}/users/DeleteUsers`;
 export const GET_USER_BY_UUID = `${API}/users/GetUserByRFIDCard`;
+export const CHECK_PASSWORD = `${API}/users/CheckPassword`;
 
 export const ALL_APARTMENT = `${API}/apartment/GetAllApartments`;
 export const APARTMENT_BY_ID = `${API}/apartment/GetApartmentById`;
@@ -113,7 +114,7 @@ export const UPDATE_CAMERA = `${API}/camera/UpdateCamera`;
 export const CREATE_CAMERA = `${API}/camera/CreateCamera`;
 export const DELETE_CAMERA = `${API}/camera/DeleteCamera`;
 
-export const DETECT_LICENSEPLATE = "http://localhost:5000/DetectLicensePlate";
+export const DETECT_LICENSEPLATE = "http://localhost:8000/recognize";
 
 export const GET_ALL_TIMEKEEPING_LOG = `${API}/timeKeepingLog/GetAllTimeKeepingLog`;
 export const GET_ALL_TIMEKEEPING_LOG_DELETE = `${API}/timeKeepingLog/GetAllTimeKeepingLogDelete`;
@@ -158,3 +159,5 @@ export const GET_TOTAl_FEES_FOR_TODAY = `${API}/parkingTransaction/GetTotalFeesF
 // export const GET_TIMEKEEPING_BY_USERID_AND_DATE_ARRANGE = `${API}/timeKeeping/GetTimeKeepingByUserIdAndDateRange`;
 // export const FILTER_TIMEKEEPING = `${API}/timeKeeping/FilterTimeKeeping`;
 // export const GET_TIMEKEEPING_BY_USERID_AND_SHIFTID = `${API}/timeKeeping/GetTimeKeepingByUserIdAndShiftIdAndDateTime`;
+
+export const SEND_OTP = `${API}/otp/send-otp`;

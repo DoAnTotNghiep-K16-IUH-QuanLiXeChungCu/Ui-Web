@@ -108,13 +108,24 @@ const CheckCameraExit = ({
       const licensePlates1 = await detectLicensePlate(imageUrlFront);
       console.log("licensePlates1", licensePlates1);
 
-      let data = licensePlates1.join(",");
+      let data = "";
+      if (Array.isArray(licensePlates1) && licensePlates1.length > 0) {
+        data = licensePlates1.join(",");
+      }
+
+      // Nếu không có biển số trên ảnh đầu tiên và có ảnh thứ hai
       if (licensePlates1.length === 0 && photo2) {
         const licensePlates2 = await detectLicensePlate(imageUrlBack);
         console.log("licensePlates2", licensePlates2);
 
-        data = licensePlates2.join(",");
+        // Kiểm tra nếu licensePlates2 là mảng và xử lý
+        if (Array.isArray(licensePlates2) && licensePlates2.length > 0) {
+          data = licensePlates2.join(",");
+        } else if (typeof licensePlates2 === "string" && licensePlates2) {
+          data = licensePlates2; // Nếu là chuỗi
+        }
       }
+
       setExitLicensePlate(data);
       setImageUrl({
         front: imageUrlFront,

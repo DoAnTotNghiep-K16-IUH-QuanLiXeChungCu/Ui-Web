@@ -7,7 +7,7 @@ import ParkingManagement from "./../Employee/pages/ParkingManage";
 import ConnectConfiguration from "./../Employee/pages/ConnectConfiguration";
 import CheckingJob from "./../Employee/pages/CheckingJob";
 import UserShiftEmployee from "./../Employee/pages/UserShiftEmployee";
-import Profile from "./../Employee/pages/Profile";
+import Profile from "../Employee/pages/Profile";
 import MonthlyTicketList from "./../Employee/pages/MonthlyTicketList";
 import AboutUs from "./../Employee/pages/AboutUs";
 import Vehicle from "./../Employee/pages/Vehicle";
@@ -29,6 +29,9 @@ import AdminLayout from "./../Admin/layouts/AdminLayout";
 import PayRoll from "./../Admin/pages/PayRoll";
 import PayRollFomula from "./../Admin/pages/PayRollFomula";
 import Apartment from "./../Employee/pages/Apartment";
+import ForgotPassword from "../Employee/pages/ForgotPassword";
+import SendOTP from "../Employee/pages/SendOTP";
+import AdminProfile from "../Admin/pages/AdminProfile";
 
 const Routers = () => {
   const routers = [
@@ -58,7 +61,7 @@ const Routers = () => {
         { path: "report/per-day", element: <ReportPerDay /> },
         { path: "report/payrolls", element: <PayRoll /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
-        { path: "account/profile", element: <Profile /> },
+        { path: "account/profile", element: <AdminProfile /> },
         { path: "userShift/schedular", element: <UserShift /> },
         { path: "userShift/checking-job", element: <CheckingJob /> },
         { path: "setting/connect", element: <ConnectConfiguration /> },
@@ -93,7 +96,11 @@ const Routers = () => {
     {
       path: "/auth",
       element: <AuthLayout />,
-      children: [{ path: "login", element: <Login /> }],
+      children: [
+        { path: "login", element: <Login /> },
+        { path: "forgot-password", element: <ForgotPassword /> },
+        { path: "sendOTP", element: <SendOTP /> },
+      ],
     },
     { path: "*", element: <NotFound /> },
   ];

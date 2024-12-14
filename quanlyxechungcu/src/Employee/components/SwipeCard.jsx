@@ -21,6 +21,8 @@ const SwipeCard = () => {
         const check = await findCardByUUID(newRfidData);
         const userFinded = await GetUserByRFIDCard(newRfidData);
         console.log("check", check);
+        console.log("userFinded", userFinded);
+
         if (!check) {
           setShowNotification({
             content: `Không có thẻ ${newRfidData} nào trong danh sách.`,

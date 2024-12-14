@@ -11,6 +11,7 @@ import { getAllVehicle } from "../../useAPI/useVehicleAPI";
 import { findCustomerByID } from "../../useAPI/useCustomerAPI";
 import Loading from "../components/Loading";
 import { findCardByUUID, setUpSerialPortEntry } from "../../useAPI/useCardAPI";
+import { GetUserByRFIDCard } from "../../useAPI/useUserAPI";
 
 const MonthlyTicketList = () => {
   const [tickets, setTickets] = useState([]);
@@ -131,7 +132,9 @@ const MonthlyTicketList = () => {
       });
       return; // Không tiếp tục nếu giá vé không hợp lệ
     }
-    const check = await findCardByUUID(card);
+    const check = await GetUserByRFIDCard(card);
+    console.log("GetUserByRFIDCard", check);
+
     if (!check) {
       setShowNotification({
         content: `Không có thẻ ${card} nào trong danh sách.`,
