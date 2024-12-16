@@ -235,7 +235,7 @@ const UserShift = () => {
     }
   };
 
-  const handleDelete = async (selectedUserShift) => {
+  const handleDelete = async () => {
     if (!selectedUserShift) {
       setShowNotification({
         content: "Bạn chưa chọn ca để xóa",
@@ -243,6 +243,8 @@ const UserShift = () => {
         show: true,
       });
     } else {
+      console.log("selectedUserShift", selectedUserShift);
+
       const del = await deleteUserShift(selectedUserShift?.id);
       if (del) {
         setShowNotification({

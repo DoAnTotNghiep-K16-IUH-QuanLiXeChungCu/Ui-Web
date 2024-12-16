@@ -3,6 +3,8 @@ import CheckEE from "../components/ParkingHistory/CheckEE";
 import { filterRecord } from "../../useAPI/useRecordAPI";
 import { format } from "date-fns";
 import Loading from "../components/Loading";
+import ParkingHistoryModal from "./ParkingHistoryModal";
+import Notification from "../../Admin/components/Notification";
 const ParkingHistory = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [records, setRecords] = useState([]);
@@ -11,32 +13,39 @@ const ParkingHistory = () => {
   const totalPages = Math.ceil(records.length / pageSize);
   const [searchTerm, setSearchTerm] = useState(""); // Kích thước trang
   const [filteredRecords, setFilteredRecords] = useState([]);
-
   const [outFilter, setOutFilter] = useState("");
   const [fromDateFilter, setFromDateFilter] = useState("");
   const [toDateFilter, setToDateFilter] = useState("");
   const [customerTypeFilter, setCustomerTypeFilter] = useState("");
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const today = new Date();
-        const threeDaysAgo = new Date(today);
-        threeDaysAgo.setDate(today.getDate() - 3);
-        const fromDay = format(threeDaysAgo, "yyyy-MM-dd");
-        const toDay = format(today, "yyyy-MM-dd");
+  const [filHistory, setFilHistory] = useState({
+    fromDay: "",
+    toDay: "",
+    pageNumber: "",
+    pageSize: "",
+  });
+  const [showModal, setShowModal] = useState(false);
+  const [showNotification, setShowNotification] = useState({
+    content: "",
+    type: "",
+    show: false,
+  });
+  const fetchData = async () => {
+    try {
+      const today = new Date();
+      const threeDaysAgo = new Date(today);
+      threeDaysAgo.setDate(today.getDate() - 3);
+      const fromDay = format(threeDaysAgo, "yyyy-MM-dd");
+      const toDay = format(today, "yyyy-MM-dd");
 
-        if (fromDay && toDay) {
-          const records = await filterRecord(" ", fromDay, toDay, " ", 1, 5000);
-          setRecords(records || []);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false); // Dừng loading khi dữ liệu đã được fetch
+      if (fromDay && toDay) {
+        const records = await filterRecord(" ", fromDay, toDay, " ", 1, 5000);
+        setRecords(records || []);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -50,7 +59,7 @@ const ParkingHistory = () => {
 
       const matchesCustomerTypeFilter =
         customerTypeFilter === "" ||
-        record.entryRecord.customer.isResident ===
+        record?.entryRecord?.customer?.isResident ===
           (customerTypeFilter === "true");
 
       // Chuyển đổi fromDateFilter và toDateFilter thành đối tượng Date
@@ -116,9 +125,6 @@ const ParkingHistory = () => {
       setCurrentPage(currentPage - 1);
     }
   };
-  if (loading) {
-    return <Loading />; // Hiển thị Loading nếu đang tải dữ liệu
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -171,9 +177,9 @@ const ParkingHistory = () => {
           </select>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded"
-            onClick={() => applyPaginationAndFilter()}
+            onClick={() => setShowModal(true)}
           >
-            LỌC
+            THÊM DỮ LIỆU
           </button>
         </div>
         <div className="grid grid-cols-5 gap-4">
@@ -232,24 +238,24 @@ const ParkingHistory = () => {
                       </td>
 
                       <td className="border p-2">
-                        {record.entryRecord.licensePlate}
+                        {record?.entryRecord.licensePlate}
                       </td>
                       <td className="border p-2">
-                        {record.entryRecord.customer.isResident === true
+                        {record?.entryRecord?.customer.isResident === true
                           ? "Trong khu dân cư"
                           : "Vãn lai"}
                       </td>
                       <td className="border p-2">
-                        {record.entryRecord?.customer &&
-                        record.entryRecord?.customer?.fullName
-                          ? record.entryRecord.customer.fullName // Trả về tên khách hàng nếu tồn tại
+                        {record?.entryRecord?.customer &&
+                        record?.entryRecord?.customer?.fullName
+                          ? record?.entryRecord?.customer?.fullName // Trả về tên khách hàng nếu tồn tại
                           : "Không có"}
                       </td>
                       <td className="border p-2">
-                        {record.entryRecord?.users_shift?.fullName}
+                        {record?.entryRecord?.user?.fullName}
                       </td>
                       <td className="border p-2">
-                        {record.exitRecord?.totalFee}
+                        {record?.exitRecord?.totalFee}
                       </td>
                     </tr>
                   ))}
@@ -279,16 +285,6 @@ const ParkingHistory = () => {
 
           {/* Image Section */}
           <div className="col-span-2 bg-white border p-4 rounded">
-            {/* <div className="flex space-x-4 p-2 border border-gray-900">
-              <p>
-                Ô Tô: <span className={`font-bold text-red-500`}>18</span>
-              </p>
-              <p>
-                Xe Máy: <span className={`font-bold text-red-500`}>18</span>
-              </p>
-              
-            </div> */}
-
             <CheckEE
               type="entry"
               time={selectedRecord?.entryRecord?.entryTime || ""} // Kiểm tra nếu selectedRecord tồn tại
@@ -305,6 +301,17 @@ const ParkingHistory = () => {
           </div>
         </div>
       </div>
+      <Notification
+        showNotification={showNotification}
+        setShowNotification={setShowNotification}
+      />
+      <ParkingHistoryModal
+        setFilHistory={setFilHistory}
+        filHistory={filHistory}
+        setShowModal={setShowModal}
+        showModal={showModal}
+        setRecords={setRecords}
+      />
     </div>
   );
 };

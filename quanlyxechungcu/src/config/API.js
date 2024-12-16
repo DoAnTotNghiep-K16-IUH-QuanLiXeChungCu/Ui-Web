@@ -7,6 +7,8 @@ export const ALL_USER = `${API}/users/GetAllUsers`;
 export const DELETE_USER = `${API}/users/DeleteUsers`;
 export const GET_USER_BY_UUID = `${API}/users/GetUserByRFIDCard`;
 export const CHECK_PASSWORD = `${API}/users/CheckPassword`;
+export const USER_BY_EMAIL = `${API}/users/FindUserByEmail`;
+export const RESET_PASSWORD = `${API}/users/ResetPassword`;
 
 export const ALL_APARTMENT = `${API}/apartment/GetAllApartments`;
 export const APARTMENT_BY_ID = `${API}/apartment/GetApartmentById`;

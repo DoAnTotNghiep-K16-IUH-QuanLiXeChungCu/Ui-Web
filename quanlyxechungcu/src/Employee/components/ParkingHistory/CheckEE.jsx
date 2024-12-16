@@ -2,6 +2,7 @@ import { formatDateTime } from "../../../utils";
 
 const CheckEE = ({ type, time, front_pic, back_pic }) => {
   // Ảnh mặc định nếu không có ảnh
+  const formattedTime = time ? formatDateTime(time) : "";
   const defaultImage =
     "https://sanketoan.vn/public/library_employer/thutran25122n3%40gmail.com-31694/images/%E1%BA%A3nh%20tr%E1%BA%AFng.jpg";
   return (
@@ -31,7 +32,7 @@ const CheckEE = ({ type, time, front_pic, back_pic }) => {
       >
         {type === "entry" ? "HÌNH ẢNH VÀO" : "HÌNH ẢNH RA"}
         <br />
-        Thời gian: {formatDateTime(time)}
+        Thời gian: {formattedTime}
       </div>
     </div>
   );

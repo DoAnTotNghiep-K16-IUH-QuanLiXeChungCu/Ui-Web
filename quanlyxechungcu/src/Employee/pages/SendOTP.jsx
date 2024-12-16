@@ -1,11 +1,19 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import Notification from "../components/Notification"; // Bạn có thể thay đổi đường dẫn này nếu cần
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Notification from "../components/Notification";
+import { sendOTP } from "../../useAPI/useUserAPI";
+import { useFormStatus } from "react-dom";
 
 const SendOTP = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [countdown, setCountdown] = useState(30); // Đếm ngược 30s
+  const [isResendAllowed, setIsResendAllowed] = useState(false); // Điều kiện để cho phép gửi lại OTP
   const location = useLocation();
-  const { otpLog } = location.state || { otp: Array(6).fill("") }; // Mặc định là mảng 6 phần tử rỗng
+  const { otpLog = "", email = "" } = location.state || {};
+  console.log("email in OTP", email);
+
+  const [otpHere, setOtpHere] = useState(otpLog);
+  const navigate = useNavigate();
 
   const [showNotification, setShowNotification] = useState({
     content: "",
@@ -13,17 +21,23 @@ const SendOTP = () => {
     show: false,
   });
 
-  // Hàm xử lý thay đổi giá trị OTP
-  const handleChange = (value, index) => {
-    console.log("value", value);
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prevCountdown) => prevCountdown - 1);
+      }, 1000);
+      return () => clearInterval(timer); // Dọn dẹp khi component bị unmount hoặc countdown thay đổi
+    } else {
+      setIsResendAllowed(true); // Khi hết đếm ngược thì cho phép gửi lại OTP
+    }
+  }, [countdown]);
 
-    // Kiểm tra nếu giá trị nhập vào là một số hợp lệ hoặc là rỗng
+  const handleChange = (value, index) => {
     if (/^[0-9]$/.test(value) || value === "") {
       const updatedOtp = [...otp];
       updatedOtp[index] = value;
       setOtp(updatedOtp);
 
-      // Tự động focus vào ô tiếp theo nếu giá trị nhập vào
       if (value && index < otp.length - 1) {
         document.getElementById(`otp-${index + 1}`).focus();
       }
@@ -31,27 +45,41 @@ const SendOTP = () => {
     value = "";
   };
 
-  // Hàm xử lý sự kiện khi nhấn phím Backspace
   const handleKeyDown = (e, index) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       document.getElementById(`otp-${index - 1}`).focus();
     }
   };
 
-  // Hàm xử lý khi nhấn nút Submit OTP
   const handleSubmit = () => {
-    if (otpLog.join("") !== otp.join("")) {
+    if (String(otp.join("")) !== String(otpHere)) {
       setShowNotification({
         content: "Mã OTP bạn nhập không khớp với mã đã gửi",
         type: "Error",
         show: true,
       });
     } else {
-      setShowNotification({
-        content: "Xác thực thành công!",
-        type: "Success",
-        show: true,
+      navigate("/auth/resetPassword", {
+        state: { email: email },
       });
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (isResendAllowed) {
+      const sentOtp = await sendOTP(email);
+      if (!sentOtp) {
+        setShowNotification({
+          content: "Đã có lỗi trong quá trình gửi mã OTP",
+          type: "Error",
+          show: true,
+        });
+        return;
+      }
+      setOtpHere(sentOtp);
+      setCountdown(30); // Reset lại thời gian đếm ngược
+      setIsResendAllowed(false); // Tắt nút gửi lại cho đến khi đếm ngược hoàn thành
+      // Gửi OTP qua email ở đây (chẳng hạn thông qua API)
     }
   };
 
@@ -82,6 +110,21 @@ const SendOTP = () => {
         >
           Submit OTP
         </button>
+
+        <div className="text-center mt-4">
+          {countdown > 0 ? (
+            <span className="text-sm text-gray-600">
+              Mã OTP sẽ hết hạn trong {countdown}s
+            </span>
+          ) : (
+            <button
+              onClick={handleResendOTP}
+              className="text-blue-500 hover:underline"
+            >
+              Gửi lại mã OTP
+            </button>
+          )}
+        </div>
       </div>
       <Notification
         showNotification={showNotification}

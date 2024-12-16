@@ -90,22 +90,31 @@ const RFIDCard = () => {
       const addedCard = await addCard(newCardUUID); // Kiểm tra xem addedCard có đúng không
       console.log("Thẻ mới được thêm:", addedCard); // Thêm log để kiểm tra
       setCards((prev) => [...prev, addedCard]); // Thêm thẻ mới vào danh sách
+      setShowNotification({
+        content: `Thẻ ${newCardUUID} đã được thêm vào danh sách.`,
+        type: "Notification",
+        show: true,
+      });
       setNewCardUUID("");
     }
   };
 
-  const handleDeleteCard = async (id) => {
-    if (!id) {
+  const handleDeleteCard = async (selectC) => {
+    if (!selectC) {
       console.error("ID của xe không hợp lệ");
       return;
     }
 
     try {
-      await deleteCard(id);
-      setCards((prev) => prev.filter((card) => card._id !== id));
+      await deleteCard(selectC._id);
+      setCards((prev) => prev.filter((card) => card._id !== selectC._id));
 
       setSelectedCard(null);
-      console.log(`thẻ ID ${id} đã được xóa thành công.`);
+      setShowNotification({
+        content: `Thẻ ${selectC.uuid} đã xóa khỏikhỏi vào danh sách.`,
+        type: "Notification",
+        show: true,
+      });
     } catch (error) {
       console.error("Có lỗi khi xóa xe:", error);
     }
@@ -172,7 +181,7 @@ const RFIDCard = () => {
                   </button>
                   <button
                     className="bg-red-500 text-white px-4 py-2 rounded"
-                    onClick={() => handleDeleteCard(selectedCard._id)}
+                    onClick={() => handleDeleteCard(selectedCard)}
                   >
                     XÓA
                   </button>

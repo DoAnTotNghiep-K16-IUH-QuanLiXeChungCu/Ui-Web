@@ -24,7 +24,7 @@ const CheckingJob = () => {
     show: false,
   });
   useEffect(() => {
-    const eventSource = new EventSource(READ_RFID_CARD_EXIT);
+    const eventSource = new EventSource(READ_RFID_CARD_ENTRY);
     eventSource.onmessage = async (event) => {
       if (isStart === false) {
         cardData.current = "";

@@ -32,6 +32,7 @@ import Apartment from "./../Employee/pages/Apartment";
 import ForgotPassword from "../Employee/pages/ForgotPassword";
 import SendOTP from "../Employee/pages/SendOTP";
 import AdminProfile from "../Admin/pages/AdminProfile";
+import ResetPassword from "../Employee/pages/ResetPassword";
 
 const Routers = () => {
   const routers = [
@@ -100,6 +101,7 @@ const Routers = () => {
         { path: "login", element: <Login /> },
         { path: "forgot-password", element: <ForgotPassword /> },
         { path: "sendOTP", element: <SendOTP /> },
+        { path: "resetPassword", element: <ResetPassword /> },
       ],
     },
     { path: "*", element: <NotFound /> },

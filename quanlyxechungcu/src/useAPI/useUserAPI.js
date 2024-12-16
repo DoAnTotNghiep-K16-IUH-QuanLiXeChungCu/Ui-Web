@@ -4,8 +4,10 @@ import {
   CHECK_PASSWORD,
   DELETE_USER,
   GET_USER_BY_UUID,
+  RESET_PASSWORD,
   SEND_OTP,
   UPDATE_USER,
+  USER_BY_EMAIL,
 } from "../config/API";
 import { format } from "date-fns";
 import axios from "axios"; // Import axios
@@ -191,6 +193,40 @@ export const deleteUser = async (id) => {
   } catch (error) {
     console.error(
       "Có lỗi xảy ra khi xóa dữ liệu User:",
+      error.response?.data?.error || error.message
+    );
+    return null; // Hoặc có thể trả về giá trị nào khác nếu cần
+  }
+};
+
+export const GetUserByEmail = async (email) => {
+  try {
+    const response = await axios.patch(USER_BY_EMAIL, {
+      email: email,
+    });
+
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
+  } catch (error) {
+    // console.error(
+    //   "Có lỗi xảy ra khi lấy dữ liệu User:",
+    //   error.response?.data?.error || error.message
+    // );
+    return null; // Hoặc có thể trả về giá trị nào khác nếu cần
+  }
+};
+
+export const resetPassword = async (user) => {
+  try {
+    const response = await axios.put(RESET_PASSWORD, {
+      id: user._id,
+      username: user.username,
+      password: user.password, // Thêm email
+    });
+
+    return response.data.data; // Trả về dữ liệu nếu yêu cầu thành công
+  } catch (error) {
+    console.error(
+      "Có lỗi xảy ra khi lấy dữ liệu User:",
       error.response?.data?.error || error.message
     );
     return null; // Hoặc có thể trả về giá trị nào khác nếu cần

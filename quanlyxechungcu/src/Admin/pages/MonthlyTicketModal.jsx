@@ -78,7 +78,7 @@ const MonthlyTicketModal = ({
         <h2 className="text-2xl font-semibold text-gray-700 mb-6">
           Đăng ký Vé tháng
         </h2>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-4">
           <div className="grid grid-cols-5">
             <div className="space-y-4 col-span-4 mr-3">
               <div className="grid grid-cols-4 gap-4">
@@ -268,8 +268,9 @@ const MonthlyTicketModal = ({
           </div>
           <div className="flex justify-end">
             <button
-              type="submit"
+              type="buttonbutton"
               className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+              onClick={handleSubmit()}
             >
               Thêm
             </button>
@@ -281,7 +282,7 @@ const MonthlyTicketModal = ({
               Đóng
             </button>
           </div>
-        </form>
+        </div>
       </div>
       <Notification
         showNotification={showNotification}

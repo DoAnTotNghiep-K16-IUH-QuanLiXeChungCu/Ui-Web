@@ -1,22 +1,38 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { sendOTP } from "../../useAPI/useUserAPI";
+import { GetUserByEmail, sendOTP } from "../../useAPI/useUserAPI";
+import Notification from "../components/Notification";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const [showNotification, setShowNotification] = useState({
+    content: "",
+    type: "",
+    show: false,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Kiểm tra xem email có hợp lệ không
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && emailRegex.test(email)) {
       try {
-        const otp = await sendOTP(email);
-        if (otp) {
-          navigate("/auth/sendOTP", { state: { otp } }); // Truyền otp qua state
+        const checkEmail = await GetUserByEmail(email);
+        if (!checkEmail) {
+          setShowNotification({
+            content: "Không có tài khoản nào dùng email mà bạn nhập ",
+            type: "Error",
+            show: true,
+          });
+          return;
+        }
+        const sentOtp = await sendOTP(email); // sentOtp là chuỗi
+        if (sentOtp) {
+          navigate("/auth/sendOTP", {
+            state: { otpLog: sentOtp, email: email },
+          }); // Truyền chuỗi
         }
       } catch (error) {
         setMessage(
@@ -78,6 +94,10 @@ const ForgotPassword = () => {
           </Link>
         </div>
       </div>
+      <Notification
+        showNotification={showNotification}
+        setShowNotification={setShowNotification}
+      />
     </div>
   );
 };
