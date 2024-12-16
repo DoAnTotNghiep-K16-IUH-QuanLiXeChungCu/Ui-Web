@@ -6,6 +6,7 @@ import {
   deleteUserShift,
   filterUserShift,
   getAllUserShift,
+  getUserShiftsByUserIdAndShiftIdAndDateTime,
   updateUserShift,
 } from "../../useAPI/useUserShiftAPI";
 import UserShiftModal from "./UserShiftModal";
@@ -52,14 +53,28 @@ const UserShift = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [highlightedUser, setHighlightedUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true); // Bắt đầu loading
       try {
         const shifts = await getAllShift();
-        setShifts(shifts);
+
+        // Thứ tự ưu tiên của các ca trực
+        const shiftOrder = ["Sáng", "Chiều", "Tối", "Khuya"];
+
+        // Sắp xếp shifts dựa theo shiftOrder
+        const sortedShifts = shifts.sort((a, b) => {
+          return (
+            shiftOrder.indexOf(a.shiftName) - shiftOrder.indexOf(b.shiftName)
+          );
+        });
+        // Cập nhật state
+        setShifts(sortedShifts);
         const users = await getAllUser();
-        setUsers(users);
+        const usersWithRoleUser = users.filter((user) => user.role === "User");
+        // console.log("Users with role 'User':", usersWithRoleUser);
+        setUsers(usersWithRoleUser);
         const userShifts = await getAllUserShift();
         setUserShifts(userShifts);
       } catch (error) {
@@ -185,6 +200,19 @@ const UserShift = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const findUserShift = await getUserShiftsByUserIdAndShiftIdAndDateTime(
+        newUserShift.userId,
+        newUserShift.shiftId,
+        newUserShift.dateTime
+      );
+      if (findUserShift !== null) {
+        setShowNotification({
+          content: `Ca ${newUserShift.shiftName} ngày ${newUserShift.dateTime} đã được phân cho nhân viên ${newUserShift?.fullname} trước đó`,
+          type: "Error",
+          show: true,
+        });
+        return;
+      }
       const addedUserShift = await addUserShift(newUserShift);
       console.log("addedUserShift", addedUserShift);
 
@@ -207,7 +235,7 @@ const UserShift = () => {
     }
   };
 
-  const handleDelete = async (selectedUserShift) => {
+  const handleDelete = async () => {
     if (!selectedUserShift) {
       setShowNotification({
         content: "Bạn chưa chọn ca để xóa",
@@ -215,6 +243,8 @@ const UserShift = () => {
         show: true,
       });
     } else {
+      console.log("selectedUserShift", selectedUserShift);
+
       const del = await deleteUserShift(selectedUserShift?.id);
       if (del) {
         setShowNotification({
@@ -224,9 +254,23 @@ const UserShift = () => {
         });
         setUserShifts(
           userShifts.filter((shift) => shift._id !== selectedUserShift.id)
-        ); // Xóa khỏi dữ liệu đầy đủ
+        );
+        setSelectedUserShift(null);
+        setShowConfirmModal(false);
         filterUserShiftsForWeek(currentWeekStart); // Cập nhật lại tuần hiện tại
       }
+    }
+  };
+  const confirmDelete = (selectedUserShift) => {
+    if (!selectedUserShift) {
+      setShowNotification({
+        content: "Bạn chưa chọn ca để xóa",
+        type: "Error",
+        show: true,
+      });
+    } else {
+      setSelectedUserShift(selectedUserShift); // Lưu ca cần xóa
+      setShowConfirmModal(true); // Hiển thị modal
     }
   };
 
@@ -292,11 +336,11 @@ const UserShift = () => {
             className="bg-blue-500 text-white px-4 py-2 rounded"
             onClick={handleAddClick}
           >
-            THÊM
+            PHÂN CÔNG
           </button>
           <button
             className="bg-red-500 text-white px-4 py-2 rounded"
-            onClick={() => handleDelete(selectedUserShift)}
+            onClick={() => confirmDelete(selectedUserShift)}
           >
             XÓA
           </button>
@@ -476,6 +520,67 @@ const UserShift = () => {
         shifts={shifts}
         users={users}
       />
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-2xl w-96 p-6 relative animate-fade-in">
+            {/* Close Icon */}
+            <button
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Header */}
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Xác nhận xóa
+            </h3>
+
+            {/* Content */}
+            <p className="text-gray-600 text-center mb-6">
+              Bạn có chắc chắn muốn xóa ca{" "}
+              <span className="font-bold text-red-600">
+                {selectedUserShift?.dateTime}
+              </span>{" "}
+              của nhân viên{" "}
+              <span className="font-bold text-blue-600">
+                {selectedUserShift?.fullname}
+              </span>{" "}
+              không?
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between">
+              <button
+                className="flex-1 px-4 py-2 mr-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition shadow"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="flex-1 px-4 py-2 ml-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow"
+                onClick={handleDelete}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Notification
         showNotification={showNotification}
         setShowNotification={setShowNotification}

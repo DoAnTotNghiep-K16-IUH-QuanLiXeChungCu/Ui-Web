@@ -56,7 +56,7 @@ export const addMonthlyTicket = async (ticket) => {
       console.error("monthlyFee phải là một số lớn hơn 0.___________");
       return; // Không tiếp tục nếu monthlyFee không hợp lệ
     }
-    console.log("DATA in API: ", ticket);
+    // console.log("DATA in API: ", ticket);
 
     const response = await fetch(CREATE_MONTHLY_TICKET, {
       method: "POST",

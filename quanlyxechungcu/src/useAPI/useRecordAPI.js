@@ -247,9 +247,13 @@ export const filterRecord = async (
         "Content-Type": "application/json",
       },
     });
-    // console.log("response.data.data.records", response.data.data.records);
+    // console.log(
+    //   "Is records an array?",
+    //   Array.isArray(response.data.data.records)
+    // ); // true
 
-    return response.data.data.records; // Trả về dữ liệu nếu yêu cầu thành công
+    return response.data.data.records;
+    // Trả về dữ liệu nếu yêu cầu thành công
   } catch (error) {
     console.error(
       "Có lỗi xảy ra khi lấy dữ liệu:",

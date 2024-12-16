@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import SwipeCard from "../components/SwipeCard";
+import { findCardByUUID } from "../../useAPI/useCardAPI";
 
 const AccountModal = ({
   openModal,
@@ -7,7 +8,6 @@ const AccountModal = ({
   setNewAccount,
   handleSubmit,
   setOpenModal,
-  findCardByUUID, // Thêm `findCardByUUID` vào props
 }) => {
   if (!openModal) return null;
 
@@ -18,7 +18,7 @@ const AccountModal = ({
     if (check) {
       setNewAccount((prev) => ({
         ...prev,
-        rfidCard: check._id, // Cập nhật trạng thái với id thẻ RFID
+        rfidCard: check.uuid, // Cập nhật trạng thái với id thẻ RFID
       }));
     }
   };
@@ -63,11 +63,11 @@ const AccountModal = ({
               <input
                 type="date"
                 id="birthDay"
-                value={newAccount?.birthday}
+                value={newAccount?.birthDay}
                 onChange={(e) =>
                   setNewAccount((prev) => ({
                     ...prev,
-                    birthday: e.target.value,
+                    birthDay: e.target.value,
                   }))
                 }
                 className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"

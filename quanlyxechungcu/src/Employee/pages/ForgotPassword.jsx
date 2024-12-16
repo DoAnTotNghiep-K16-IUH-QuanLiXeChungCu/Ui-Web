@@ -1,16 +1,44 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { GetUserByEmail, sendOTP } from "../../useAPI/useUserAPI";
+import Notification from "../components/Notification";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const [showNotification, setShowNotification] = useState({
+    content: "",
+    type: "",
+    show: false,
+  });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Thực hiện logic gửi yêu cầu khôi phục mật khẩu tại đây
-    // Giả lập thành công khi email không rỗng
-    if (email) {
-      setMessage("A password reset link has been sent to your email address.");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && emailRegex.test(email)) {
+      try {
+        const checkEmail = await GetUserByEmail(email);
+        if (!checkEmail) {
+          setShowNotification({
+            content: "Không có tài khoản nào dùng email mà bạn nhập ",
+            type: "Error",
+            show: true,
+          });
+          return;
+        }
+        const sentOtp = await sendOTP(email); // sentOtp là chuỗi
+        if (sentOtp) {
+          navigate("/auth/sendOTP", {
+            state: { otpLog: sentOtp, email: email },
+          }); // Truyền chuỗi
+        }
+      } catch (error) {
+        setMessage(
+          "An error occurred while sending the OTP. Please try again."
+        );
+      }
     } else {
       setMessage("Please enter a valid email address.");
     }
@@ -20,10 +48,10 @@ const ForgotPassword = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-bold text-gray-800 text-center">
-          Forgot Password
+          Quên mật khẩu
         </h2>
         <p className="text-sm text-gray-600 text-center mb-6">
-          Enter your email address to receive a password reset link.
+          Nhập địa chỉ email để lấy mã OTP
         </p>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -31,7 +59,7 @@ const ForgotPassword = () => {
               className="block text-gray-700 text-sm font-semibold mb-2"
               htmlFor="email"
             >
-              Email Address
+              Địa chỉ email
             </label>
             <input
               type="email"
@@ -47,7 +75,7 @@ const ForgotPassword = () => {
               type="submit"
               className="w-full bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-500"
             >
-              Send Reset Link
+              Gửi mã OTP
             </button>
           </div>
           {message && (
@@ -66,6 +94,10 @@ const ForgotPassword = () => {
           </Link>
         </div>
       </div>
+      <Notification
+        showNotification={showNotification}
+        setShowNotification={setShowNotification}
+      />
     </div>
   );
 };

@@ -47,6 +47,11 @@ const Login = () => {
           secure: true, // Chỉ gửi cookie qua HTTPS
           sameSite: "Strict", // Ngăn chặn CSRF
         });
+        Cookies.set("username", data.data.username, {
+          expires: 1, // Cookie sẽ hết hạn sau 1 ngày
+          secure: true, // Chỉ gửi cookie qua HTTPS
+          sameSite: "Strict", // Ngăn chặn CSRF
+        });
         const { role, accessToken, ...filteredProfile } = data.data;
         const profile = filteredProfile;
         // console.log("profile", profile);

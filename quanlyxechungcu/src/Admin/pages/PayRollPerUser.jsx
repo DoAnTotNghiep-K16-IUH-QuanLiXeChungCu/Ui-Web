@@ -131,11 +131,7 @@ const PayRollPerUser = () => {
     console.log("selectedUser", selectedUser);
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      wb,
-      ws,
-      `Lương ${selectedUser?.fullname} năm ${selectedYear}`
-    );
+    XLSX.utils.book_append_sheet(wb, ws, `Salary year ${selectedYear}`);
     XLSX.writeFile(wb, "payroll.xlsx");
   };
   const handleSelectedUser = (e) => {

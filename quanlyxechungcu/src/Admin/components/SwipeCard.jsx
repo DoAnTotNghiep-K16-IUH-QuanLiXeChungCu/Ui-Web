@@ -23,7 +23,7 @@ const SwipeCard = () => {
         console.log("check", check);
         if (!check) {
           setShowNotification({
-            content: `Không có thẻ ${newRfidData} nào trong danh sách.`,
+            content: `Không có thẻ ${newRfidData} nào trong danh sách`,
             type: "Error",
             show: true,
           });

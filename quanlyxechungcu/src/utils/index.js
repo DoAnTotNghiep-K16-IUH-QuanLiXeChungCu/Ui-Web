@@ -64,7 +64,7 @@ export const formatDateTime = (isoDateString) => {
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0
   const year = date.getFullYear();
 
-  return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`; // Định dạng "hh:mm:ss dd/mm/yyyy"
+  return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}` || ""; // Định dạng "hh:mm:ss dd/mm/yyyy"
 };
 export const FindIconName = (label) => {
   switch (label) {

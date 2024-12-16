@@ -73,9 +73,10 @@ const PayRoll = () => {
         type: "Error",
         show: true,
       });
+      return; // Ngăn chặn đoạn mã tiếp tục chạy
     }
 
-    // Thêm ngày/tháng/năm vào ghi chú
+    // Định dạng ngày hiện tại
     const currentDate = new Date();
     const formattedDate = `${currentDate
       .getDate()
@@ -85,7 +86,7 @@ const PayRoll = () => {
       .padStart(2, "0")}/${currentDate.getFullYear()}`;
     const updatedNote = `Thêm tiền ${
       modalType === "addAllowance" ? "trợ cấp" : "trừ"
-    } với lý do ${note} vào ngày ${formattedDate}`.trim();
+    } với lý do "${note}" vào ngày ${formattedDate}`.trim();
 
     // Chuẩn bị dữ liệu payroll cập nhật
     const {
@@ -102,22 +103,16 @@ const PayRoll = () => {
       note: existingNote = "",
     } = selectedEmployee;
 
-    const updatedPayRollEmployee = {
-      id,
-      userID: userID._id,
-      payPeriod,
-      totalRegularHours,
-      totalOvertimeHours,
-      basicSalary,
-      overtimeSalary,
-      deductions,
-      allowance,
-      totalSalary,
-      note: `${existingNote}\n${updatedNote}`.trim(),
-    };
-
-    // Cập nhật tùy theo loại modal
     const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount)) {
+      setShowNotification({
+        content: "Số tiền không hợp lệ, vui lòng nhập lại!",
+        type: "Error",
+        show: true,
+      });
+      return;
+    }
+
     const updatedFields =
       modalType === "addAllowance"
         ? {
@@ -131,33 +126,47 @@ const PayRoll = () => {
           }
         : {};
 
-    const payRollUpdated = { ...updatedPayRollEmployee, ...updatedFields };
+    const updatedPayRollEmployee = {
+      id,
+      userID: userID._id,
+      payPeriod,
+      totalRegularHours,
+      totalOvertimeHours,
+      basicSalary,
+      overtimeSalary,
+      ...updatedFields,
+      note: `${existingNote}\n${updatedNote}`.trim(),
+    };
 
     // Gọi API cập nhật payroll
     try {
-      const updatePay = await UpdatePayRoll(payRollUpdated);
-      console.log("updatePay", updatePay);
+      const updatePay = await UpdatePayRoll(updatedPayRollEmployee);
 
       if (updatePay) {
         setShowNotification({
-          content: `Đã thêm tiền ${
-            modalType === "addAllowance" ? "trợ cấp" : "trừ"
-          } đối với nhân viên ${updatePay.userID.fullname} với lý do ${note}`,
+          content: `Đã ${
+            modalType === "addAllowance" ? "thêm trợ cấp" : "trừ lương"
+          } cho nhân viên ${updatePay.userID.fullname} với lý do "${note}"`,
           type: "Notification",
           show: true,
         });
         fetchData(selectedMonth, selectedYear);
       } else {
         setShowNotification({
-          content: `Đã có lỗi trong quá trình thêm tiền ${
-            modalType === "addAllowance" ? "trợ cấp" : "trừ"
-          } đối với nhân viên ${updatePay.userID.fullname} với lý do ${note}`,
+          content: `Đã có lỗi khi ${
+            modalType === "addAllowance" ? "thêm trợ cấp" : "trừ lương"
+          }. Vui lòng thử lại.`,
           type: "Error",
           show: true,
         });
       }
     } catch (error) {
       console.error("Đã xảy ra lỗi khi cập nhật:", error);
+      setShowNotification({
+        content: "Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.",
+        type: "Error",
+        show: true,
+      });
     }
 
     // Đặt lại trạng thái modal
@@ -223,7 +232,7 @@ const PayRoll = () => {
     XLSX.utils.book_append_sheet(
       wb,
       ws,
-      `Lương${selectedPay?.userID?.fullname} tháng ${selectedMonth}/${selectedYear}`
+      `Salary ${selectedMonth} ${selectedYear}`
     );
     XLSX.writeFile(wb, "payroll.xlsx");
   };

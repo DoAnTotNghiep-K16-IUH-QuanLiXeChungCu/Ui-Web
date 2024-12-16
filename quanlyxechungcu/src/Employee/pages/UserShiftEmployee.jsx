@@ -27,7 +27,19 @@ const UserShiftEmployee = () => {
       setLoading(true); // Bắt đầu loading
       try {
         const shifts = await getAllShift();
-        setShifts(shifts);
+
+        // Thứ tự ưu tiên của các ca trực
+        const shiftOrder = ["Sáng", "Chiều", "Tối", "Khuya"];
+
+        // Sắp xếp shifts dựa theo shiftOrder
+        const sortedShifts = shifts.sort((a, b) => {
+          return (
+            shiftOrder.indexOf(a.shiftName) - shiftOrder.indexOf(b.shiftName)
+          );
+        });
+        // Cập nhật state
+        setShifts(sortedShifts);
+
         const userShifts = await getAllUserShift();
         setUserShifts(userShifts);
       } catch (error) {

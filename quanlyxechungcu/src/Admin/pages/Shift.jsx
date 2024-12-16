@@ -10,8 +10,19 @@ const Shift = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const listShift = await getAllShift();
-      setShifts(listShift);
+      const shifts = await getAllShift();
+
+      // Thứ tự ưu tiên của các ca trực
+      const shiftOrder = ["Sáng", "Chiều", "Tối", "Khuya"];
+
+      // Sắp xếp shifts dựa theo shiftOrder
+      const sortedShifts = shifts.sort((a, b) => {
+        return (
+          shiftOrder.indexOf(a.shiftName) - shiftOrder.indexOf(b.shiftName)
+        );
+      });
+      // Cập nhật state
+      setShifts(sortedShifts);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

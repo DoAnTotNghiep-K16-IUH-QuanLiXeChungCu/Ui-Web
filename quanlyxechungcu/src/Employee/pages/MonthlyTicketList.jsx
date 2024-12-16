@@ -11,6 +11,7 @@ import { getAllVehicle } from "../../useAPI/useVehicleAPI";
 import { findCustomerByID } from "../../useAPI/useCustomerAPI";
 import Loading from "../components/Loading";
 import { findCardByUUID, setUpSerialPortEntry } from "../../useAPI/useCardAPI";
+import { GetUserByRFIDCard } from "../../useAPI/useUserAPI";
 
 const MonthlyTicketList = () => {
   const [tickets, setTickets] = useState([]);
@@ -106,7 +107,7 @@ const MonthlyTicketList = () => {
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setNewTickets({ ...newTickets, [name]: value });
-    console.log(newTickets);
+    // console.log(newTickets);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -114,7 +115,7 @@ const MonthlyTicketList = () => {
     setShowAddForm(false);
   };
   const addNewMonthlyTicket = async (newTicket, content) => {
-    // console.log("newTicket______", newTicket);
+    console.log("newTicket______", newTicket);
     if (newTicket.monthlyFee <= 0) {
       setShowNotification({
         content: "Phí không được <0",
@@ -131,17 +132,21 @@ const MonthlyTicketList = () => {
       });
       return; // Không tiếp tục nếu giá vé không hợp lệ
     }
+    console.log("dslkfajl;dslkfajlfjalk;");
+
     const check = await findCardByUUID(card);
-    if (!check) {
+    const userFinded = await GetUserByRFIDCard(card);
+    console.log("check", check);
+    if (check === null) {
       setShowNotification({
-        content: `Không có thẻ ${card} nào trong danh sách.`,
+        content: `Không có thẻ ${card}`,
         type: "Error",
         show: true,
       });
-    } else if (check?.userId) {
+    } else if (userFinded) {
       setShowNotification({
-        content: `Thẻ có mã ${card} là thẻ dành cho nhân viên.`,
-        type: "Error",
+        content: `Thẻ ${card} là thẻ dành cho nhân viên`,
+        type: "Warning",
         show: true,
       });
     } else {
@@ -156,7 +161,10 @@ const MonthlyTicketList = () => {
         type: "Notification",
         show: true,
       });
-      const addTicket = await addMonthlyTicket(newTicket);
+
+      const newTicketHere = { ...newTicket, rFIDCardID: check._id };
+      // console.log("newTicketHere", newTicketHere);
+      const addTicket = await addMonthlyTicket(newTicketHere);
       if (addTicket._id) {
         setTickets((prev) => [...prev, addTicket]);
         setNewTickets({
@@ -351,12 +359,12 @@ const MonthlyTicketList = () => {
             >
               THÊM
             </button>
-            {/* <button
+            <button
               className="bg-red-500 text-white px-4 py-2 rounded"
               onClick={() => handleDeleteTicket(selectedTicket?._id)}
             >
               XÓA
-            </button> */}
+            </button>
             <button
               className="bg-yellow-500 text-white px-4 py-2 rounded"
               onClick={() => setShowExtend(!showExtend)}
@@ -450,12 +458,12 @@ const MonthlyTicketList = () => {
               );
             })}
           </select>
-          {/* <button
+          <button
             className="bg-green-500 text-white px-4 py-2 rounded"
             onClick={() => applyPaginationAndFilter()}
           >
             TÌM
-          </button> */}
+          </button>
         </div>
         <div>
           {/* Ticket Table */}

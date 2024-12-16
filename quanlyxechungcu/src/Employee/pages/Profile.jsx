@@ -1,8 +1,9 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { UPDATE_USER } from "../../config/API";
-import Notification from "../components/Notification";
+import Notification from "../../Admin/components/Notification";
 import UserContext from "../../context/UserContext";
-import { calculateAge } from "../../utils";
+import { calculateAge } from "../../utils/index";
+
 const Profile = () => {
   const { profile, setProfile } = useContext(UserContext);
   const [showNotification, setShowNotification] = useState({
@@ -10,6 +11,8 @@ const Profile = () => {
     type: "",
     show: false,
   });
+  console.log("profile", profile);
+
   const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -62,7 +65,7 @@ const Profile = () => {
         // Cập nhật lại fullname của formData trước khi lưu cookie
         const updatedDataUser = {
           ...profile,
-          age: formData.age,
+          birthDay: formData.birthDay,
           fullname: formData.fullname,
           address: formData.dataUser,
           phoneNumber: formData.phoneNumber,
