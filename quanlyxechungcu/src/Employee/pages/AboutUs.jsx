@@ -8,10 +8,9 @@ const AboutUs = () => {
           Về Chúng Tôi
         </h1>
         <p className="text-gray-700 text-lg leading-relaxed mb-6">
-          Chào mừng bạn đến với{" "}
-          <span className="font-semibold">[Tên Phần Mềm Quản Lý Xe]</span>, giải
-          pháp tối ưu cho quản lý bãi đỗ xe và kiểm soát phương tiện tại chung
-          cư, khu dân cư, và các địa điểm công cộng.
+          Chào mừng bạn đến với <span className="font-semibold">DKParking</span>
+          , giải pháp tối ưu cho quản lý bãi đỗ xe và kiểm soát phương tiện tại
+          chung cư, khu dân cư, và các địa điểm công cộng.
         </p>
         <h2 className="text-2xl font-semibold text-gray-800 mb-3">Tầm Nhìn</h2>
         <p className="text-gray-700 leading-relaxed mb-6">
@@ -54,9 +53,8 @@ const AboutUs = () => {
           </li>
         </ul>
         <p className="text-center text-gray-700 text-lg">
-          <span className="font-medium">Hãy để [Tên Phần Mềm Quản Lý Xe]</span>{" "}
-          trở thành giải pháp đáng tin cậy giúp bạn quản lý bãi đỗ xe dễ dàng
-          hơn bao giờ hết!
+          <span className="font-medium">Hãy để DKParking</span> trở thành giải
+          pháp đáng tin cậy giúp bạn quản lý bãi đỗ xe dễ dàng hơn bao giờ hết!
         </p>
         <div className="text-center mt-6">
           <button className="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700">
