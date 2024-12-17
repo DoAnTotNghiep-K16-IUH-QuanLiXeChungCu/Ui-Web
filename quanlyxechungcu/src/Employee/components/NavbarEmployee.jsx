@@ -44,13 +44,13 @@ const NavbarEmployee = () => {
       <div className="container mx-auto flex justify-center items-center space-x-6">
         {myUserID ? (
           <>
-            <Link
+            {/* <Link
               to="about-us"
               className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"
             >
               <FontAwesomeIcon icon={faCircleInfo} />
               VỀ CHÚNG TÔI
-            </Link>
+            </Link> */}
             <Link
               to="/parking-check"
               className="text-white hover:text-gray-600 focus:outline-none transition-colors duration-300 pl-5 flex flex-col items-center"

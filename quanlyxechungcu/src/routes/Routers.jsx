@@ -85,7 +85,7 @@ const Routers = () => {
         { path: "manage/parking-slot", element: <ParkingSlot /> },
         { path: "manage/apartment", element: <Apartment /> },
 
-        { path: "about-us", element: <AboutUs /> },
+        // { path: "about-us", element: <AboutUs /> },
         { path: "monthly-ticket", element: <MonthlyTicketList /> },
         { path: "account/profile", element: <Profile /> },
         { path: "userShift/schedular", element: <UserShiftEmployee /> },

@@ -51,16 +51,16 @@ const Home = () => {
           </div>
         </div>
       </section>
-      <div className="min-h-screen max-w-7xl bg-gray-100 p-6 flex flex-col items-center justify-center space-y-6 ml-10">
+      <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-center space-x-6 mx-auto">
         <img
           src={rate2}
           alt="ảnh chính"
-          className="w-[675px] h-auto rounded-lg shadow-lg"
+          className="w-[675px] h-auto rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl"
         />
         <img
           src={rate1}
           alt="ảnh chính"
-          className="w-[675px] h-auto rounded-lg shadow-lg"
+          className="w-[675px] h-auto rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl"
         />
       </div>
     </div>

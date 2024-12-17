@@ -213,7 +213,13 @@ const AttendanceHistory = () => {
                       {index + 1 + (currentPage - 1) * pageSize}
                     </td>
                     <td className="border p-2">{log?.userID?.fullname}</td>
-                    <td className="border p-2">{log.scanTime}</td>
+                    <td className="border p-2">
+                      {new Date(log.scanTime).toLocaleString("en-US", {
+                        timeZone: "Asia/Ho_Chi_Minh",
+                        hour12: false,
+                      })}
+                    </td>
+
                     <td className="border p-2">
                       {log.status === "in" ? "Đi vào" : "Đi ra"}
                     </td>
